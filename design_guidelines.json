@@ -1,0 +1,136 @@
+{
+  "project_name": "NALAYAK",
+  "theme": "light",
+  "brand_identity": {
+    "description": "A contemporary Indian fashion/streetwear brand ecommerce site. Premium fashion label first, ecommerce second.",
+    "philosophy": "Clean editorial discipline of H&M, premium visual storytelling of BLUORNG, strong merchandising of Bonkers Corner, with Nalayak's rebellious, witty Indian youth identity. 'Luxury fashion website with an attitude problem.'",
+    "tone": "Humour via copywriting only, visuals stay premium."
+  },
+  "typography": {
+    "display_font": "Cabinet Grotesk, Syne, or Clash Display (Refined grotesk display)",
+    "body_font": "Inter, Helvetica Neue, or Switzer (Clean sans body)",
+    "hierarchy": {
+      "hero": "text-6xl to text-8xl, tracking-tighter, uppercase, tight leading (leading-[0.85]).",
+      "h2": "text-4xl to text-6xl, tracking-tight, uppercase.",
+      "body": "text-base, leading-relaxed, tracking-normal."
+    },
+    "rules": [
+      "Never center default text block, use strong left or right alignment to build tension.",
+      "Typography drives the layout. Use large oversized wordmarks.",
+      "No generic sans for headings."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "black": "#0A0A0A",
+      "off_white": "#F7F7F5",
+      "white": "#FFFFFF",
+      "soft_grey": "#8C8C8C",
+      "border": "#E5E5E5"
+    },
+    "rules": [
+      "Restrained neutral palette.",
+      "FORBIDDEN: gradients, glassmorphism, bright saturated accents (unless purely functional like a sale tag)."
+    ]
+  },
+  "layouts_and_spacing": {
+    "style": "Minimal editorial brutalism.",
+    "spacing": "Generous whitespace. Use Tailwind p-12, p-16, py-24, py-32.",
+    "border_radius": "Strictly 0px (rounded-none). No excessive rounded containers. Sharp, tailored aesthetic.",
+    "grid": "Bento grids with uneven column spans (e.g., 8-col grid where items span 5 and 3) for asymmetrical tension.",
+    "components": "No SaaS cards. Avoid shadow-sm or ring. Rely on 1px solid lines (border-black) and negative space."
+  },
+  "motion_and_interactions": {
+    "libraries_required": ["framer-motion", "lenis", "react-fast-marquee"],
+    "scroll": "Lenis smooth scrolling is MANDATORY. Standard browser scroll feels cheap.",
+    "hero_animation": "Large kinetic hero with masked line-by-line reveal on load using Framer Motion.",
+    "parallax": "One subtle parallax hero moment.",
+    "marquee": "One slow editorial marquee with refined typography.",
+    "micro_interactions": "Framer-motion scroll reveals (fade-up and clip-path). Image scaling on hover (subtle scale-105 with overflow-hidden)."
+  },
+  "pages_and_sections": {
+    "homepage": {
+      "announcement_bar": "Sticky, thin, black background, white text.",
+      "navigation": "Sticky, transparent to solid blur-free background, minimal links.",
+      "hero": "Editorial hero 'NOT FOR EVERYONE'. Kinetic masked text reveal. Parallax background image.",
+      "new_arrivals": "Product grid. Spotlit product photography, clipped frames (1px borders).",
+      "manifesto": "Numbered manifesto chapters (e.g., '01.', '02.') with large typography and witty copy.",
+      "editorial_collections": "'THE NALAYAK EDIT'. Asymmetrical masonry or split grid.",
+      "category_tiles": "Shop-by-category, large imagery, stark typography.",
+      "campaign": "'WELCOME TO THE WRONG CROWD'. Dramatic dark section, inverted colors.",
+      "best_sellers": "Horizontal scroll or tight grid.",
+      "brand_story": "Split section (50% image, 50% typography/copy).",
+      "social_grid": "'NALAYAK IRL'. Tightly packed image grid.",
+      "newsletter": "'DON'T BE NORMAL'. Minimalist input field, strong solid button.",
+      "footer": "Full ecommerce footer with massive brand wordmark."
+    },
+    "other_pages": {
+      "plp": "Product listing pages with minimal filters, sharp dropdowns.",
+      "pdp": "Product detail pages. Immersive gallery, sticky cart actions on the right.",
+      "cart_drawer": "Persistent cart drawer sliding from the right. Sharp edges, black and white.",
+      "search": "Full-screen search overlay with large input text.",
+      "wishlist": "Local storage based, simple grid.",
+      "account": "Minimal forms, no rounded inputs."
+    }
+  },
+  "media": {
+    "data_management": "Curated premium fashion/streetwear stock photos, all managed from one central data file (e.g., `src/data/storeData.js`).",
+    "image_urls": [
+      {
+        "category": "Hero / Urban Lifestyle",
+        "url": "https://images.unsplash.com/photo-1548123378-bde4eca81d2d",
+        "description": "man in tracksuit standing by the black metal pull-up door posing"
+      },
+      {
+        "category": "Campaign / Rebellious Youth",
+        "url": "https://images.unsplash.com/photo-1576775068668-c147f14c36f7",
+        "description": "man wearing sunglasses and black jacket standing beside door"
+      },
+      {
+        "category": "Editorial / City",
+        "url": "https://images.unsplash.com/photo-1532332248682-206cc786359f",
+        "description": "man standing near clear glass building and tree during daytime"
+      },
+      {
+        "category": "Black & White / The Nalayak Edit",
+        "url": "https://images.unsplash.com/photo-1638638977172-9f7169a77930",
+        "description": "a woman with her eyes closed in the dark"
+      },
+      {
+        "category": "Black & White Portrait",
+        "url": "https://images.unsplash.com/photo-1567226028173-20eb319d0bac",
+        "description": "grayscale portrait photo of a woman"
+      },
+      {
+        "category": "Products / Apparel Placeholder",
+        "url": "https://images.unsplash.com/photo-1504198458649-3128b932f49e",
+        "description": "pile of black, white, and gray textiles on white padded chair with brown frame"
+      }
+    ]
+  },
+  "accessibility": [
+    "High contrast ratios for all text.",
+    "All interactive elements MUST include a `data-testid` attribute (e.g., `data-testid=\"cart-drawer-button\"`).",
+    "Ensure hover states have higher contrast."
+  ],
+  "instructions_to_main_agent": [
+    "DO NOT use generic AI aesthetic. Read the 'brand_identity' carefully.",
+    "Implement 'Swiss Brutalism' + 'Luxury Fashion'.",
+    "No HTML/Tailwind standard cards or SaaS aesthetic. No rounded corners (rounded-none).",
+    "Build a central mock data file (`.js`) for all products, categories, and manifesto texts.",
+    "Install and configure Lenis, Framer Motion, and React Fast Marquee.",
+    "Apply `data-testid` to EVERY button, link, and form input."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements and stark contrast, NEVER through soft shadows.",
+    "You MUST NOT apply universal transition (e.g., `transition: all`). Always add transitions for specific interactive elements.",
+    "You MUST NOT center align the app container.",
+    "Use modern, sharp button styles (rounded-none). NEVER pill-shaped.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc.",
+    "Every interaction needs micro-animations - hover states, transitions, entrance animations.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Prioritize using pre-existing components from src/components/ui but aggressively restyle them to remove borders, shadows, and radii.",
+    "Use sonner for toasts."
+  ]
+}
