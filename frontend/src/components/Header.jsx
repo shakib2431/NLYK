@@ -42,16 +42,9 @@ export default function Header() {
             >
               <Menu size={20} strokeWidth={1.5} />
             </button>
-            {/* <Link to="/" data-testid="logo-link" className="font-display font-extrabold tracking-tight text-xl md:text-2xl">
+            <Link to="/" data-testid="logo-link" className="font-display font-extrabold tracking-tight text-xl md:text-2xl">
               NALAYAK
-            </Link> */}
-            <div className="w-[150px] h-10 overflow-hidden flex items-center">
-  <img
-    src="/NLYK.png"
-    alt="NALAYAK"
-    className="w-[190px] max-w-none h-auto"
-  />
-</div>
+            </Link>
           </div>
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
