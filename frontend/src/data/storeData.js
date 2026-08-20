@@ -23,6 +23,7 @@ export const nav = [
   { label: 'TEES', to: '/tees' },
   { label: 'HOODIES', to: '/hoodies' },
   { label: 'BOTTOMS', to: '/bottoms' },
+  { label: 'ACCESSORIES', to: '/accessories' },
   { label: 'COLLECTIONS', to: '/collections' },
   { label: 'CUSTOM', to: '/custom-design' },
 ];
@@ -55,7 +56,7 @@ export const manifesto = [
   {
     n: '02',
     title: 'MADE IN INDIA, WORN EVERYWHERE',
-    copy: 'Designed in Mumbai. Loud in every timezone.',
+    copy: 'Designed in Kolkata. Loud in every timezone.',
   },
   {
     n: '03',
@@ -176,13 +177,20 @@ export const products = [
     stock: 22, newArrival: true, bestSeller: false, featured: false,
   },
   {
-    id: 'p08', slug: 'her-chaos-crop-tee', name: 'HER CHAOS CROP TEE',
-    price: 999, compareAt: 1199, category: 'tees', gender: 'women',
-    desc: 'Cropped, not tamed. A sharper silhouette with the same terrible decision-making built in.',
-    images: ['photo-1503342217505-b0a15ec3261c', 'photo-1554568218-0f1715e72254'],
-    sizes: APPAREL_SIZES, colors: [PAPER, JET, MAROON], badge: null,
-    stock: 25, newArrival: true, bestSeller: true, featured: false,
+  id: 'p08', slug: 'her-chaos-crop-tee', name: 'HER CHAOS CROP TEE',
+  price: 999, compareAt: 1199, category: 'tees', gender: 'women',
+  desc: 'Cropped, not tamed. A sharper silhouette with the same terrible decision-making built in.',
+  images: ['photo-1503342217505-b0a15ec3261c', 'photo-1554568218-0f1715e72254'],
+  sizes: APPAREL_SIZES,
+  colors: [PAPER, JET, MAROON],
+
+  colorImages: {
+    Paper: '/her-chaos-crop-tee-white.png',
   },
+
+  badge: null,
+  stock: 25, newArrival: true, bestSeller: true, featured: false,
+},
   {
     id: 'p09', slug: 'off-record-overshirt', name: 'OFF RECORD OVERSHIRT',
     price: 1899, compareAt: null, category: 'shirts', gender: 'men',
@@ -314,6 +322,24 @@ export const products = [
     modelUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb',
     posterImage: 'photo-1552346154-21d32810aba3',
   },
+  {
+  id: 'p29',
+  slug: 'nalayak-chain',
+  name: 'NALAYAK CHAIN',
+  price: 899,
+  compareAt: null,
+  category: 'accessories',
+  gender: 'women',
+  desc: 'Not jewelry. A problem attached to your jeans. Heavy-link metal chain made for wearing things slightly wrong.',
+  images: ['/female-jeans-chain.png'],
+  sizes: ['OS'],
+  colors: [JET],
+  badge: 'NEW',
+  stock: 25,
+  newArrival: true,
+  bestSeller: false,
+  featured: true,
+},
   {
     id: 'p25', slug: 'midnight-cargo-tee', name: 'MIDNIGHT CARGO TEE',
     price: 1299, compareAt: null, category: 'tees', gender: 'unisex',

@@ -60,11 +60,11 @@ export function About() {
         <Reveal>
           <p className="text-[11px] tracking-[0.3em] text-smoke mb-3">THE STORY</p>
           <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-3xl md:text-5xl mb-10">
-            BORN IN MUMBAI. RAISED BY THE WRONG CROWD.
+            BORN IN kolkata. RAISED BY THE WRONG CROWD.
           </h2>
           <div className="space-y-5 text-sm md:text-base leading-relaxed text-ink/80">
             <p>
-              We make heavyweight, well-built clothes in Mumbai for the people who never quite fit the mould. The ones who question the rules. The ones who make their own. The ones who would rather be remembered than approved.
+              We make heavyweight, well-built clothes in kolkata for the people who never quite fit the mould. The ones who question the rules. The ones who make their own. The ones who would rather be remembered than approved.
             </p>
             <p>
               Every drop is small on purpose. Every graphic earns its place. Fabric is sourced like we have to wear it ourselves — because we do. If your relatives approve of your outfit, we've failed — and so, respectfully, have you.
@@ -142,7 +142,7 @@ export function Shipping() {
   return (
     <PageShell kicker="LOGISTICS" title="SHIPPING" testId="shipping-page">
       <p><span className="font-medium text-ink">Free shipping</span> on all orders above ₹999. Below that, a flat ₹99 — someone has to pay the courier, and we'd rather it be you on small orders.</p>
-      <p>Orders dispatch within 48 hours from our Mumbai studio. Metro cities receive orders in 2–4 working days; everywhere else in India, 4–7 working days.</p>
+      <p>Orders dispatch within 48 hours from our Kolkata studio. Metro cities receive orders in 2–4 working days; everywhere else in India, 4–7 working days.</p>
       <p>Tracking hits your inbox the moment your order ships. If it hasn't moved in 5 days, write to us and we'll start making calls.</p>
       <p>International shipping is coming. The wrong crowd is global; our logistics are catching up.</p>
     </PageShell>

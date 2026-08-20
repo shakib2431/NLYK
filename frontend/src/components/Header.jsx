@@ -1,3 +1,4 @@
+import Marquee from 'react-fast-marquee';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Search, Heart, User, ShoppingBag, Menu } from 'lucide-react';
@@ -24,9 +25,21 @@ export default function Header() {
 
   return (
     <>
-      <div className="bg-ink text-paper text-center py-2 px-4" data-testid="announcement-bar">
-        <p className="text-[10px] md:text-[11px] tracking-[0.25em] font-medium">{site.announcement}</p>
-      </div>
+     <div
+  className="bg-ink text-paper py-2 overflow-hidden"
+  data-testid="announcement-bar"
+>
+  <Marquee speed={35} gradient={false} pauseOnHover>
+    {[...Array(4)].map((_, i) => (
+      <span
+        key={i}
+        className="mx-10 text-[10px] md:text-[11px] tracking-[0.25em] font-medium whitespace-nowrap"
+      >
+        {site.announcement}
+      </span>
+    ))}
+  </Marquee>
+</div>
 
       <header
         className={`sticky top-0 z-40 border-b transition-colors duration-300 ${scrolled ? 'bg-paper border-line' : 'bg-paper/95 border-transparent'}`}
@@ -48,6 +61,7 @@ export default function Header() {
           </div>
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
+            
             {nav.map((item) => (
               <NavLink
                 key={item.to}

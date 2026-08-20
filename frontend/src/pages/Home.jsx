@@ -16,22 +16,69 @@ import { useSeo } from '@/hooks/useSeo';
 
 function Hero() {
   const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const [slide, setSlide] = useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
+  const slides = [
+    {
+      desktop: `https://images.unsplash.com/${hero.desktop}?q=80&w=2000&auto=format&fit=crop`,
+      mobile: `https://images.unsplash.com/${hero.mobile}?q=80&w=900&auto=format&fit=crop`,
+    },
+    {
+      desktop: '/slide2.png',
+      mobile: '/slide2.png',
+    },
+    {
+      desktop: '/slide3.png',
+      mobile: '/slide3.png',
+    },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlide((current) => (current + 1) % slides.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const currentSlide = slides[slide];
+
   return (
-    <section ref={ref} className="relative h-[92vh] min-h-[560px] overflow-hidden bg-ink" data-testid="hero">
-      <motion.div className="absolute inset-0" style={{ y, scale }}>
+    <section
+      ref={ref}
+      className="relative h-[92vh] min-h-[560px] overflow-hidden bg-ink"
+      data-testid="hero"
+    >
+      <motion.div
+        className="absolute inset-0"
+        style={{ y, scale }}
+      >
         <picture>
-          <source media="(max-width: 768px)" srcSet={`https://images.unsplash.com/${hero.mobile}?q=80&w=900&auto=format&fit=crop`} />
-          <img
-            src={`https://images.unsplash.com/${hero.desktop}?q=80&w=2000&auto=format&fit=crop`}
+          <source
+            media="(max-width: 768px)"
+            srcSet={currentSlide.mobile}
+          />
+
+          <motion.img
+            key={currentSlide.desktop}
+            src={currentSlide.desktop}
             alt="NALAYAK AW26 campaign — the wrong crowd"
             className="h-full w-full object-cover opacity-90"
-            loading="eager"
+            loading={slide === 0 ? 'eager' : 'lazy'}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
           />
         </picture>
+
         <div className="absolute inset-0 bg-ink/35" />
       </motion.div>
 
@@ -44,9 +91,11 @@ function Hero() {
         >
           {hero.kicker}
         </motion.p>
+
         <h1 className="font-display font-black uppercase text-paper tracking-tighter leading-[0.85] text-[17vw] md:text-[10vw]">
           <MaskedLines lines={hero.lines} delay={0.25} />
         </h1>
+
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,6 +104,7 @@ function Hero() {
         >
           {hero.copy}
         </motion.p>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,6 +118,7 @@ function Hero() {
           >
             {hero.primary.label}
           </Link>
+
           <Link
             to={hero.secondary.to}
             data-testid="hero-explore-btn"
@@ -80,7 +131,6 @@ function Hero() {
     </section>
   );
 }
-
 function EditorialMarquee() {
   return (
     <div className="bg-ink text-paper py-4 border-y border-ink overflow-hidden" data-testid="editorial-marquee">

@@ -44,11 +44,14 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="py-10 md:py-14 overflow-hidden">
-          <p className="font-display font-extrabold uppercase tracking-tighter leading-[0.8] text-[18vw] md:text-[13vw] text-paper/95 select-none" aria-hidden="true">
-            NALAYAK
-          </p>
-        </div>
+        <div className="py-12 md:py-16 overflow-hidden">
+  <p
+    className="font-display font-extrabold uppercase tracking-tight leading-none text-[clamp(4.5rem,8vw,9rem)] text-paper/95 select-none"
+    aria-hidden="true"
+  >
+    NALAYAK
+  </p>
+</div>
 
         <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-paper/15">
           <p className="text-[11px] tracking-[0.15em] text-paper/50">

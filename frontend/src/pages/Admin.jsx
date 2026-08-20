@@ -6,6 +6,22 @@ import { formatReleaseLabel } from '@/services/membership';
 import { useSeo } from '@/hooks/useSeo';
 
 const API = () => process.env.REACT_APP_BACKEND_URL;
+const getDropImage = (image) => {
+  if (!image) return '';
+
+  // Full external image URL.
+  if (/^https?:\/\//i.test(image)) {
+    return image;
+  }
+
+  // Local/public image.
+  if (image.startsWith('/')) {
+    return image;
+  }
+
+  // Current product image IDs are resolved by the backend.
+  return image;
+};
 
 async function adminFetch(path, key, options = {}) {
   const res = await fetch(`${API()}${path}`, {
@@ -40,32 +56,73 @@ export default function Admin() {
   const [orders, setOrders] = useState(null);
   const [requests, setRequests] = useState(null);
   const [irl, setIrl] = useState(null);
+  const [tickets, setTickets] = useState(null);
   const [error, setError] = useState(false);
 
-  const load = async (k) => {
+const load = async (k) => {
+  try {
+    // Orders are currently backed by Supabase and are working.
+    const o = await adminFetch('/api/admin/orders', k);
+
+    setOrders(o.orders || []);
+    localStorage.setItem('nalayak_admin', k);
+    setKey(k);
+    setError(false);
+
+    // These two currently depend on local MongoDB.
+    // Don't let them prevent admin login.
     try {
-      const [o, r, i] = await Promise.all([
-        adminFetch('/api/admin/orders', k),
-        adminFetch('/api/admin/custom-requests', k),
-        adminFetch('/api/admin/irl', k),
-      ]);
-      setOrders(o.orders);
-      setRequests(r.requests);
-      setIrl(i.items);
-      localStorage.setItem('nalayak_admin', k);
-      setKey(k);
-      setError(false);
+      const r = await adminFetch('/api/admin/custom-requests', k);
+      setRequests(r.requests || []);
     } catch {
-      setError(true);
-      if (!k) return;
-      localStorage.removeItem('nalayak_admin');
-      setKey('');
+      setRequests([]);
     }
-  };
+
+    try {
+      const i = await adminFetch('/api/admin/irl', k);
+      setIrl(i.items || []);
+    } catch {
+      setIrl([]);
+    }
+    try {
+  const t = await adminFetch('/api/admin/support/tickets', k);
+  setTickets(t.tickets || []);
+} catch {
+  setTickets([]);
+}
+  } catch {
+    setError(true);
+    if (!k) return;
+    localStorage.removeItem('nalayak_admin');
+    setKey('');
+  }
+};
 
   useEffect(() => {
     if (key) load(key);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+  fetch(
+    `${process.env.REACT_APP_BACKEND_URL}/api/support/tickets`,
+    {
+      credentials: 'include',
+    }
+  )
+    .then(async (res) => {
+      if (!res.ok) {
+        throw new Error('Failed to load support tickets');
+      }
+
+      return res.json();
+    })
+    .then((data) => {
+      setTickets(data.tickets || []);
+    })
+    .catch((error) => {
+      console.error('SUPPORT TICKETS ERROR:', error);
+      setTickets([]);
+    });
+}, []);
 
   const act = async (fn, msg) => {
     try {
@@ -127,7 +184,7 @@ export default function Admin() {
       </div>
 
       <div className="mt-10 flex gap-2 border-b border-line pb-px" role="tablist">
-        {['orders', 'custom', 'irl', 'drops'].map((t) => (
+        {['orders', 'custom', 'support', 'irl', 'drops'].map((t) => (
           <button
             key={t}
             role="tab"
@@ -190,6 +247,183 @@ export default function Admin() {
           </div>
         )}
 
+        {tab === 'support' && (
+  <div
+    className="divide-y divide-line border-y border-line"
+    data-testid="admin-support"
+  >
+    {(tickets || []).length === 0 && (
+      <p className="py-10 text-smoke text-sm">
+        No support tickets.
+      </p>
+    )}
+
+    {(tickets || []).map((ticket) => (
+      <div
+        key={ticket.ticket_number}
+        className="py-6"
+        data-testid={`admin-ticket-${ticket.ticket_number}`}
+      >
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
+
+          {/* TICKET DETAILS */}
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p className="font-display font-bold tracking-tight text-lg">
+                {ticket.ticket_number}
+              </p>
+
+              <span className="text-[10px] tracking-[0.25em] text-smoke">
+                {(ticket.status || 'open').toUpperCase()}
+              </span>
+            </div>
+
+            <div className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+              <div>
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                  ORDER
+                </p>
+                <p>{ticket.order_id || '—'}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                  ISSUE
+                </p>
+                <p>{ticket.issue_type || '—'}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                  PRODUCT
+                </p>
+                <p>{ticket.product_name || '—'}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                  CREATED
+                </p>
+                <p>
+                  {ticket.created_at
+                    ? new Date(ticket.created_at).toLocaleString('en-IN')
+                    : '—'}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 border-l-2 border-ink pl-4">
+              <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
+                CUSTOMER MESSAGE
+              </p>
+              <p className="text-sm leading-relaxed text-ink/75">
+                {ticket.description}
+              </p>
+            </div>
+
+            {/* CUSTOMER IMAGES */}
+            {Array.isArray(ticket.images) && ticket.images.length > 0 && (
+              <div className="mt-5">
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-3">
+                  ATTACHMENTS
+                </p>
+
+                <div className="flex flex-wrap gap-3">
+                  {ticket.images.map((image, index) => (
+                    <a
+                      key={index}
+                      href={image}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block border border-line"
+                    >
+                      <img
+                        src={image}
+                        alt={`Ticket attachment ${index + 1}`}
+                        className="w-24 h-24 object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* EXISTING ADMIN NOTE */}
+            {ticket.admin_note && (
+              <div className="mt-5">
+                <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
+                  ADMIN NOTE
+                </p>
+                <p className="text-sm text-ink/70">
+                  {ticket.admin_note}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* ADMIN ACTIONS */}
+          <div className="w-full md:w-[260px] border border-line p-4">
+            <p className="text-[10px] tracking-[0.25em] text-smoke mb-4">
+              UPDATE TICKET
+            </p>
+
+            <select
+              defaultValue={ticket.status || 'open'}
+              id={`ticket-status-${ticket.ticket_number}`}
+              className="w-full border border-line bg-transparent px-3 py-3 text-sm outline-none"
+            >
+              <option value="open">OPEN</option>
+<option value="in-review">IN REVIEW</option>
+<option value="waiting-customer">WAITING FOR CUSTOMER</option>
+<option value="resolved">RESOLVED</option>
+<option value="closed">CLOSED</option>
+            </select>
+
+            <textarea
+              id={`ticket-note-${ticket.ticket_number}`}
+              defaultValue={ticket.admin_note || ''}
+              placeholder="Internal note / response..."
+              rows={4}
+              className="mt-3 w-full border border-line bg-transparent px-3 py-3 text-sm outline-none resize-none"
+            />
+
+            <button
+              onClick={() => {
+                const status = document.getElementById(
+                  `ticket-status-${ticket.ticket_number}`
+                ).value;
+
+                const admin_note = document.getElementById(
+                  `ticket-note-${ticket.ticket_number}`
+                ).value;
+
+                act(
+                  () =>
+                    adminFetch(
+                      `/api/admin/support/tickets/${encodeURIComponent(ticket.ticket_number)}/status`,
+                      key,
+                      {
+                        method: 'POST',
+                        body: JSON.stringify({
+                          status,
+                          admin_note,
+                        }),
+                      }
+                    ),
+                  `${ticket.ticket_number} updated.`
+                );
+              }}
+              className="mt-3 w-full bg-ink text-paper py-3 text-[10px] tracking-[0.2em] font-medium hover:bg-ink/85 transition-colors"
+            >
+              SAVE UPDATE
+            </button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
         {tab === 'irl' && (
           <div data-testid="admin-irl">
             {(irl || []).length === 0 && <p className="py-10 text-smoke text-sm">No uploads yet.</p>}
@@ -233,7 +467,18 @@ export default function Admin() {
                     testId={`admin-golive-${p.slug}`}
                     onClick={async () => {
                       try {
-                        const d = await adminFetch('/api/drops/go-live', key, { method: 'POST', body: JSON.stringify({ slug: p.slug, name: p.name }) });
+                      const d = await adminFetch(
+  '/api/drops/go-live',
+  key,
+  {
+    method: 'POST',
+    body: JSON.stringify({
+      slug: p.slug,
+      name: p.name,
+      image: getDropImage(p.images?.[0]),
+    }),
+  }
+);
                         toast.success(`${d.sent} member${d.sent === 1 ? '' : 's'} emailed.`, { description: p.name });
                       } catch {
                         toast.error('Blast failed.');

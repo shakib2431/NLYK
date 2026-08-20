@@ -11,6 +11,9 @@ import { formatINR } from '@/data/storeData';
 export default function ProductCard({ product, priority = false }) {
   const { wishlist, toggleWishlist, addToCart, member } = useStore();
   const [hover, setHover] = useState(false);
+const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name);
+const selectedImage =
+  product.colorImages?.[selectedColor] || product.images[0];
   const wished = wishlist.includes(product.slug);
   const soldOut = product.stock === 0;
   const canBuy = canPurchase(product, member);
@@ -33,7 +36,7 @@ export default function ProductCard({ product, priority = false }) {
       <div className="relative overflow-hidden bg-white border border-line aspect-[3/4]">
         <Link to={`/product/${product.slug}`} data-testid={`product-link-${product.slug}`} aria-label={product.name}>
           <SafeImg
-            id={product.images[0]} w={800} alt={product.name}
+            id={selectedImage} w={800} alt={product.name}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${hover && product.images[1] ? 'opacity-0' : 'opacity-100'}`}
             {...(priority ? { loading: 'eager' } : {})}
           />
@@ -117,11 +120,23 @@ export default function ProductCard({ product, priority = false }) {
             )}
           </div>
         </div>
-        <div className="flex gap-1 pt-1">
-          {product.colors.map((c) => (
-            <span key={c.name} title={c.name} className="h-3 w-3 border border-ink/30" style={{ backgroundColor: c.hex }} />
-          ))}
-        </div>
+       <div className="flex gap-1 pt-1">
+  {product.colors.map((c) => (
+    <button
+      key={c.name}
+      type="button"
+      title={c.name}
+      aria-label={`Select ${c.name}`}
+      onClick={() => setSelectedColor(c.name)}
+      className={`h-3 w-3 border transition-all duration-200 ${
+        selectedColor === c.name
+          ? 'border-ink ring-1 ring-ink ring-offset-1'
+          : 'border-ink/30'
+      }`}
+      style={{ backgroundColor: c.hex }}
+    />
+  ))}
+</div>
       </div>
     </div>
   );

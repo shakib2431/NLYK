@@ -12,40 +12,104 @@ export default function CartPage() {
   useSeo('Bag', 'Review your bag.');
   const { cart, cartSubtotal, updateQty, removeFromCart, clearCart } = useStore();
   const [placing, setPlacing] = useState(false);
-  const [order, setOrder] = useState(null);
+const [order, setOrder] = useState(null);
+const [checkoutOpen, setCheckoutOpen] = useState(false);
+const [checkoutName, setCheckoutName] = useState('');
+const [checkoutEmail, setCheckoutEmail] = useState('');
+const [checkoutPhone, setCheckoutPhone] = useState('');
+const [checkoutAddress, setCheckoutAddress] = useState('');
   const shipping = cartSubtotal >= FREE_SHIPPING_THRESHOLD || cartSubtotal === 0 ? 0 : 99;
 
   const checkout = async () => {
+  if (!checkoutOpen) {
     let user = null;
-    try { user = JSON.parse(localStorage.getItem('nalayak_user') || 'null'); } catch { /* ignore */ }
-    if (!user?.email) {
-      toast.error('Sign in to check out.', { description: 'Thirty seconds. Account, top right.' });
-      return;
-    }
-    setPlacing(true);
+
     try {
-      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      user = JSON.parse(
+        localStorage.getItem('nalayak_user') || 'null'
+      );
+    } catch {
+      /* ignore */
+    }
+
+   setCheckoutName(user?.name || '');
+setCheckoutEmail(user?.email || '');
+setCheckoutPhone(user?.phone || '');
+setCheckoutAddress(user?.shipping_address || '');
+setCheckoutOpen(true);
+return;
+  }
+
+  if (!checkoutName.trim()) {
+    toast.error('Enter your name.');
+    return;
+  }
+
+  if (!checkoutEmail.trim()) {
+    toast.error('Enter your email.');
+    return;
+  }
+  if (!checkoutPhone.trim()) {
+  toast.error('Enter your phone number.');
+  return;
+}
+
+if (!checkoutAddress.trim()) {
+  toast.error('Enter your shipping address.');
+  return;
+}
+
+  setPlacing(true);
+
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/api/orders`,
+     {
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          email: user.email,
-          name: user.name,
-          items: cart.map((i) => ({ slug: i.slug, name: i.name, size: i.size, color: i.color, qty: i.qty, price: i.price })),
+          email: checkoutEmail.trim(),
+          name: checkoutName.trim(),
+            phone: checkoutPhone.trim(),
+  shipping_address: checkoutAddress.trim(),
+          items: cart.map((i) => ({
+            slug: i.slug,
+            name: i.name,
+            size: i.size,
+            color: i.color,
+            qty: i.qty,
+            price: i.price,
+          })),
           subtotal: cartSubtotal,
           shipping,
           total: cartSubtotal + shipping,
         }),
-      });
-      if (!res.ok) throw new Error('order_failed');
-      const data = await res.json();
-      setOrder({ id: data.orderId, emailed: data.emailed, total: cartSubtotal + shipping });
-      clearCart();
-    } catch {
-      toast.error('Order failed to place. Try again.');
-    } finally {
-      setPlacing(false);
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error('order_failed');
     }
-  };
+
+    const data = await res.json();
+
+    setOrder({
+      id: data.orderId,
+      emailed: data.emailed,
+      total: cartSubtotal + shipping,
+    });
+
+    setCheckoutOpen(false);
+    clearCart();
+  } catch {
+    toast.error('Order failed to place. Try again.');
+  } finally {
+    setPlacing(false);
+  }
+};
 
   if (order) {
     return (
@@ -56,14 +120,18 @@ export default function CartPage() {
         </h1>
         <p className="mt-6 text-smoke text-sm md:text-base max-w-md mx-auto">
           {order.emailed
-            ? 'Confirmed and receipt sent to your email. It ships from Mumbai within 48 hours.'
-            : 'Confirmed. It ships from Mumbai within 48 hours.'}
+            ? 'Confirmed and receipt sent to your email. It ships from Kolkata within 48 hours.'
+            : 'Confirmed. It ships from Kolkata within 48 hours.'}
         </p>
         <p className="mt-2 text-sm font-semibold">Total — ₹{order.total.toLocaleString('en-IN')}</p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link to="/account" data-testid="order-account-btn" className="bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors">
-            VIEW YOUR ORDERS
-          </Link>
+          <Link
+  to={`/track/${order.id}`}
+  data-testid="order-track-btn"
+  className="bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors"
+>
+  TRACK YOUR ORDER
+</Link>
           <Link to="/new-arrivals" data-testid="order-continue-btn" className="border border-ink px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors">
             CONTINUE SHOPPING
           </Link>
@@ -138,6 +206,49 @@ export default function CartPage() {
                 <span data-testid="summary-total">{formatINR(cartSubtotal + shipping)}</span>
               </div>
             </div>
+             {checkoutOpen && (
+  <div className="mt-6 space-y-3 border-t border-line pt-6">
+    <p className="text-[11px] tracking-[0.25em] text-smoke">
+      WHO ARE WE SHIPPING TO?
+    </p>
+
+    <input
+      type="text"
+      value={checkoutName}
+      onChange={(e) => setCheckoutName(e.target.value)}
+      placeholder="Your name"
+      className="w-full border border-line px-4 py-3 text-sm outline-none focus:border-ink"
+      autoComplete="name"
+    />
+
+    <input
+      type="email"
+      value={checkoutEmail}
+      onChange={(e) => setCheckoutEmail(e.target.value)}
+      placeholder="Your email"
+      className="w-full border border-line px-4 py-3 text-sm outline-none focus:border-ink"
+      autoComplete="email"
+    />
+
+    <input
+      type="tel"
+      value={checkoutPhone}
+      onChange={(e) => setCheckoutPhone(e.target.value)}
+      placeholder="Your phone number"
+      className="w-full border border-line px-4 py-3 text-sm outline-none focus:border-ink"
+      autoComplete="tel"
+    />
+
+    <textarea
+      value={checkoutAddress}
+      onChange={(e) => setCheckoutAddress(e.target.value)}
+      placeholder="Full shipping address"
+      rows={4}
+      className="w-full border border-line px-4 py-3 text-sm outline-none focus:border-ink resize-none"
+      autoComplete="street-address"
+    />
+  </div>
+)}
             <button
               data-testid="summary-checkout-btn"
               disabled={placing}

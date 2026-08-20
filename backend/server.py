@@ -1,72 +1,467 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Header, Response, Query
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Header, Response, Query, Cookie
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+
 import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+
 import uuid
 from datetime import datetime, timezone
+from motor.motor_asyncio import AsyncIOMotorClient
+
+
+# ─────────────────────────────────────────────
+# Environment
+# ─────────────────────────────────────────────
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / ".env")
+
+
+# ─────────────────────────────────────────────
+# MongoDB connection
+# ─────────────────────────────────────────────
+
+mongo_url = os.environ.get("MONGO_URL", "").strip()
+db_name = os.environ.get("DB_NAME", "").strip()
+
+if not mongo_url:
+    raise RuntimeError("MONGO_URL is missing from backend/.env")
+
+if not db_name:
+    raise RuntimeError("DB_NAME is missing from backend/.env")
+
+client = AsyncIOMotorClient(mongo_url)
+db = client[db_name]
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+
 
 # Create the main app without a prefix
 app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+# ─────────────────────────────────────────────
+# Twilio Verify OTP
+# ─────────────────────────────────────────────
+
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "").strip()
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "").strip()
+TWILIO_VERIFY_SERVICE_SID = os.environ.get(
+    "TWILIO_VERIFY_SERVICE_SID", ""
+).strip()
+
+if not TWILIO_ACCOUNT_SID:
+    logging.warning("TWILIO_ACCOUNT_SID is not configured")
+
+if not TWILIO_AUTH_TOKEN:
+    logging.warning("TWILIO_AUTH_TOKEN is not configured")
+
+if not TWILIO_VERIFY_SERVICE_SID:
+    logging.warning("TWILIO_VERIFY_SERVICE_SID is not configured")
+
+
+class SendOTPRequest(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=20)
+
+
+class VerifyOTPRequest(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=20)
+    code: str = Field(..., min_length=4, max_length=8)
+    name: str = Field(default="NALAYAK", max_length=100)
+
+
+def normalize_phone(phone: str) -> str:
+    """
+    NALAYAK currently accepts Indian 10-digit numbers
+    and converts them to E.164 format.
+    """
+
+    phone = phone.strip().replace(" ", "").replace("-", "")
+
+    # Indian 10-digit number
+    if phone.isdigit() and len(phone) == 10:
+        phone = "+91" + phone
+
+    # 91XXXXXXXXXX without +
+    elif phone.isdigit() and len(phone) == 12 and phone.startswith("91"):
+        phone = "+" + phone
+
+    # Already E.164
+    elif phone.startswith("+"):
+        pass
+
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Please enter a valid phone number."
+        )
+
+    return phone
+
+
+async def twilio_verify_request(
+    endpoint: str,
+    data: dict,
+):
+    url = (
+        f"https://verify.twilio.com/v2/"
+        f"Services/{TWILIO_VERIFY_SERVICE_SID}/{endpoint}"
+    )
+
+    async with _httpx.AsyncClient(timeout=15.0) as http:
+        response = await http.post(
+            url,
+            data=data,
+            auth=(
+                TWILIO_ACCOUNT_SID,
+                TWILIO_AUTH_TOKEN,
+            ),
+        )
+
+    return response
+
+
+@api_router.post("/auth/send-otp")
+async def send_otp(payload: SendOTPRequest):
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
+        raise HTTPException(
+            status_code=500,
+            detail="OTP service is not configured."
+        )
+
+    if not TWILIO_VERIFY_SERVICE_SID:
+        raise HTTPException(
+            status_code=500,
+            detail="OTP service ID is not configured."
+        )
+
+    phone = normalize_phone(payload.phone)
+
+    response = await twilio_verify_request(
+        "Verifications",
+        {
+            "To": phone,
+            "Channel": "sms",
+        },
+    )
+
+    if response.status_code >= 400:
+        logging.error(
+            "Twilio send OTP failed: %s",
+            response.text,
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to send OTP. Please try again."
+        )
+
+    return {
+        "success": True,
+        "message": "OTP sent successfully.",
+        "phone": phone,
+    }
+
+
+@api_router.post("/auth/verify-otp")
+async def verify_otp(payload: VerifyOTPRequest, response: Response):
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
+        raise HTTPException(
+            status_code=500,
+            detail="OTP service is not configured."
+        )
+
+    if not TWILIO_VERIFY_SERVICE_SID:
+        raise HTTPException(
+            status_code=500,
+            detail="OTP service ID is not configured."
+        )
+
+    phone = normalize_phone(payload.phone)
+
+    twilio_response = await twilio_verify_request(
+        "VerificationCheck",
+        {
+            "To": phone,
+            "Code": payload.code.strip(),
+        },
+    )
+
+    if twilio_response.status_code >= 400:
+        logging.error(
+            "Twilio verify OTP failed: %s",
+            twilio_response.text,
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired OTP."
+        )
+
+    result = twilio_response.json()
+
+    if result.get("status") != "approved":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired OTP."
+        )
+
+    # ─────────────────────────────────────────────
+    # Find or create Nalayak member
+    # ─────────────────────────────────────────────
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        member_resp = await client_http.get(
+            f"{base_url}/members",
+            params={
+                "select": "*",
+                "phone": f"eq.{phone}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if member_resp.status_code >= 400:
+        logging.error(
+            "Member lookup failed: %s %s",
+            member_resp.status_code,
+            member_resp.text,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to load member."
+        )
+
+    members = member_resp.json() or []
+
+    if members:
+        member = members[0]
+
+        # Keep the latest supplied name if one exists.
+        # Name is added below by Account.jsx.
+    else:
+        now = datetime.now(timezone.utc).isoformat()
+
+        member_doc = {
+            "phone": phone,
+            "name": payload.name.strip() or "NALAYAK",
+            "status": "active",
+            "membership_type": "free",
+            "is_founding_member": False,
+            "joined_at": now,
+            "created_at": now,
+            "updated_at": now,
+        }
+
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            create_resp = await client_http.post(
+                f"{base_url}/members",
+                headers={
+                    **headers,
+                    "Prefer": "return=representation",
+                },
+                json=member_doc,
+            )
+
+        if create_resp.status_code >= 400:
+            logging.error(
+                "Member creation failed: %s %s",
+                create_resp.status_code,
+                create_resp.text,
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to create member."
+            )
+
+        created = create_resp.json() or []
+
+        if not created:
+            raise HTTPException(
+                status_code=500,
+                detail="Member creation returned no member."
+            )
+
+        member = created[0]
+
+    # ─────────────────────────────────────────────
+    # Create persistent session
+    # ─────────────────────────────────────────────
+
+    session_token = str(uuid.uuid4())
+
+    from datetime import timedelta
+
+    expires_at = (
+        datetime.now(timezone.utc) + timedelta(days=30)
+    ).isoformat()
+
+    session_doc = {
+        "member_id": member["id"],
+        "token": session_token,
+        "expires_at": expires_at,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        session_resp = await client_http.post(
+            f"{base_url}/member_sessions",
+            headers={
+                **headers,
+                "Prefer": "return=minimal",
+            },
+            json=session_doc,
+        )
+
+    if session_resp.status_code >= 400:
+        logging.error(
+            "Member session creation failed: %s %s",
+            session_resp.status_code,
+            session_resp.text,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to create member session."
+        )
+
+    response.set_cookie(
+        key="nalayak_session",
+        value=session_token,
+        max_age=60 * 60 * 24 * 30,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
+
+    return {
+        "success": True,
+        "verified": True,
+        "phone": phone,
+        "expires_at": expires_at,
+        "member": member,
+    }
+
+
+@api_router.get("/auth/me")
+async def get_current_member(
+    nalayak_session: str = Cookie(None),
+):
+    if not nalayak_session:
+        raise HTTPException(
+            status_code=401,
+            detail="not_authenticated",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    # Find session
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        session_resp = await client_http.get(
+            f"{base_url}/member_sessions",
+            params={
+                "select": "member_id,expires_at",
+                "token": f"eq.{nalayak_session}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if session_resp.status_code >= 400:
+        logger.error(
+            "Member session lookup failed: "
+            f"{session_resp.status_code} {session_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to validate session.",
+        )
+
+    sessions = session_resp.json() or []
+
+    if not sessions:
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    session = sessions[0]
+
+    # Check expiry
+    expires_at = datetime.fromisoformat(
+        session["expires_at"].replace("Z", "+00:00")
+    )
+
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    # Load member
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        member_resp = await client_http.get(
+            f"{base_url}/members",
+            params={
+                "select": "*",
+                "id": f"eq.{session['member_id']}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if member_resp.status_code >= 400:
+        logger.error(
+            "Member lookup failed: "
+            f"{member_resp.status_code} {member_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to load member.",
+        )
+
+    members = member_resp.json() or []
+
+    if not members:
+        raise HTTPException(
+            status_code=401,
+            detail="member_not_found",
+        )
+
+    return {
+        "authenticated": True,
+        "member": members[0],
+    }
+
+
+@api_router.post("/auth/logout")
+async def logout(response: Response):
+    response.delete_cookie(
+        key="nalayak_session",
+        path="/",
+    )
+
+    return {
+        "success": True,
+    }
 
 
 # Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
 
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# ── Transactional email (Emergent managed Resend) ──
+# ── Transactional email via Resend ──
 import re as _re
 import ipaddress as _ipaddress
 import httpx as _httpx
@@ -74,10 +469,13 @@ from html import escape as _escape
 from html.parser import HTMLParser as _HTMLParser
 from urllib.parse import urlparse as _urlparse
 
-EMAIL_BASE_URL = "https://integrations.emergentagent.com"
-EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
-EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK")
-SITE_URL = os.environ.get("SITE_URL", "")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK").strip()
+EMAIL_FROM_ADDRESS = os.environ.get(
+    "EMAIL_FROM_ADDRESS",
+    "onboarding@resend.dev",
+).strip()
+SITE_URL = os.environ.get("SITE_URL", "").strip()
 
 _SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
 _CRED_ASK = ("reply with your password", "reply with the code", "send your password", "cvv",
@@ -143,23 +541,70 @@ def _assert_safe_email(subject: str, html: str) -> None:
             if not _same_site(m.group(1).lower(), real):
                 raise ValueError(f"Anchor text {m.group(1)!r} != real link host {real!r} (G3)")
 
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK").strip()
+EMAIL_FROM_ADDRESS = os.environ.get(
+    "EMAIL_FROM_ADDRESS",
+    "onboarding@resend.dev",
+).strip()
+
+
 async def send_email(*, to: str, subject: str, html: str) -> str | None:
+
     _assert_safe_email(subject, html)
-    if not EMAIL_KEY:
-        raise HTTPException(status_code=503, detail="email_not_configured")
-    payload = {"to": [to], "subject": subject, "html": html, "from_name": EMAIL_FROM_NAME}
+
+    if not RESEND_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="email_not_configured",
+        )
+
+    payload = {
+        "from": f"{EMAIL_FROM_NAME} <{EMAIL_FROM_ADDRESS}>",
+        "to": [to],
+        "subject": subject,
+        "html": html,
+    }
+
     try:
         async with _httpx.AsyncClient(timeout=30) as client_http:
             resp = await client_http.post(
-                f"{EMAIL_BASE_URL}/api/v1/email/send",
-                headers={"X-Email-Key": EMAIL_KEY},
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
                 json=payload,
             )
-        resp.raise_for_status()
-        return resp.json().get("id")
+
+        if resp.status_code >= 400:
+            logger.error(
+                f"Resend email send failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to send email",
+            )
+
+        result = resp.json()
+
+        logger.info(
+            "Email sent successfully via Resend: %s",
+            result.get("id"),
+        )
+
+        return result.get("id")
+
+    except HTTPException:
+        raise
+
     except Exception as e:
-        logger.error(f"Email send failed: {e}")
-        raise HTTPException(status_code=502, detail="Failed to send email")
+        logger.exception("Email send failed: %s", e)
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to send email",
+        )
 
 class WelcomeEmailInput(BaseModel):
     email: str
@@ -212,63 +657,269 @@ async def send_welcome_email(input: WelcomeEmailInput):
     return {"status": "sent", "email_id": email_id}
 
 # ── Drop alerts + custom design requests ──
+
 class AlertRegisterInput(BaseModel):
     email: str
     slug: str
 
+
 @api_router.post("/alerts/register")
 async def register_alert(input: AlertRegisterInput):
-    if not _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", input.email or ""):
-        raise HTTPException(status_code=400, detail="invalid_email")
-    await db.drop_alert_registrations.update_one(
-        {"email": input.email, "slug": input.slug},
-        {"$setOnInsert": {
-            "email": input.email, "slug": input.slug, "notified": False,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }},
-        upsert=True,
-    )
-    return {"status": "registered"}
+    if not _re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        input.email or "",
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_email",
+        )
+
+    headers = {
+        **supabase_rest_headers(),
+        "Prefer": "resolution=merge-duplicates,return=minimal",
+    }
+
+    base_url = supabase_rest_url()
+
+    doc = {
+        "email": input.email,
+        "product_slug": input.slug,
+        "notified": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.post(
+                f"{base_url}/drop_alerts",
+                headers=headers,
+                json=doc,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase drop alert registration failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to register drop alert",
+            )
+
+        return {
+            "status": "registered",
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase drop alert registration failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to register drop alert",
+        )
+
 
 class DropGoLiveInput(BaseModel):
     slug: str
     name: str
+    image: str = ""
+
+
+def resolve_drop_image(image: str) -> str:
+    image = (image or "").strip()
+
+    if not image:
+        return ""
+
+    # Already a full URL.
+    if image.startswith("https://"):
+        return image
+
+    # Local/public image from the NALAYAK frontend.
+    if image.startswith("/"):
+        return f"{SITE_URL.rstrip('/')}{image}"
+
+    # Product image IDs used in storeData.js.
+    # Example:
+    # photo-1507003211169-0a1dd7228f2d
+    return (
+        f"https://images.unsplash.com/{image}"
+        "?auto=format&fit=crop&w=1200&q=85"
+    )
+
 
 @api_router.post("/drops/go-live")
-async def drop_go_live(input: DropGoLiveInput, x_admin_key: str = Header(None)):
+async def drop_go_live(
+    input: DropGoLiveInput,
+    x_admin_key: str = Header(None),
+):
     admin_guard(x_admin_key)
-    # Triggered when a coming-soon piece goes live (cron/admin hook in production).
-    if not EMAIL_KEY:
-        return {"status": "skipped", "reason": "email_not_configured"}
-    regs = await db.drop_alert_registrations.find(
-        {"slug": input.slug, "notified": {"$ne": True}}, {"_id": 0}
-    ).to_list(500)
+
+    if not RESEND_API_KEY:
+        return {
+            "status": "skipped",
+            "reason": "email_not_configured",
+        }
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/drop_alerts",
+                params={
+                    "select": "*",
+                    "product_slug": f"eq.{input.slug}",
+                    "notified": "neq.true",
+                    "limit": "500",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase drop alert lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch drop alerts",
+            )
+
+        regs = resp.json() or []
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase drop alert lookup failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch drop alerts",
+        )
+
     name = _escape(input.name)
     href = f"{SITE_URL.rstrip('/')}/product/{input.slug}"
     subject = f"{name} is live."
-    html = (
-        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-        '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
-        '<p style="color:#F7F7F5;font-size:28px;font-weight:800;letter-spacing:-1px;margin:0">NALAYAK</p>'
-        '</td></tr><tr><td style="padding:40px 24px;font-family:Arial,sans-serif">'
-        '<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 12px">DROP ALERT</p>'
-        f'<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0 0 16px">{name} IS LIVE.</h1>'
-        '<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 28px">You asked. It landed. '
-        'Get there before the crowd does.</p>'
-        f'<a href="{href}" style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
-        'font-size:11px;letter-spacing:3px;text-decoration:none;padding:14px 28px">SHOP THE PIECE</a>'
-        f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0">Sent by {EMAIL_FROM_NAME}. '
-        'We never ask for your password or card details by email.</p>'
-        '</td></tr></table>'
-    )
-    sent = 0
-    for r in regs:
-        await send_email(to=r["email"], subject=subject, html=html)
-        await db.drop_alert_registrations.update_one(
-            {"email": r["email"], "slug": input.slug}, {"$set": {"notified": True}}
+
+    image_url = resolve_drop_image(input.image)
+    safe_image_url = _escape(image_url)
+
+    product_image_html = ""
+
+    if safe_image_url:
+        product_image_html = (
+            f'<a href="{href}" style="display:block;text-decoration:none;margin:0 0 28px">'
+            f'<img src="{safe_image_url}" '
+            f'alt="{name}" '
+            'width="600" '
+            'style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;text-decoration:none;">'
+            '</a>'
         )
-        sent += 1
-    return {"status": "done", "sent": sent}
+
+    html = (
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+        'style="width:100%;background:#F7F7F5;">'
+
+        '<tr>'
+        '<td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A;">'
+        '<p style="color:#F7F7F5;font-size:28px;font-weight:800;letter-spacing:-1px;margin:0;">'
+        'NALAYAK'
+        '</p>'
+        '</td>'
+        '</tr>'
+
+        '<tr>'
+        '<td style="padding:40px 24px;font-family:Arial,sans-serif;">'
+
+        '<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 12px;">'
+        'DROP ALERT'
+        '</p>'
+
+        f'<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;'
+        f'margin:0 0 16px;">{name} IS LIVE.</h1>'
+
+        '<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 28px;">'
+        'You asked. It landed. Get there before the crowd does.'
+        '</p>'
+
+        f'{product_image_html}'
+
+        f'<a href="{href}" '
+        'style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
+        'font-size:11px;letter-spacing:3px;text-decoration:none;padding:14px 28px;">'
+        'SHOP THE PIECE'
+        '</a>'
+
+        f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0;">'
+        f'Sent by {EMAIL_FROM_NAME}. '
+        'We never ask for your password or card details by email.'
+        '</p>'
+
+        '</td>'
+        '</tr>'
+
+        '</table>'
+    )
+
+    sent = 0
+
+    for r in regs:
+        email = r.get("email")
+
+        if not email:
+            continue
+
+        try:
+            await send_email(
+                to=email,
+                subject=subject,
+                html=html,
+            )
+
+            async with _httpx.AsyncClient(timeout=30) as client_http:
+                update_resp = await client_http.patch(
+                    f"{base_url}/drop_alerts",
+                    params={
+                        "id": f"eq.{r['id']}",
+                    },
+                    headers={
+                        **headers,
+                        "Prefer": "return=minimal",
+                    },
+                    json={
+                        "notified": True,
+                    },
+                )
+
+            if update_resp.status_code >= 400:
+                logger.error(
+                    "Supabase drop alert notification update failed: "
+                    f"{update_resp.status_code} {update_resp.text}"
+                )
+                continue
+
+            sent += 1
+
+        except Exception as e:
+            logger.error(
+                f"Failed to notify drop alert {r.get('id')}: {e}"
+            )
+
+    return {
+        "status": "done",
+        "sent": sent,
+    }
+
+class RequestStatusInput(BaseModel):
+    status: str
 
 class CustomRequestInput(BaseModel):
     name: str
@@ -282,22 +933,128 @@ class CustomRequestInput(BaseModel):
     description: str = ""
     images: list = []
 
+
+def supabase_rest_headers():
+    secret = os.environ.get("SUPABASE_FUNCTION_SECRET", "")
+    if not secret:
+        raise HTTPException(
+            status_code=503,
+            detail="supabase_function_not_configured",
+        )
+
+    return {
+        "apikey": secret,
+        "Authorization": f"Bearer {secret}",
+        "Content-Type": "application/json",
+    }
+
+
+def supabase_rest_url():
+    url = os.environ.get(
+        "SUPABASE_URL",
+        "https://yeosgnfvopvufroihyhs.supabase.co",
+    ).rstrip("/")
+
+    return url + "/rest/v1"
+
+
 @api_router.post("/custom-requests")
 async def create_custom_request(input: CustomRequestInput):
     if not _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", input.email or ""):
-        raise HTTPException(status_code=400, detail="invalid_email")
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_email",
+        )
+
     import random
+
     ref = f"NL-{random.randint(1000, 9999)}"
-    while await db.custom_requests.find_one({"ref": ref}, {"_id": 0}):
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    # Make sure the generated reference is unique.
+    for _ in range(20):
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            check = await client_http.get(
+                f"{base_url}/custom_requests",
+                params={
+                    "select": "ref",
+                    "ref": f"eq.{ref}",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if check.status_code >= 400:
+            logger.error(
+                "Supabase custom request lookup failed: "
+                f"{check.status_code} {check.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to create custom request",
+            )
+
+        existing = check.json()
+
+        if not existing:
+            break
+
         ref = f"NL-{random.randint(1000, 9999)}"
-    doc = input.dict()
-    doc.update({"ref": ref, "created_at": datetime.now(timezone.utc).isoformat(), "status": "received"})
-    await db.custom_requests.insert_one(doc)
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail="Could not generate unique reference",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    doc = {
+        "ref": ref,
+        "user_id": None,
+        "email": input.email,
+        "name": input.name,
+        "phone": input.phone,
+        "garment": input.garment,
+        "size": input.size,
+        "vibes": input.vibes,
+        "colours": input.colours,
+        "budget": input.budget,
+        "description": input.description,
+        "images": input.images,
+        "status": "received",
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.post(
+            f"{base_url}/custom_requests",
+            headers={
+                **headers,
+                "Prefer": "return=representation",
+            },
+            json=doc,
+        )
+
+    if resp.status_code >= 400:
+        logger.error(
+            "Supabase custom request insert failed: "
+            f"{resp.status_code} {resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to create custom request",
+        )
+
     emailed = False
-    if EMAIL_KEY:
+
+    if RESEND_API_KEY:
         garment = _escape(input.garment or "—")
         size = _escape(input.size or "—")
         subject = f"Request {ref} — received."
+
         html = (
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
             '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
@@ -313,94 +1070,148 @@ async def create_custom_request(input: CustomRequestInput):
             'We never ask for your password or card details by email.</p>'
             '</td></tr></table>'
         )
-        await send_email(to=input.email, subject=subject, html=html)
-        emailed = True
-    return {"ref": ref, "emailed": emailed}
-
-# ── Orders (mock checkout, real receipts) ──
-class OrderInput(BaseModel):
-    email: str
-    name: str = ""
-    items: list = []
-    subtotal: int = 0
-    shipping: int = 0
-    total: int = 0
-
-@api_router.post("/orders")
-async def create_order(input: OrderInput):
-    if not _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", input.email or ""):
-        raise HTTPException(status_code=400, detail="invalid_email")
-    if not input.items:
-        raise HTTPException(status_code=400, detail="empty_order")
-    import random
-    order_id = f"NLO-{random.randint(1000, 9999)}"
-    while await db.orders.find_one({"order_id": order_id}, {"_id": 0}):
-        order_id = f"NLO-{random.randint(1000, 9999)}"
-    doc = input.dict()
-    doc.update({
-        "order_id": order_id,
-        "status": "placed",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
-    await db.orders.insert_one(doc)
-    emailed = False
-    if EMAIL_KEY:
-        rows = "".join(
-            f'<tr><td style="padding:8px 0;font-size:13px;color:#333">{_escape(str(i.get("name", "")))} '
-            f'<span style="color:#8C8C8C">· {_escape(str(i.get("size", "")))} × {int(i.get("qty", 1))}</span></td>'
-            f'<td style="padding:8px 0;font-size:13px;color:#333;text-align:right">₹{int(i.get("price", 0)) * int(i.get("qty", 1)):,}</td></tr>'
-            for i in input.items
+        await send_email(
+            to=input.email,
+            subject=subject,
+            html=html,
         )
-        subject = f"Order {order_id} — confirmed."
-        html = (
-            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-            '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
-            '<p style="color:#F7F7F5;font-size:28px;font-weight:800;letter-spacing:-1px;margin:0">NALAYAK</p>'
-            '</td></tr><tr><td style="padding:40px 24px;font-family:Arial,sans-serif">'
-            '<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 12px">ORDER CONFIRMED</p>'
-            f'<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0 0 16px">GOOD CHOICE, {_escape((input.name or "").split()[0] or "NALAYAK").upper()}.</h1>'
-            f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 24px">Order <strong>{order_id}</strong> is in. '
-            'It ships from Mumbai within 48 hours.</p>'
-            f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #E5E5E5">{rows}'
-            f'<tr><td style="padding:12px 0;font-size:13px;color:#8C8C8C;border-top:1px solid #E5E5E5">Shipping</td>'
-            f'<td style="padding:12px 0;font-size:13px;text-align:right;border-top:1px solid #E5E5E5">{"FREE" if input.shipping == 0 else f"₹{input.shipping:,}"}</td></tr>'
-            f'<tr><td style="padding:4px 0 12px;font-size:15px;font-weight:700">Total</td>'
-            f'<td style="padding:4px 0 12px;font-size:15px;font-weight:700;text-align:right">₹{input.total:,}</td></tr></table>'
-            f'<a href="{SITE_URL.rstrip("/")}/track/{order_id}" style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
-            'font-size:11px;letter-spacing:3px;text-decoration:none;padding:14px 28px;margin-top:8px">TRACK YOUR ORDER</a>'
-            f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0">Sent by {EMAIL_FROM_NAME}. '
-            'We never ask for your password or card details by email.</p>'
-            '</td></tr></table>'
-        )
-        await send_email(to=input.email, subject=subject, html=html)
+
         emailed = True
-    return {"orderId": order_id, "emailed": emailed}
 
-@api_router.get("/orders")
-async def list_orders(email: str = ""):
-    if not _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email or ""):
-        return {"orders": []}
-    orders = await db.orders.find({"email": email}, {"_id": 0}).sort("created_at", -1).to_list(50)
-    return {"orders": orders}
+    return {
+        "ref": ref,
+        "emailed": emailed,
+    }
 
-class RequestStatusInput(BaseModel):
-    status: str
+
+@api_router.get("/admin/custom-requests")
+async def admin_custom_requests(
+    x_admin_key: str = Header(None),
+):
+    admin_guard(x_admin_key)
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.get(
+            f"{base_url}/custom_requests",
+            params={
+                "select": "*",
+                "order": "created_at.desc",
+                "limit": "100",
+            },
+            headers=headers,
+        )
+
+    if resp.status_code >= 400:
+        logger.error(
+            "Supabase custom request list failed: "
+            f"{resp.status_code} {resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch custom requests",
+        )
+
+    return {
+        "requests": resp.json() or []
+    }
+
 
 @api_router.post("/custom-requests/{ref}/status")
-async def update_custom_request_status(ref: str, input: RequestStatusInput, x_admin_key: str = Header(None)):
+async def update_custom_request_status(
+    ref: str,
+    input: RequestStatusInput,
+    x_admin_key: str = Header(None),
+):
     admin_guard(x_admin_key)
-    allowed = ["received", "in-progress", "completed"]
+
+    allowed = [
+        "received",
+        "in-progress",
+        "completed",
+    ]
+
     if input.status not in allowed:
-        raise HTTPException(status_code=400, detail="invalid_status")
-    req = await db.custom_requests.find_one({"ref": ref}, {"_id": 0})
-    if not req:
-        raise HTTPException(status_code=404, detail="not_found")
-    await db.custom_requests.update_one({"ref": ref}, {"$set": {"status": input.status}})
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_status",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        existing_resp = await client_http.get(
+            f"{base_url}/custom_requests",
+            params={
+                "select": "*",
+                "ref": f"eq.{ref}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if existing_resp.status_code >= 400:
+        logger.error(
+            "Supabase custom request lookup failed: "
+            f"{existing_resp.status_code} {existing_resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch custom request",
+        )
+
+    existing = existing_resp.json()
+
+    if not existing:
+        raise HTTPException(
+            status_code=404,
+            detail="not_found",
+        )
+
+    req = existing[0]
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        update_resp = await client_http.patch(
+            f"{base_url}/custom_requests",
+            params={
+                "ref": f"eq.{ref}",
+            },
+            headers={
+                **headers,
+                "Prefer": "return=representation",
+            },
+            json={
+                "status": input.status,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+
+    if update_resp.status_code >= 400:
+        logger.error(
+            "Supabase custom request update failed: "
+            f"{update_resp.status_code} {update_resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to update custom request",
+        )
+
     emailed = False
-    if EMAIL_KEY and req.get("email"):
+
+    if RESEND_API_KEY and req.get("email"):
         label = input.status.replace("-", " ").upper()
-        name = _escape((req.get("name") or "").split()[0] or "there")
-        subject = f"Request {ref} — {input.status.replace('-', ' ')}."
+        name = _escape(
+            (req.get("name") or "").split()[0] or "there"
+        )
+
+        subject = (
+            f"Request {ref} — "
+            f"{input.status.replace('-', ' ')}."
+        )
+
         html = (
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
             '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
@@ -416,200 +1227,1863 @@ async def update_custom_request_status(ref: str, input: RequestStatusInput, x_ad
             'We never ask for your password or card details by email.</p>'
             '</td></tr></table>'
         )
-        await send_email(to=req["email"], subject=subject, html=html)
+
+        await send_email(
+            to=req["email"],
+            subject=subject,
+            html=html,
+        )
+
         emailed = True
-    return {"ref": ref, "status": input.status, "emailed": emailed}
+
+    return {
+        "ref": ref,
+        "status": input.status,
+        "emailed": emailed,
+    }
+
+# ── Orders (mock checkout, real receipts) ──
+class OrderInput(BaseModel):
+    email: str
+    name: str = ""
+    phone: str = ""
+    shipping_address: str = ""
+    items: list = []
+    subtotal: int = 0
+    shipping: int = 0
+    total: int = 0
+
+@api_router.post("/orders")
+async def create_order(
+    input: OrderInput,
+    nalayak_session: str = Cookie(None),
+):
+    if not nalayak_session:
+        raise HTTPException(
+            status_code=401,
+            detail="not_authenticated",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    # Resolve the logged-in member from the session.
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        session_resp = await client_http.get(
+            f"{base_url}/member_sessions",
+            params={
+                "select": "member_id,expires_at",
+                "token": f"eq.{nalayak_session}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if session_resp.status_code >= 400:
+        logger.error(
+            "Member session lookup failed: "
+            f"{session_resp.status_code} {session_resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to validate session.",
+        )
+
+    sessions = session_resp.json() or []
+
+    if not sessions:
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    session = sessions[0]
+
+    expires_at = datetime.fromisoformat(
+        session["expires_at"].replace("Z", "+00:00")
+    )
+
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    member_id = session["member_id"]
+
+    if not _re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        input.email or "",
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_email",
+        )
+
+    if not input.items:
+        raise HTTPException(
+            status_code=400,
+            detail="empty_order",
+        )
+
+    headers = {
+        **headers,
+        "Prefer": "return=representation",
+    }
+
+    # Generate a unique Nalayak order number.
+    import random
+
+    order_id = None
+
+    for _ in range(20):
+        candidate = f"NLO-{random.randint(1000, 9999)}"
+
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            check = await client_http.get(
+                f"{base_url}/orders",
+                params={
+                    "select": "order_id",
+                    "order_id": f"eq.{candidate}",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if check.status_code >= 400:
+            logger.error(
+                "Supabase order lookup failed: "
+                f"{check.status_code} {check.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to create order",
+            )
+
+        if not check.json():
+            order_id = candidate
+            break
+
+    if not order_id:
+        raise HTTPException(
+            status_code=500,
+            detail="Could not generate unique order ID",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    doc = {
+        "order_id": order_id,
+        "user_id": member_id,
+        "email": input.email,
+        "name": input.name,
+        "phone": input.phone,
+        "shipping_address": input.shipping_address,
+        "items": input.items,
+        "subtotal": input.subtotal,
+        "shipping": input.shipping,
+        "total": input.total,
+        "status": "placed",
+        "created_at": now,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.post(
+            f"{base_url}/orders",
+            headers=headers,
+            json=doc,
+        )
+
+    if resp.status_code >= 400:
+        logger.error(
+            "Supabase order insert failed: "
+            f"{resp.status_code} {resp.text}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to create order",
+        )
+
+    emailed = False
+
+    if RESEND_API_KEY:
+        rows = "".join(
+            f'<tr>'
+            f'<td style="padding:8px 0;font-size:13px;color:#333">'
+            f'{_escape(str(i.get("name", "")))} '
+            f'<span style="color:#8C8C8C">'
+            f'· {_escape(str(i.get("size", "")))} × '
+            f'{int(i.get("qty", 1))}'
+            f'</span>'
+            f'</td>'
+            f'<td style="padding:8px 0;font-size:13px;color:#333;text-align:right">'
+            f'₹{int(i.get("price", 0)) * int(i.get("qty", 1)):,}'
+            f'</td>'
+            f'</tr>'
+            for i in input.items
+        )
+
+        subject = f"Order {order_id} — confirmed."
+
+        html = (
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+            '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
+            '<p style="color:#F7F7F5;font-size:28px;font-weight:800;letter-spacing:-1px;margin:0">'
+            'NALAYAK'
+            '</p>'
+            '</td></tr>'
+
+            '<tr><td style="padding:40px 24px;font-family:Arial,sans-serif">'
+
+            '<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 12px">'
+            'ORDER CONFIRMED'
+            '</p>'
+
+            f'<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0 0 16px">'
+            f'GOOD CHOICE, {_escape((input.name or "").split()[0] or "NALAYAK").upper()}.'
+            '</h1>'
+
+            f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 24px">'
+            f'Order <strong>{order_id}</strong> is in. '
+            'It ships from Kolkata within 48 hours.'
+            '</p>'
+
+            f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+            f'style="border-top:1px solid #E5E5E5">'
+            f'{rows}'
+
+            f'<tr>'
+            f'<td style="padding:12px 0;font-size:13px;color:#8C8C8C;border-top:1px solid #E5E5E5">'
+            'Shipping'
+            '</td>'
+
+            f'<td style="padding:12px 0;font-size:13px;text-align:right;border-top:1px solid #E5E5E5">'
+            f'{"FREE" if input.shipping == 0 else f"₹{input.shipping:,}"}'
+            '</td>'
+            '</tr>'
+
+            f'<tr>'
+            f'<td style="padding:4px 0 12px;font-size:15px;font-weight:700">'
+            'Total'
+            '</td>'
+
+            f'<td style="padding:4px 0 12px;font-size:15px;font-weight:700;text-align:right">'
+            f'₹{input.total:,}'
+            '</td>'
+            '</tr>'
+
+            '</table>'
+
+            f'<a href="{SITE_URL.rstrip("/")}/track/{order_id}" '
+            'style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
+            'font-size:11px;letter-spacing:3px;text-decoration:none;'
+            'padding:14px 28px;margin-top:8px">'
+            'TRACK YOUR ORDER'
+            '</a>'
+
+            f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0">'
+            f'Sent by {EMAIL_FROM_NAME}. '
+            'We never ask for your password or card details by email.'
+            '</p>'
+
+            '</td></tr></table>'
+        )
+
+        try:
+            await send_email(
+                to=input.email,
+                subject=subject,
+                html=html,
+            )
+
+            emailed = True
+
+        except HTTPException as e:
+            logger.error(
+                "Order confirmation email failed for %s: %s",
+                order_id,
+                e.detail,
+            )
+
+            emailed = False
+
+        except Exception as e:
+            logger.exception(
+                "Order confirmation email failed for %s: %s",
+                order_id,
+                e,
+            )
+
+            emailed = False
+
+    return {
+        "orderId": order_id,
+        "emailed": emailed,
+    }
+
+
+@api_router.get("/orders")
+async def list_orders(
+    nalayak_session: str = Cookie(None),
+):
+    if not nalayak_session:
+        raise HTTPException(
+            status_code=401,
+            detail="not_authenticated",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        # Resolve the logged-in member from the session.
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            session_resp = await client_http.get(
+                f"{base_url}/member_sessions",
+                params={
+                    "select": "member_id,expires_at",
+                    "token": f"eq.{nalayak_session}",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if session_resp.status_code >= 400:
+            logger.error(
+                "Member session lookup failed: "
+                f"{session_resp.status_code} {session_resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to validate session.",
+            )
+
+        sessions = session_resp.json() or []
+
+        if not sessions:
+            raise HTTPException(
+                status_code=401,
+                detail="session_expired",
+            )
+
+        session = sessions[0]
+
+        expires_at = datetime.fromisoformat(
+            session["expires_at"].replace("Z", "+00:00")
+        )
+
+        if expires_at <= datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=401,
+                detail="session_expired",
+            )
+
+        member_id = session["member_id"]
+
+        # Fetch ONLY this member's orders.
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/orders",
+                params={
+                    "select": "*",
+                    "user_id": f"eq.{member_id}",
+                    "order": "created_at.desc",
+                    "limit": "50",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase customer orders lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch orders",
+            )
+
+        return {
+            "orders": resp.json() or []
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception(
+            "Supabase customer orders request failed: %s",
+            e,
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch orders",
+        )
+
 
 # ── Order tracking + shipping status ──
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str):
-    order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
-    if not order:
-        raise HTTPException(status_code=404, detail="not_found")
-    return order
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/orders",
+                params={
+                    "select": "*",
+                    "order_id": f"eq.{order_id}",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase order lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch order",
+            )
+
+        orders = resp.json() or []
+
+        if not orders:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        return orders[0]
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception(
+            "Supabase order lookup failed: %s",
+            e,
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch order",
+        )
 
 class OrderStatusInput(BaseModel):
     status: str
 
 @api_router.post("/orders/{order_id}/status")
-async def update_order_status(order_id: str, input: OrderStatusInput, x_admin_key: str = Header(None)):
+async def update_order_status(
+    order_id: str,
+    input: OrderStatusInput,
+    x_admin_key: str = Header(None),
+):
     admin_guard(x_admin_key)
-    allowed = ["placed", "shipped", "delivered"]
-    if input.status not in allowed:
-        raise HTTPException(status_code=400, detail="invalid_status")
-    order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
-    if not order:
-        raise HTTPException(status_code=404, detail="not_found")
-    await db.orders.update_one(
-        {"order_id": order_id},
-        {"$set": {"status": input.status, f"{input.status}_at": datetime.now(timezone.utc).isoformat()}},
-    )
-    emailed = False
-    if EMAIL_KEY and order.get("email") and input.status in ("shipped", "delivered"):
-        name = _escape((order.get("name") or "").split()[0] or "there")
-        shipped = input.status == "shipped"
-        headline = "IT'S ON ITS WAY." if shipped else "IT'S THERE."
-        if shipped:
-            body = "left the studio and is moving. Track it below."
-            cta_href = f'{SITE_URL.rstrip("/")}/track/{order_id}'
-            cta_text = "TRACK YOUR ORDER"
-        else:
-            body = ("has landed. Now the important part: wear it out, shoot it, tag @NALAYAK — "
-                    "we repost the good ones. Loved it? Hated it? Reply and tell us.")
-            cta_href = SITE_URL.rstrip("/")
-            cta_text = "SEE NALAYAK IRL"
-        subject = f"Order {order_id} — {'shipped' if shipped else 'delivered'}."
-        html = (
-            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-            '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;background:#0A0A0A">'
-            '<p style="color:#F7F7F5;font-size:28px;font-weight:800;letter-spacing:-1px;margin:0">NALAYAK</p>'
-            '</td></tr><tr><td style="padding:40px 24px;font-family:Arial,sans-serif">'
-            '<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 12px">ORDER UPDATE</p>'
-            f'<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0 0 16px">{headline}</h1>'
-            f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 28px">Hi {name}. Order '
-            f'<strong>{order_id}</strong> {body}</p>'
-            f'<a href="{cta_href}" style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
-            f'font-size:11px;letter-spacing:3px;text-decoration:none;padding:14px 28px">{cta_text}</a>'
-            f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0">Sent by {EMAIL_FROM_NAME}. '
-            'We never ask for your password or card details by email.</p>'
-            '</td></tr></table>'
+
+    allowed = [
+        "placed",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+    ]
+
+    status = (input.status or "").strip().lower()
+
+    if status not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_status",
         )
-        await send_email(to=order["email"], subject=subject, html=html)
-        emailed = True
-    return {"order_id": order_id, "status": input.status, "emailed": emailed}
+
+    supabase_url = os.environ.get(
+        "SUPABASE_URL",
+        "",
+    ).rstrip("/")
+
+    supabase_secret = os.environ.get(
+        "SUPABASE_FUNCTION_SECRET",
+        "",
+    )
+
+    if not supabase_url:
+        raise HTTPException(
+            status_code=500,
+            detail="SUPABASE_URL is not configured",
+        )
+
+    if not supabase_secret:
+        raise HTTPException(
+            status_code=500,
+            detail="SUPABASE_FUNCTION_SECRET is not configured",
+        )
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.post(
+                f"{supabase_url}/functions/v1/update-order-status",
+                headers={
+                    "Content-Type": "application/json",
+                    "apikey": supabase_secret,
+                    "Authorization": f"Bearer {supabase_secret}",
+                },
+                json={
+                    "order_id": order_id,
+                    "status": status,
+                },
+            )
+
+        try:
+            result = resp.json()
+        except Exception:
+            result = {
+                "detail": resp.text,
+            }
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase order status update failed: "
+                f"{resp.status_code} {result}"
+            )
+
+            raise HTTPException(
+                status_code=502,
+                detail=result.get(
+                    "detail",
+                    "Failed to update order",
+                ),
+            )
+
+        updated_order = result.get("order") or {}
+
+        return {
+            "order_id": order_id,
+            "status": updated_order.get(
+                "status",
+                status,
+            ),
+            "emailed": result.get(
+                "emailed",
+                False,
+            ),
+            "order": updated_order,
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception(
+            "Supabase order status request failed: %s",
+            e,
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to update order",
+        )
+
+# ── Admin orders list — Supabase ──
+@api_router.get("/admin/orders")
+async def admin_orders(
+    x_admin_key: str = Header(None),
+):
+    admin_guard(x_admin_key)
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/orders",
+                headers=headers,
+                params={
+                    "select": "*",
+                    "order": "created_at.desc",
+                    "limit": "100",
+                },
+            )
+
+        try:
+            result = resp.json()
+        except Exception:
+            result = {
+                "detail": resp.text,
+            }
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase admin orders lookup failed: "
+                f"{resp.status_code} {result}"
+            )
+
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch orders",
+            )
+
+        return {
+            "orders": result if isinstance(result, list) else [],
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception(
+            "Supabase admin orders request failed: %s",
+            e,
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch orders",
+        )
 
 # ── Object storage (Emergent) + IRL uploads + admin ──
 import uuid as _uuid
 import asyncio as _asyncio
 import requests as _requests
 
-STORAGE_BASE = (os.environ.get("INTEGRATION_PROXY_URL") or "").strip() or "https://integrations.emergentagent.com"
-STORAGE_URL = STORAGE_BASE.rstrip("/") + "/objstore/api/v1/storage"
-EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+# ── Supabase Storage ──
+# IRL images are stored in the private Supabase "irl" bucket.
+# The backend uses the server-side secret key, so the browser never
+# gets direct unrestricted access to the bucket.
+
+SUPABASE_URL = (
+    os.environ.get(
+        "SUPABASE_URL",
+        "https://yeosgnfvopvufroihyhs.supabase.co",
+    )
+    .strip()
+    .rstrip("/")
+)
+
+SUPABASE_STORAGE_BUCKET = "irl"
+
+# Server-side secret key. NEVER expose this to the frontend.
+SUPABASE_STORAGE_KEY = (
+    os.environ.get("SUPABASE_FUNCTION_SECRET") or ""
+).strip()
+
 APP_NAME = "nalayak"
 ADMIN_KEY = os.environ.get("ADMIN_KEY")
-_storage_key = None
+
 
 def init_storage(force: bool = False):
-    global _storage_key
-    if _storage_key and not force:
-        return _storage_key
-    resp = _requests.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30)
-    resp.raise_for_status()
-    _storage_key = resp.json()["storage_key"]
-    return _storage_key
+    """
+    Kept as a compatibility helper because the existing application
+    startup code may call init_storage().
+
+    Supabase Storage does not require a separate storage initialization
+    request like the old Emergent object storage did.
+    """
+    if not SUPABASE_STORAGE_KEY:
+        raise RuntimeError("SUPABASE_FUNCTION_SECRET is not configured")
+
+    return SUPABASE_STORAGE_KEY
+
 
 def put_object(path: str, data: bytes, content_type: str) -> dict:
+    """
+    Upload an object to the private Supabase Storage bucket.
+    """
     key = init_storage()
-    resp = _requests.put(
-        f"{STORAGE_URL}/objects/{path}",
-        headers={"X-Storage-Key": key, "Content-Type": content_type},
-        data=data, timeout=120,
+
+    url = (
+        f"{SUPABASE_URL}/storage/v1/object/"
+        f"{SUPABASE_STORAGE_BUCKET}/{path}"
     )
+
+    resp = _requests.post(
+        url,
+        headers={
+            "Authorization": f"Bearer {key}",
+            "apikey": key,
+            "Content-Type": content_type,
+            "x-upsert": "false",
+        },
+        data=data,
+        timeout=120,
+    )
+
     resp.raise_for_status()
-    return resp.json()
+
+    return {
+        "path": path,
+        "response": resp.json() if resp.content else {},
+    }
+
 
 def get_object(path: str):
+    """
+    Download an object from the private Supabase Storage bucket.
+    """
     key = init_storage()
-    resp = _requests.get(f"{STORAGE_URL}/objects/{path}", headers={"X-Storage-Key": key}, timeout=60)
+
+    url = (
+        f"{SUPABASE_URL}/storage/v1/object/"
+        f"{SUPABASE_STORAGE_BUCKET}/{path}"
+    )
+
+    resp = _requests.get(
+        url,
+        headers={
+            "Authorization": f"Bearer {key}",
+            "apikey": key,
+        },
+        timeout=60,
+    )
+
     resp.raise_for_status()
-    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+
+    return (
+        resp.content,
+        resp.headers.get(
+            "Content-Type",
+            "application/octet-stream",
+        ),
+    )
 
 def admin_guard(x_admin_key: str = Header(None)):
     if ADMIN_KEY and x_admin_key != ADMIN_KEY:
         raise HTTPException(status_code=401, detail="unauthorized")
 
-@api_router.post("/irl/upload")
-async def irl_upload(file: UploadFile = File(...), order_id: str = "", name: str = ""):
-    if not (file.content_type or "").startswith("image/"):
-        raise HTTPException(status_code=400, detail="images_only")
-    data = await file.read()
-    if len(data) > 8 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="file_too_large")
-    ext = (file.filename or "jpg").split(".")[-1].lower()
-    if ext not in ("jpg", "jpeg", "png", "webp", "gif", "heic"):
-        ext = "jpg"
-    path = f"{APP_NAME}/irl/{_uuid.uuid4()}.{ext}"
-    result = await _asyncio.to_thread(put_object, path, data, file.content_type or "image/jpeg")
+# ── IRL / Real Life uploads — Supabase Storage + Supabase Postgres ──
+
+def supabase_storage_headers(content_type: str | None = None):
+    secret = os.environ.get("SUPABASE_FUNCTION_SECRET", "")
+    if not secret:
+        raise HTTPException(
+            status_code=503,
+            detail="supabase_function_not_configured",
+        )
+
+    headers = {
+        "apikey": secret,
+        "Authorization": f"Bearer {secret}",
+    }
+
+    if content_type:
+        headers["Content-Type"] = content_type
+
+    return headers
+
+
+def supabase_storage_url(path: str = ""):
+    base = os.environ.get(
+        "SUPABASE_URL",
+        "https://yeosgnfvopvufroihyhs.supabase.co",
+    ).rstrip("/")
+
+    url = f"{base}/storage/v1"
+
+    if path:
+        url += "/" + path.lstrip("/")
+
+    return url
+
+# ─────────────────────────────────────────────
+# Support Tickets
+# ─────────────────────────────────────────────
+
+class SupportTicketInput(BaseModel):
+    order_id: str
+    issue_type: str
+    product_name: str = ""
+    description: str
+    images: list = []
+
+
+class SupportTicketStatusInput(BaseModel):
+    status: str
+    admin_note: str = ""
+
+
+SUPPORT_ISSUE_TYPES = [
+    "wrong_item",
+    "damaged",
+    "missing_item",
+    "size_issue",
+    "delivery_issue",
+    "return_refund",
+    "other",
+]
+
+
+SUPPORT_STATUSES = [
+    "open",
+    "in-review",
+    "waiting-customer",
+    "resolved",
+    "closed",
+]
+
+
+async def get_authenticated_member_id(nalayak_session: str | None):
+    """
+    Resolve the logged-in NALAYAK member from the session cookie.
+    """
+
+    if not nalayak_session:
+        raise HTTPException(
+            status_code=401,
+            detail="not_authenticated",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        session_resp = await client_http.get(
+            f"{base_url}/member_sessions",
+            params={
+                "select": "member_id,expires_at",
+                "token": f"eq.{nalayak_session}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if session_resp.status_code >= 400:
+        logger.error(
+            "Support session lookup failed: "
+            f"{session_resp.status_code} {session_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to validate session.",
+        )
+
+    sessions = session_resp.json() or []
+
+    if not sessions:
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    session = sessions[0]
+
+    expires_at = datetime.fromisoformat(
+        session["expires_at"].replace("Z", "+00:00")
+    )
+
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=401,
+            detail="session_expired",
+        )
+
+    return session["member_id"]
+
+
+def generate_support_ticket_number():
+    import random
+
+    return f"NL-T-{random.randint(1000, 9999)}"
+
+
+@api_router.post("/support/tickets")
+async def create_support_ticket(
+    input: SupportTicketInput,
+    nalayak_session: str = Cookie(None),
+):
+    """
+    Customer creates a support ticket for their own delivered order.
+    """
+
+    member_id = await get_authenticated_member_id(
+        nalayak_session
+    )
+
+    issue_type = (input.issue_type or "").strip()
+
+    if issue_type not in SUPPORT_ISSUE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_issue_type",
+        )
+
+    description = (input.description or "").strip()
+
+    if len(description) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail="description_too_short",
+        )
+
+    order_id = (input.order_id or "").strip()
+
+    if not order_id:
+        raise HTTPException(
+            status_code=400,
+            detail="order_id_required",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    # ─────────────────────────────────────────
+    # Verify that this order belongs to member
+    # ─────────────────────────────────────────
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        order_resp = await client_http.get(
+            f"{base_url}/orders",
+            params={
+                "select": "*",
+                "order_id": f"eq.{order_id}",
+                "user_id": f"eq.{member_id}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if order_resp.status_code >= 400:
+        logger.error(
+            "Support order lookup failed: "
+            f"{order_resp.status_code} {order_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to verify order.",
+        )
+
+    orders = order_resp.json() or []
+
+    if not orders:
+        raise HTTPException(
+            status_code=404,
+            detail="order_not_found",
+        )
+
+    order = orders[0]
+
+    # ─────────────────────────────────────────
+    # Only delivered orders can raise a ticket
+    # ─────────────────────────────────────────
+
+    if (order.get("status") or "").lower() != "delivered":
+        raise HTTPException(
+            status_code=400,
+            detail="support_available_after_delivery",
+        )
+
+    # ─────────────────────────────────────────
+    # Prevent accidental duplicate open tickets
+    # ─────────────────────────────────────────
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        existing_resp = await client_http.get(
+            f"{base_url}/support_tickets",
+            params={
+                "select": "ticket_number,status",
+                "user_id": f"eq.{member_id}",
+                "order_id": f"eq.{order_id}",
+                "status": "not.in.(resolved,closed)",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if existing_resp.status_code >= 400:
+        logger.error(
+            "Support ticket duplicate check failed: "
+            f"{existing_resp.status_code} {existing_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to check existing tickets.",
+        )
+
+    existing = existing_resp.json() or []
+
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ticket_already_exists",
+                "ticket_number": existing[0].get("ticket_number"),
+            },
+        )
+
+    # ─────────────────────────────────────────
+    # Generate ticket number
+    # ─────────────────────────────────────────
+
+    ticket_number = None
+
+    for _ in range(20):
+        candidate = generate_support_ticket_number()
+
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            check_resp = await client_http.get(
+                f"{base_url}/support_tickets",
+                params={
+                    "select": "id",
+                    "ticket_number": f"eq.{candidate}",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if check_resp.status_code >= 400:
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to generate support ticket.",
+            )
+
+        if not check_resp.json():
+            ticket_number = candidate
+            break
+
+    if not ticket_number:
+        raise HTTPException(
+            status_code=500,
+            detail="Could not generate ticket number.",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+
     doc = {
-        "id": str(_uuid.uuid4()),
-        "storage_path": result["path"],
-        "original_filename": file.filename,
-        "content_type": file.content_type or "image/jpeg",
+        "ticket_number": ticket_number,
+        "user_id": member_id,
         "order_id": order_id,
-        "name": name,
+        "issue_type": issue_type,
+        "product_name": input.product_name.strip(),
+        "description": description,
+        "images": input.images or [],
+        "status": "open",
+        "admin_note": "",
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        insert_resp = await client_http.post(
+            f"{base_url}/support_tickets",
+            headers={
+                **headers,
+                "Prefer": "return=representation",
+            },
+            json=doc,
+        )
+
+    if insert_resp.status_code >= 400:
+        logger.error(
+            "Support ticket insert failed: "
+            f"{insert_resp.status_code} {insert_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to create support ticket.",
+        )
+
+    created = insert_resp.json() or []
+
+    ticket = created[0] if created else doc
+
+    return {
+        "success": True,
+        "ticket": ticket,
+    }
+
+
+@api_router.get("/support/tickets")
+async def list_my_support_tickets(
+    nalayak_session: str = Cookie(None),
+):
+    """
+    Return only the logged-in member's tickets.
+    """
+
+    member_id = await get_authenticated_member_id(
+        nalayak_session
+    )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.get(
+            f"{base_url}/support_tickets",
+            params={
+                "select": "*",
+                "user_id": f"eq.{member_id}",
+                "order": "created_at.desc",
+                "limit": "50",
+            },
+            headers=headers,
+        )
+
+    if resp.status_code >= 400:
+        logger.error(
+            "Customer support tickets lookup failed: "
+            f"{resp.status_code} {resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch support tickets.",
+        )
+
+    return {
+        "tickets": resp.json() or []
+    }
+
+
+@api_router.get("/support/tickets/{ticket_number}")
+async def get_my_support_ticket(
+    ticket_number: str,
+    nalayak_session: str = Cookie(None),
+):
+    """
+    Customer can only view their own ticket.
+    """
+
+    member_id = await get_authenticated_member_id(
+        nalayak_session
+    )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.get(
+            f"{base_url}/support_tickets",
+            params={
+                "select": "*",
+                "ticket_number": f"eq.{ticket_number}",
+                "user_id": f"eq.{member_id}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if resp.status_code >= 400:
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch support ticket.",
+        )
+
+    tickets = resp.json() or []
+
+    if not tickets:
+        raise HTTPException(
+            status_code=404,
+            detail="ticket_not_found",
+        )
+
+    return {
+        "ticket": tickets[0]
+    }
+
+
+# ─────────────────────────────────────────────
+# Admin Support Tickets
+# ─────────────────────────────────────────────
+
+@api_router.get("/admin/support/tickets")
+async def admin_support_tickets(
+    x_admin_key: str = Header(None),
+):
+    admin_guard(x_admin_key)
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        resp = await client_http.get(
+            f"{base_url}/support_tickets",
+            params={
+                "select": "*",
+                "order": "created_at.desc",
+                "limit": "200",
+            },
+            headers=headers,
+        )
+
+    if resp.status_code >= 400:
+        logger.error(
+            "Admin support tickets lookup failed: "
+            f"{resp.status_code} {resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch support tickets.",
+        )
+
+    return {
+        "tickets": resp.json() or []
+    }
+
+
+@api_router.post("/admin/support/tickets/{ticket_number}/status")
+async def admin_update_support_ticket(
+    ticket_number: str,
+    input: SupportTicketStatusInput,
+    x_admin_key: str = Header(None),
+):
+    admin_guard(x_admin_key)
+
+    status = (input.status or "").strip().lower()
+
+    if status not in SUPPORT_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_status",
+        )
+
+    headers = {
+        **supabase_rest_headers(),
+        "Prefer": "return=representation",
+    }
+
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        existing_resp = await client_http.get(
+            f"{base_url}/support_tickets",
+            params={
+                "select": "*",
+                "ticket_number": f"eq.{ticket_number}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if existing_resp.status_code >= 400:
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch support ticket.",
+        )
+
+    existing = existing_resp.json() or []
+
+    if not existing:
+        raise HTTPException(
+            status_code=404,
+            detail="ticket_not_found",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    update_doc = {
+        "status": status,
+        "admin_note": input.admin_note or "",
+        "updated_at": now,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        update_resp = await client_http.patch(
+            f"{base_url}/support_tickets",
+            params={
+                "ticket_number": f"eq.{ticket_number}",
+            },
+            headers=headers,
+            json=update_doc,
+        )
+
+    if update_resp.status_code >= 400:
+        logger.error(
+            "Support ticket update failed: "
+            f"{update_resp.status_code} {update_resp.text}"
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to update support ticket.",
+        )
+
+    updated = update_resp.json() or []
+
+    return {
+        "success": True,
+        "ticket": updated[0] if updated else {
+            **existing[0],
+            **update_doc,
+        },
+    }
+@api_router.post("/irl/upload")
+async def irl_upload(
+    file: UploadFile = File(...),
+    order_id: str = "",
+    name: str = "",
+):
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="images_only",
+        )
+
+    data = await file.read()
+
+    if len(data) > 8 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="file_too_large",
+        )
+
+    ext = (file.filename or "jpg").split(".")[-1].lower()
+
+    if ext not in (
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "gif",
+        "heic",
+    ):
+        ext = "jpg"
+
+    storage_path = f"nalayak/{_uuid.uuid4()}.{ext}"
+
+    storage_url = supabase_storage_url(
+        f"object/irl/{storage_path}"
+    )
+
+    content_type = file.content_type or "image/jpeg"
+
+    try:
+        async with _httpx.AsyncClient(timeout=120) as client_http:
+            upload_resp = await client_http.post(
+                storage_url,
+                headers=supabase_storage_headers(content_type),
+                content=data,
+            )
+
+        if upload_resp.status_code >= 400:
+            logger.error(
+                "Supabase IRL storage upload failed: "
+                f"{upload_resp.status_code} {upload_resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to upload IRL image",
+            )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase IRL storage upload failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to upload IRL image",
+        )
+
+    file_id = str(_uuid.uuid4())
+
+    doc = {
+        "id": file_id,
+        "user_id": None,
+        "order_id": order_id or None,
+        "storage_path": storage_path,
+        "original_filename": file.filename,
+        "content_type": content_type,
         "status": "pending",
         "is_deleted": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
-    await db.irl_uploads.insert_one(doc)
-    return {"id": doc["id"], "status": "pending"}
+
+    headers = {
+        **supabase_rest_headers(),
+        "Prefer": "return=representation",
+    }
+
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.post(
+                f"{base_url}/irl_uploads",
+                headers=headers,
+                json=doc,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase IRL database insert failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+
+            # Clean up the uploaded object if database insert fails.
+            try:
+                async with _httpx.AsyncClient(timeout=30) as client_http:
+                    await client_http.delete(
+                        storage_url,
+                        headers=supabase_storage_headers(),
+                    )
+            except Exception:
+                pass
+
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to save IRL upload",
+            )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase IRL database insert failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to save IRL upload",
+        )
+
+    return {
+        "id": file_id,
+        "status": "pending",
+    }
+
 
 @api_router.get("/irl/approved")
 async def irl_approved():
-    items = await db.irl_uploads.find(
-        {"status": "approved", "is_deleted": False}, {"_id": 0, "id": 1, "name": 1}
-    ).sort("created_at", -1).to_list(12)
-    return {"items": items}
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/irl_uploads",
+                params={
+                    "select": "id,order_id,created_at",
+                    "status": "eq.approved",
+                    "is_deleted": "eq.false",
+                    "order": "created_at.desc",
+                    "limit": "12",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase approved IRL lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch approved IRL uploads",
+            )
+
+        return {
+            "items": resp.json()
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase approved IRL request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch approved IRL uploads",
+        )
+
 
 @api_router.get("/irl/mine")
 async def irl_mine(email: str = ""):
-    if not _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email or ""):
+    if not _re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        email or "",
+    ):
         return {"items": []}
-    orders = await db.orders.find({"email": email}, {"_id": 0, "order_id": 1}).to_list(100)
-    ids = [o["order_id"] for o in orders]
-    if not ids:
-        return {"items": []}
-    items = await db.irl_uploads.find(
-        {"order_id": {"$in": ids}, "status": "approved", "is_deleted": False},
-        {"_id": 0, "id": 1, "order_id": 1, "created_at": 1},
-    ).to_list(50)
-    return {"items": items}
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            orders_resp = await client_http.get(
+                f"{base_url}/orders",
+                params={
+                    "select": "order_id",
+                    "email": f"eq.{email}",
+                    "limit": "100",
+                },
+                headers=headers,
+            )
+
+        if orders_resp.status_code >= 400:
+            logger.error(
+                "Supabase customer orders lookup failed: "
+                f"{orders_resp.status_code} {orders_resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch customer orders",
+            )
+
+        orders = orders_resp.json()
+        ids = [
+            o.get("order_id")
+            for o in orders
+            if o.get("order_id")
+        ]
+
+        if not ids:
+            return {"items": []}
+
+        # PostgREST `in` filter.
+        order_filter = "(" + ",".join(
+            str(i).replace(",", "") for i in ids
+        ) + ")"
+
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/irl_uploads",
+                params={
+                    "select": "id,order_id,created_at",
+                    "order_id": f"in.{order_filter}",
+                    "status": "eq.approved",
+                    "is_deleted": "eq.false",
+                    "order": "created_at.desc",
+                    "limit": "50",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase customer IRL lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch customer IRL uploads",
+            )
+
+        return {
+            "items": resp.json()
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase customer IRL request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch customer IRL uploads",
+        )
+
 
 @api_router.get("/irl/file/{file_id}")
 async def irl_file(file_id: str):
-    record = await db.irl_uploads.find_one(
-        {"id": file_id, "status": "approved", "is_deleted": False}, {"_id": 0}
-    )
-    if not record:
-        raise HTTPException(status_code=404, detail="not_found")
-    data, content_type = await _asyncio.to_thread(get_object, record["storage_path"])
-    return Response(content=data, media_type=record.get("content_type", content_type))
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
 
-@api_router.get("/admin/orders")
-async def admin_orders(x_admin_key: str = Header(None)):
-    admin_guard(x_admin_key)
-    orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return {"orders": orders}
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/irl_uploads",
+                params={
+                    "select": "id,storage_path,content_type",
+                    "id": f"eq.{file_id}",
+                    "status": "eq.approved",
+                    "is_deleted": "eq.false",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
 
-@api_router.get("/admin/custom-requests")
-async def admin_custom_requests(x_admin_key: str = Header(None)):
-    admin_guard(x_admin_key)
-    reqs = await db.custom_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return {"requests": reqs}
+        if resp.status_code >= 400:
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch IRL upload",
+            )
+
+        records = resp.json()
+
+        if not records:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        record = records[0]
+
+        storage_path = record.get("storage_path")
+
+        if not storage_path:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        async with _httpx.AsyncClient(timeout=60) as client_http:
+            image_resp = await client_http.get(
+                supabase_storage_url(
+                    f"object/irl/{storage_path}"
+                ),
+                headers=supabase_storage_headers(),
+            )
+
+        if image_resp.status_code >= 400:
+            logger.error(
+                "Supabase IRL image fetch failed: "
+                f"{image_resp.status_code} {image_resp.text}"
+            )
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        return Response(
+            content=image_resp.content,
+            media_type=record.get(
+                "content_type",
+                image_resp.headers.get(
+                    "Content-Type",
+                    "application/octet-stream",
+                ),
+            ),
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase IRL file request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch IRL file",
+        )
+
 
 @api_router.get("/admin/irl")
-async def admin_irl(x_admin_key: str = Header(None)):
+async def admin_irl(
+    x_admin_key: str = Header(None),
+):
     admin_guard(x_admin_key)
-    items = await db.irl_uploads.find({"is_deleted": False}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return {"items": items}
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/irl_uploads",
+                params={
+                    "select": "*",
+                    "is_deleted": "eq.false",
+                    "order": "created_at.desc",
+                    "limit": "100",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase admin IRL lookup failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch IRL uploads",
+            )
+
+        return {
+            "items": resp.json()
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase admin IRL request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch IRL uploads",
+        )
+
 
 @api_router.post("/admin/irl/{file_id}/status")
-async def admin_irl_status(file_id: str, input: OrderStatusInput, x_admin_key: str = Header(None)):
+async def admin_irl_status(
+    file_id: str,
+    input: OrderStatusInput,
+    x_admin_key: str = Header(None),
+):
     admin_guard(x_admin_key)
-    if input.status not in ("approved", "rejected", "pending"):
-        raise HTTPException(status_code=400, detail="invalid_status")
-    await db.irl_uploads.update_one({"id": file_id}, {"$set": {"status": input.status}})
-    return {"id": file_id, "status": input.status}
+
+    if input.status not in (
+        "approved",
+        "rejected",
+        "pending",
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_status",
+        )
+
+    headers = {
+        **supabase_rest_headers(),
+        "Prefer": "return=representation",
+    }
+
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.patch(
+                f"{base_url}/irl_uploads",
+                params={
+                    "id": f"eq.{file_id}",
+                },
+                headers=headers,
+                json={
+                    "status": input.status,
+                },
+            )
+
+        if resp.status_code >= 400:
+            logger.error(
+                "Supabase IRL status update failed: "
+                f"{resp.status_code} {resp.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to update IRL status",
+            )
+
+        updated = resp.json()
+
+        if not updated:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        return {
+            "id": file_id,
+            "status": input.status,
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase IRL status request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to update IRL status",
+        )
+
 
 @api_router.get("/admin/irl-file/{file_id}")
-async def admin_irl_file(file_id: str, x_admin_key: str = Header(None), auth: str = Query(None)):
+async def admin_irl_file(
+    file_id: str,
+    x_admin_key: str = Header(None),
+    auth: str = Query(None),
+):
     admin_guard(x_admin_key or auth)
-    record = await db.irl_uploads.find_one({"id": file_id, "is_deleted": False}, {"_id": 0})
-    if not record:
-        raise HTTPException(status_code=404, detail="not_found")
-    data, content_type = await _asyncio.to_thread(get_object, record["storage_path"])
-    return Response(content=data, media_type=record.get("content_type", content_type))
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    try:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            resp = await client_http.get(
+                f"{base_url}/irl_uploads",
+                params={
+                    "select": "id,storage_path,content_type",
+                    "id": f"eq.{file_id}",
+                    "is_deleted": "eq.false",
+                    "limit": "1",
+                },
+                headers=headers,
+            )
+
+        if resp.status_code >= 400:
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch IRL upload",
+            )
+
+        records = resp.json()
+
+        if not records:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        record = records[0]
+
+        storage_path = record.get("storage_path")
+
+        if not storage_path:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        async with _httpx.AsyncClient(timeout=60) as client_http:
+            image_resp = await client_http.get(
+                supabase_storage_url(
+                    f"object/irl/{storage_path}"
+                ),
+                headers=supabase_storage_headers(),
+            )
+
+        if image_resp.status_code >= 400:
+            raise HTTPException(
+                status_code=404,
+                detail="not_found",
+            )
+
+        return Response(
+            content=image_resp.content,
+            media_type=record.get(
+                "content_type",
+                image_resp.headers.get(
+                    "Content-Type",
+                    "application/octet-stream",
+                ),
+            ),
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Supabase admin IRL file request failed: {e}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch IRL file",
+        )
 
 # ── Razorpay membership checkout ──
 # One-time membership purchase. Recurring Club subscriptions come later via

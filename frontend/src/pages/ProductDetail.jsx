@@ -41,6 +41,8 @@ export default function ProductDetail() {
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
   const [show3D, setShow3D] = useState(false);
+  const selectedColorImage =
+  product?.colorImages?.[color?.name] || null;
 
   useEffect(() => {
     setImgIndex(0); setQty(1);
@@ -110,20 +112,28 @@ export default function ProductDetail() {
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 px-4 md:px-8 py-8 md:py-12">
         <div>
-          <motion.div
-            key={imgIndex}
+         <motion.div
+  key={`${imgIndex}-${color?.name || 'default'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
             className="relative bg-white border border-line aspect-[3/4] overflow-hidden"
             data-testid="pdp-gallery"
           >
-            <SafeImg
-              id={product.images[imgIndex] || product.images[0]}
-              w={1400}
-              alt={`${product.name} — view ${imgIndex + 1}`}
-              className="h-full w-full object-cover"
-            />
+  {selectedColorImage ? (
+  <img
+    src={selectedColorImage}
+    alt={`${product.name} — ${color?.name || ''}`}
+    className="h-full w-full object-cover"
+  />
+) : (
+  <SafeImg
+    id={product.images[imgIndex] || product.images[0]}
+    w={1400}
+    alt={`${product.name} — view ${imgIndex + 1}`}
+    className="h-full w-full object-cover"
+  />
+)}
             {product.badge && (
               <span className="absolute top-4 left-4 px-2 py-1 text-[10px] tracking-[0.2em] font-medium bg-paper border border-ink">
                 {product.badge}
@@ -180,7 +190,10 @@ export default function ProductDetail() {
                   <button
                     key={c.name}
                     data-testid={`pdp-color-${c.name.toLowerCase()}`}
-                    onClick={() => setColor(c)}
+                    onClick={() => {
+  setColor(c);
+  setImgIndex(0);
+}}
                     title={c.name}
                     aria-label={`Colour ${c.name}`}
                     className={`h-9 w-9 border-2 transition-colors ${color?.name === c.name ? 'border-ink' : 'border-line hover:border-smoke'}`}
@@ -332,7 +345,7 @@ export default function ProductDetail() {
             <div className="mt-8 border-t border-line">
               <Accordion title="DESCRIPTION" testId="pdp-acc-description">{product.desc}</Accordion>
               <Accordion title="DELIVERY" testId="pdp-acc-delivery">
-                Dispatched within 48 hours from Mumbai. Metro cities: 2–4 days. Everywhere else: 4–7 days. Tracking lands in your inbox the moment it ships.
+                Dispatched within 48 hours from Kolkata. Metro cities: 2–4 days. Everywhere else: 4–7 days. Tracking lands in your inbox the moment it ships.
               </Accordion>
               <Accordion title="RETURNS" testId="pdp-acc-returns">
                 7-day return window, unused with tags on. Refund hits your account in 5–7 working days. Sale pieces are final — choose wisely.
