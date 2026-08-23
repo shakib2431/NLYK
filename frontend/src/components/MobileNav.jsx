@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, UserRound, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { nav } from '@/data/storeData';
 
@@ -10,38 +10,92 @@ export default function MobileNav({ onClose }) {
       initial={{ x: '-100%' }}
       animate={{ x: 0 }}
       exit={{ x: '-100%' }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       data-testid="mobile-nav"
     >
-      <div className="flex items-center justify-between px-4 h-14 border-b border-paper/20">
-        <span className="font-display font-extrabold tracking-tight text-xl">NALAYAK</span>
-        <button data-testid="mobile-menu-close" onClick={onClose} aria-label="Close menu" className="p-1">
-          <X size={22} strokeWidth={1.5} />
+      {/* Top header */}
+      <div className="h-14 px-4 border-b border-paper/15 flex items-center justify-between">
+        <span className="font-display font-extrabold tracking-tight text-sm">
+          NALAYAK
+        </span>
+
+        <button
+          data-testid="mobile-menu-close"
+          onClick={onClose}
+          aria-label="Close menu"
+          className="p-2 -mr-2"
+        >
+          <X size={20} strokeWidth={1.5} />
         </button>
       </div>
-      <nav className="flex-1 overflow-y-auto px-6 py-10 flex flex-col gap-2" aria-label="Mobile">
+
+      {/* Account row */}
+      <div className="h-14 px-4 border-b border-paper/15 flex items-center">
+        <Link
+          to="/account"
+          onClick={onClose}
+          data-testid="mobile-nav-account"
+          className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide"
+        >
+          <UserRound size={16} strokeWidth={1.5} />
+          <span>Login / Account</span>
+        </Link>
+      </div>
+
+      {/* Main menu */}
+      <nav
+        className="flex-1 overflow-y-auto"
+        aria-label="Mobile"
+      >
         {nav.map((item, i) => (
           <motion.div
             key={item.to}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + i * 0.05, duration: 0.5 }}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: 0.05 + i * 0.035,
+              duration: 0.35
+            }}
           >
             <Link
               to={item.to}
               onClick={onClose}
-              data-testid={`mobile-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-              className="font-display font-extrabold uppercase tracking-tight text-4xl leading-[1.15] hover:text-smoke transition-colors duration-300"
+              data-testid={`mobile-nav-${item.label
+                .toLowerCase()
+                .replace(/\s+/g, '-')}`}
+              className="min-h-[54px] px-4 border-b border-paper/15 flex items-center justify-between uppercase text-[13px] font-semibold tracking-[0.06em] hover:bg-paper/5 transition-colors"
             >
-              {item.label}
+              <span>{item.label}</span>
+
+              <ChevronRight
+                size={17}
+                strokeWidth={1.5}
+                className="opacity-60"
+              />
             </Link>
           </motion.div>
         ))}
       </nav>
-      <div className="px-6 py-6 border-t border-paper/20 flex gap-6 text-[11px] tracking-[0.2em]">
-        <Link to="/account" onClick={onClose} data-testid="mobile-nav-account">ACCOUNT</Link>
-        <Link to="/wishlist" onClick={onClose} data-testid="mobile-nav-wishlist">WISHLIST</Link>
-        <Link to="/about" onClick={onClose} data-testid="mobile-nav-about">ABOUT</Link>
+
+      {/* Bottom links */}
+      <div className="border-t border-paper/15 px-4">
+        <Link
+          to="/wishlist"
+          onClick={onClose}
+          data-testid="mobile-nav-wishlist"
+          className="h-12 flex items-center text-[11px] uppercase tracking-[0.12em] border-b border-paper/15"
+        >
+          Wishlist
+        </Link>
+
+        <Link
+          to="/about"
+          onClick={onClose}
+          data-testid="mobile-nav-about"
+          className="h-12 flex items-center text-[11px] uppercase tracking-[0.12em]"
+        >
+          About Nalayak
+        </Link>
       </div>
     </motion.div>
   );
