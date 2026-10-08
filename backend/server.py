@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Header, Response, Query, Cookie
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 
@@ -80,42 +81,127 @@ if not TWILIO_VERIFY_SERVICE_SID:
 
 
 class SendOTPRequest(BaseModel):
-    phone: str = Field(..., min_length=10, max_length=20)
+    phone: str = Field(..., min_length=1, max_length=64)
 
 
 class VerifyOTPRequest(BaseModel):
-    phone: str = Field(..., min_length=10, max_length=20)
-    code: str = Field(..., min_length=4, max_length=8)
+    phone: str = Field(..., min_length=1, max_length=64)
+    code: str = Field(..., min_length=1, max_length=10)
     name: str = Field(default="NALAYAK", max_length=100)
 
 
 def normalize_phone(phone: str) -> str:
-    """
-    NALAYAK currently accepts Indian 10-digit numbers
-    and converts them to E.164 format.
-    """
+    value = str(phone or "").strip()
+    if not value or not _re.fullmatch(r"[+0-9().\s-]+", value):
+        raise ValueError("invalid_phone")
+    if value.count("+") > 1 or ("+" in value and not value.startswith("+")):
+        raise ValueError("invalid_phone")
 
-    phone = phone.strip().replace(" ", "").replace("-", "")
-
-    # Indian 10-digit number
-    if phone.isdigit() and len(phone) == 10:
-        phone = "+91" + phone
-
-    # 91XXXXXXXXXX without +
-    elif phone.isdigit() and len(phone) == 12 and phone.startswith("91"):
-        phone = "+" + phone
-
-    # Already E.164
-    elif phone.startswith("+"):
-        pass
-
+    digits = _re.sub(r"\D", "", value)
+    if value.startswith("+"):
+        if len(digits) != 12 or not digits.startswith("91"):
+            raise ValueError("invalid_phone")
+        national_number = digits[2:]
+    elif len(digits) == 10:
+        national_number = digits
+    elif len(digits) == 12 and digits.startswith("91"):
+        national_number = digits[2:]
     else:
-        raise HTTPException(
-            status_code=400,
-            detail="Please enter a valid phone number."
+        raise ValueError("invalid_phone")
+
+    if not national_number.startswith(tuple("6789")):
+        raise ValueError("invalid_phone")
+
+    return f"+91{national_number}"
+
+
+def otp_error_response(status_code: int, code: str, message: str):
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "success": False,
+            "error": {"code": code, "message": message},
+            "detail": message,
+        },
+    )
+
+
+def twilio_error_code(response) -> int | None:
+    try:
+        value = response.json().get("code")
+    except (ValueError, AttributeError):
+        return None
+
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit() and len(value) <= 6:
+        return int(value)
+    return None
+
+
+def twilio_otp_error(response, operation: str):
+    provider_code = twilio_error_code(response)
+    logging.getLogger(__name__).warning(
+        "Twilio Verify %s rejected status=%s code=%s",
+        operation,
+        response.status_code,
+        provider_code if provider_code is not None else "unknown",
+    )
+
+    if provider_code == 21608:
+        return otp_error_response(
+            403,
+            "recipient_not_verified",
+            "This number is not approved to receive verification messages. Contact support or try an approved number.",
         )
 
-    return phone
+    if response.status_code == 429 or provider_code in {
+        20429,
+        60202,
+        60203,
+        60212,
+    }:
+        return otp_error_response(
+            429,
+            "rate_limited",
+            "Too many OTP attempts. Wait a few minutes before trying again.",
+        )
+
+    if provider_code == 60200:
+        if operation == "send":
+            return otp_error_response(
+                400,
+                "invalid_phone",
+                "Enter a valid 10-digit Indian mobile number.",
+            )
+        return otp_error_response(
+            400,
+            "invalid_code",
+            "Enter the verification code you received.",
+        )
+
+    if operation == "verify" and response.status_code == 404:
+        return otp_error_response(
+            401,
+            "invalid_code",
+            "That OTP is invalid or has expired. Request a new code and try again.",
+        )
+
+    if (
+        provider_code in {20003, 20404}
+        or response.status_code in {401, 403, 404}
+    ):
+        return otp_error_response(
+            503,
+            "service_configuration",
+            "OTP login is temporarily unavailable. Please contact support.",
+        )
+
+    return otp_error_response(
+        502,
+        "provider_error",
+        "We could not complete OTP login. Please try again later.",
+    )
 
 
 async def twilio_verify_request(
@@ -140,40 +226,88 @@ async def twilio_verify_request(
     return response
 
 
+async def call_twilio_verify(endpoint: str, data: dict, operation: str):
+    try:
+        return await twilio_verify_request(endpoint, data)
+    except _httpx.TimeoutException as error:
+        logging.getLogger(__name__).warning(
+            "Twilio Verify %s timed out (%s)",
+            operation,
+            type(error).__name__,
+        )
+    except _httpx.RequestError as error:
+        logging.getLogger(__name__).error(
+            "Twilio Verify %s transport failure (%s)",
+            operation,
+            type(error).__name__,
+        )
+    except Exception as error:
+        logging.getLogger(__name__).error(
+            "Twilio Verify %s unexpected failure (%s)",
+            operation,
+            type(error).__name__,
+        )
+
+    return otp_error_response(
+        503,
+        "provider_unavailable",
+        "OTP login is temporarily unavailable. Please wait a moment and try again.",
+    )
+
+
 @api_router.post("/auth/send-otp")
 async def send_otp(payload: SendOTPRequest):
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
-        raise HTTPException(
-            status_code=500,
-            detail="OTP service is not configured."
+        logging.getLogger(__name__).error(
+            "OTP configuration missing variable names=%s",
+            ",".join(
+                name
+                for name, value in (
+                    ("TWILIO_ACCOUNT_SID", TWILIO_ACCOUNT_SID),
+                    ("TWILIO_AUTH_TOKEN", TWILIO_AUTH_TOKEN),
+                )
+                if not value
+            ),
+        )
+        return otp_error_response(
+            503,
+            "service_configuration",
+            "OTP login is temporarily unavailable. Please contact support.",
         )
 
     if not TWILIO_VERIFY_SERVICE_SID:
-        raise HTTPException(
-            status_code=500,
-            detail="OTP service ID is not configured."
+        logging.getLogger(__name__).error(
+            "OTP configuration missing variable name=TWILIO_VERIFY_SERVICE_SID"
+        )
+        return otp_error_response(
+            503,
+            "service_configuration",
+            "OTP login is temporarily unavailable. Please contact support.",
         )
 
-    phone = normalize_phone(payload.phone)
+    try:
+        phone = normalize_phone(payload.phone)
+    except ValueError:
+        return otp_error_response(
+            400,
+            "invalid_phone",
+            "Enter a valid 10-digit Indian mobile number.",
+        )
 
-    response = await twilio_verify_request(
+    response = await call_twilio_verify(
         "Verifications",
         {
             "To": phone,
             "Channel": "sms",
         },
+        "send",
     )
 
-    if response.status_code >= 400:
-        logging.error(
-            "Twilio send OTP failed: %s",
-            response.text,
-        )
+    if isinstance(response, JSONResponse):
+        return response
 
-        raise HTTPException(
-            status_code=400,
-            detail="Unable to send OTP. Please try again."
-        )
+    if response.status_code >= 400:
+        return twilio_otp_error(response, "send")
 
     return {
         "success": True,
@@ -185,44 +319,90 @@ async def send_otp(payload: SendOTPRequest):
 @api_router.post("/auth/verify-otp")
 async def verify_otp(payload: VerifyOTPRequest, response: Response):
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
-        raise HTTPException(
-            status_code=500,
-            detail="OTP service is not configured."
+        logging.getLogger(__name__).error(
+            "OTP configuration missing variable names=%s",
+            ",".join(
+                name
+                for name, value in (
+                    ("TWILIO_ACCOUNT_SID", TWILIO_ACCOUNT_SID),
+                    ("TWILIO_AUTH_TOKEN", TWILIO_AUTH_TOKEN),
+                )
+                if not value
+            ),
+        )
+        return otp_error_response(
+            503,
+            "service_configuration",
+            "OTP login is temporarily unavailable. Please contact support.",
         )
 
     if not TWILIO_VERIFY_SERVICE_SID:
-        raise HTTPException(
-            status_code=500,
-            detail="OTP service ID is not configured."
+        logging.getLogger(__name__).error(
+            "OTP configuration missing variable name=TWILIO_VERIFY_SERVICE_SID"
+        )
+        return otp_error_response(
+            503,
+            "service_configuration",
+            "OTP login is temporarily unavailable. Please contact support.",
         )
 
-    phone = normalize_phone(payload.phone)
+    try:
+        phone = normalize_phone(payload.phone)
+    except ValueError:
+        return otp_error_response(
+            400,
+            "invalid_phone",
+            "Enter a valid 10-digit Indian mobile number.",
+        )
 
-    twilio_response = await twilio_verify_request(
+    code = payload.code.strip()
+    if not code.isdigit() or not 4 <= len(code) <= 10:
+        return otp_error_response(
+            400,
+            "invalid_code",
+            "Enter a valid verification code.",
+        )
+
+    twilio_response = await call_twilio_verify(
         "VerificationCheck",
         {
             "To": phone,
-            "Code": payload.code.strip(),
+            "Code": code,
         },
+        "verify",
     )
 
+    if isinstance(twilio_response, JSONResponse):
+        return twilio_response
+
     if twilio_response.status_code >= 400:
-        logging.error(
-            "Twilio verify OTP failed: %s",
-            twilio_response.text,
+        return twilio_otp_error(twilio_response, "verify")
+
+    try:
+        result = twilio_response.json()
+    except ValueError:
+        logging.getLogger(__name__).warning(
+            "Twilio Verify check returned non-JSON response status=%s",
+            twilio_response.status_code,
+        )
+        return otp_error_response(
+            502,
+            "provider_error",
+            "We could not complete OTP login. Please try again later.",
         )
 
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid or expired OTP."
+    if not isinstance(result, dict):
+        return otp_error_response(
+            502,
+            "provider_error",
+            "We could not complete OTP login. Please try again later.",
         )
-
-    result = twilio_response.json()
 
     if result.get("status") != "approved":
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid or expired OTP."
+        return otp_error_response(
+            401,
+            "invalid_code",
+            "That OTP is invalid or has expired. Request a new code and try again.",
         )
 
     # ─────────────────────────────────────────────

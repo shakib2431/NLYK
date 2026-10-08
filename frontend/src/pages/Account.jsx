@@ -14,11 +14,59 @@ import { useSeo } from '@/hooks/useSeo';
 const TABS = ['PROFILE', 'MEMBERSHIP', 'ORDERS', 'WISHLIST', 'ALERTS', 'ADDRESSES'];
 
 function normalizeIndianPhone(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (digits.length === 10) return `+91${digits}`;
-  if (digits.length === 12 && digits.startsWith('91')) return `+${digits}`;
-  if (String(value || '').trim().startsWith('+') && digits.length >= 10) return `+${digits}`;
-  return null;
+  const input = String(value || '').trim();
+  if (!input || !/^[+\d\s().-]+$/.test(input)) return null;
+  if ((input.match(/\+/g) || []).length > 1 || (input.includes('+') && !input.startsWith('+'))) return null;
+
+  const digits = input.replace(/\D/g, '');
+  const nationalNumber = input.startsWith('+')
+    ? digits.length === 12 && digits.startsWith('91')
+      ? digits.slice(2)
+      : null
+    : digits.length === 10
+      ? digits
+      : digits.length === 12 && digits.startsWith('91')
+        ? digits.slice(2)
+        : null;
+
+  if (!nationalNumber || !/^[6-9]\d{9}$/.test(nationalNumber)) return null;
+  return `+91${nationalNumber}`;
+}
+
+const OTP_ERROR_MESSAGES = {
+  invalid_phone: 'Enter a valid 10-digit Indian mobile number.',
+  recipient_not_verified: 'This number is not approved to receive verification messages. Contact support or try an approved number.',
+  rate_limited: 'Too many OTP attempts. Wait a few minutes before trying again.',
+  service_configuration: 'OTP login is temporarily unavailable. Please contact support.',
+  invalid_code: 'That OTP is invalid or has expired. Request a new code and try again.',
+  provider_unavailable: 'The login service may be waking up. Wait a moment and try again.',
+  provider_error: 'We could not complete OTP login. Please try again later.',
+};
+
+async function readOtpResponse(response) {
+  try {
+    const body = await response.text();
+    return body ? JSON.parse(body) : null;
+  } catch {
+    return null;
+  }
+}
+
+function otpFailureMessage(response, data, fallback) {
+  const errorCode = data?.error?.code;
+  if (OTP_ERROR_MESSAGES[errorCode]) return OTP_ERROR_MESSAGES[errorCode];
+  if (typeof data?.error?.message === 'string') return data.error.message;
+  if (typeof data?.detail === 'string') return data.detail;
+  if (response.status === 429) return OTP_ERROR_MESSAGES.rate_limited;
+  if (response.status >= 500) return OTP_ERROR_MESSAGES.provider_unavailable;
+  return fallback;
+}
+
+function otpNetworkFailureMessage(error, fallback) {
+  if (error?.name === 'AbortError' || error instanceof TypeError) {
+    return 'The login service may be waking up or temporarily unavailable. Wait a moment and try again.';
+  }
+  return error?.message || fallback;
 }
 
 const ALERT_LABEL = {
@@ -756,10 +804,16 @@ export default function Account() {
         }
       );
   
-      const data = await response.json();
+      const data = await readOtpResponse(response);
   
-      if (!response.ok || !data.success) {
-        throw new Error(data.detail || data.message || 'Failed to send OTP.');
+      if (!response.ok || !data?.success) {
+        throw new Error(
+          otpFailureMessage(
+            response,
+            data,
+            'Could not send a verification code. Please try again.'
+          )
+        );
       }
   
       setForm((current) => ({
@@ -776,7 +830,10 @@ export default function Account() {
       console.error('SEND OTP ERROR:', error);
   
       toast.error('Could not send OTP.', {
-        description: error.message || 'Please try again.',
+        description: otpNetworkFailureMessage(
+          error,
+          'Could not send a verification code. Please try again.'
+        ),
       });
     } finally {
       setSendingOtp(false);
@@ -818,10 +875,16 @@ export default function Account() {
         }
       );
   
-      const data = await response.json();
+      const data = await readOtpResponse(response);
   
-      if (!response.ok || !data.success || !data.verified) {
-        throw new Error(data.detail || 'Invalid or expired OTP.');
+      if (!response.ok || !data?.success || !data?.verified) {
+        throw new Error(
+          otpFailureMessage(
+            response,
+            data,
+            'That OTP is invalid or has expired. Request a new code and try again.'
+          )
+        );
       }
   
        if (!data.member) {
@@ -852,7 +915,10 @@ export default function Account() {
       console.error('VERIFY OTP ERROR:', error);
   
       toast.error('OTP verification failed.', {
-        description: error.message || 'Invalid or expired OTP.',
+        description: otpNetworkFailureMessage(
+          error,
+          'That OTP is invalid or has expired. Request a new code and try again.'
+        ),
       });
     } finally {
       setVerifyingOtp(false);
