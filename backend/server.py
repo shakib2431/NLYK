@@ -47,6 +47,18 @@ app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+# =========================================================
+# SHIPROCKET CONFIG
+# =========================================================
+
+SHIPROCKET_EMAIL = os.getenv("SHIPROCKET_EMAIL", "")
+SHIPROCKET_PASSWORD = os.getenv("SHIPROCKET_PASSWORD", "")
+
+SHIPROCKET_CONFIGURED = bool(
+    SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD
+)
+
 # ─────────────────────────────────────────────
 # Twilio Verify OTP
 # ─────────────────────────────────────────────
@@ -3165,10 +3177,19 @@ async def verify_razorpay_payment(input: VerifyPaymentInput):
 # Include the router in the main app
 app.include_router(api_router)
 
+
+# =========================================================
+# CORS
+# =========================================================
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3008",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
