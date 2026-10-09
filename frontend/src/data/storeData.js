@@ -26,8 +26,18 @@ export const nav = [
   { label: 'ACCESSORIES', to: '/accessories' },
   { label: 'COLLECTIONS', to: '/collections' },
   { label: 'CUSTOM', to: '/custom-design' },
+
 ];
 
+// export const hero = {
+//   desktop: 'photo-1515886657613-9f3515b0c78f',
+//   mobile: 'photo-1509631179647-0177331693ae',
+//   kicker: 'AW26 — THE WRONG CROWD',
+//   lines: ['NOT FOR', 'EVERYONE.'],
+//   copy: 'Clothes for people who were never interested in fitting in.',
+//   primary: { label: 'SHOP NEW ARRIVALS', to: '/new-arrivals' },
+//   secondary: { label: 'EXPLORE COLLECTIONS', to: '/collections' },
+// };
 export const hero = {
   desktop: 'photo-1515886657613-9f3515b0c78f',
   mobile: 'photo-1509631179647-0177331693ae',
@@ -386,6 +396,16 @@ export const products = [
   },
 ];
 
+const downloadedProductImages = ["/product-pack/WhatsApp Image 2026-10-08 at 2.25.24 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.51 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.00 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.00 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.01 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.01 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.03 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.03 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.04 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.04 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.05 PM.jpeg"];
+const applyDownloadedProductImages = () => {
+  downloadedProductImages.forEach((image, index) => {
+    if (products[index]) {
+      products[index].images = [image];
+    }
+  });
+};
+applyDownloadedProductImages();
+
 export const collections = [
   {
     slug: 'the-chaos-edit', title: 'THE CHAOS EDIT',
@@ -551,3 +571,4 @@ export const customDesign = {
   sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'OTHER'],
   budgets: ['UNDER ₹3,000', '₹3,000 — ₹6,000', '₹6,000 — ₹10,000', 'WHATEVER IT TAKES'],
 };
+

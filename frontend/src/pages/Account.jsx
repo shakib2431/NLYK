@@ -13,29 +13,22 @@ import { useSeo } from '@/hooks/useSeo';
 
 const TABS = ['PROFILE', 'MEMBERSHIP', 'ORDERS', 'WISHLIST', 'ALERTS', 'ADDRESSES'];
 
-function normalizeIndianPhone(value) {
-  const input = String(value || '').trim();
-  if (!input || !/^[+\d\s().-]+$/.test(input)) return null;
-  if ((input.match(/\+/g) || []).length > 1 || (input.includes('+') && !input.startsWith('+'))) return null;
-
-  const digits = input.replace(/\D/g, '');
-  const nationalNumber = input.startsWith('+')
-    ? digits.length === 12 && digits.startsWith('91')
-      ? digits.slice(2)
-      : null
-    : digits.length === 10
-      ? digits
-      : digits.length === 12 && digits.startsWith('91')
-        ? digits.slice(2)
-        : null;
-
-  if (!nationalNumber || !/^[6-9]\d{9}$/.test(nationalNumber)) return null;
-  return `+91${nationalNumber}`;
+function normalizeEmailAddress(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return null;
+  return email;
 }
 
 const OTP_ERROR_MESSAGES = {
-  invalid_phone: 'Enter a valid 10-digit Indian mobile number.',
-  recipient_not_verified: 'This number is not approved to receive verification messages. Contact support or try an approved number.',
+  invalid_email: 'Enter a valid email address.',
+  email_sender_not_configured: 'Email sign-in is being configured. Please try again later.',
+  email_delivery_failed: 'We could not send your sign-in code. Please try again later.',
+  account_schema_not_ready: 'Email sign-in is being set up. Please try again later.',
+  email_account_conflict: 'This email needs account support before it can be used to sign in.',
+  account_lookup_failed: 'We could not load your account. Please try again later.',
+  account_create_failed: 'We could not create your account. Please try again later.',
+  session_create_failed: 'We could not complete sign-in. Please try again later.',
+  otp_unavailable: 'Email sign-in is temporarily unavailable. Please try again later.',
   rate_limited: 'Too many OTP attempts. Wait a few minutes before trying again.',
   service_configuration: 'OTP login is temporarily unavailable. Please contact support.',
   invalid_code: 'That OTP is invalid or has expired. Request a new code and try again.',
@@ -717,7 +710,7 @@ export default function Account() {
 
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState('PROFILE');
-  const [form, setForm] = useState({ name: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '' });
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -750,8 +743,8 @@ export default function Account() {
         const u = {
           id: memberData.id,
           name: memberData.name || 'NALAYAK',
-          phone: memberData.phone,
-          email: '',
+          phone: memberData.phone || '',
+          email: memberData.email || '',
           verified: true,
           memberId: memberData.id,
           status: memberData.status,
@@ -776,15 +769,10 @@ export default function Account() {
     e.preventDefault();
   
     const name = form.name.trim();
-    const phone = normalizeIndianPhone(form.phone);
+    const email = normalizeEmailAddress(form.email);
   
-    if (!name) {
-      toast.error('Name is required.');
-      return;
-    }
-  
-    if (!phone) {
-      toast.error('Enter a valid 10-digit Indian phone number.');
+    if (!email) {
+      toast.error('Enter a valid email address.');
       return;
     }
   
@@ -792,14 +780,15 @@ export default function Account() {
   
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/auth/send-otp`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/send-email-otp`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            phone,
+            email,
+            name,
           }),
         }
       );
@@ -818,13 +807,13 @@ export default function Account() {
   
       setForm((current) => ({
         ...current,
-        phone,
+        email,
       }));
   
       setOtpSent(true);
   
       toast.success('OTP sent.', {
-        description: `Check ${phone} for your Nalayak verification code.`,
+        description: `Check ${email} for your Nalayak verification code.`,
       });
     } catch (error) {
       console.error('SEND OTP ERROR:', error);
@@ -843,11 +832,11 @@ export default function Account() {
   const verifyOtp = async (e) => {
     e.preventDefault();
   
-    const phone = normalizeIndianPhone(form.phone);
+    const email = normalizeEmailAddress(form.email);
     const token = otp.replace(/\D/g, '');
   
-    if (!phone) {
-      toast.error('Enter your phone number again.');
+    if (!email) {
+      toast.error('Enter your email address again.');
       return;
     }
   
@@ -860,7 +849,7 @@ export default function Account() {
   
     try {
        const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/auth/verify-otp`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/verify-email-otp`,
         {
           method: 'POST',
           credentials: 'include',
@@ -868,7 +857,7 @@ export default function Account() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            phone,
+            email,
             code: token,
             name: form.name.trim(),
           }),
@@ -896,8 +885,8 @@ export default function Account() {
       const u = {
         id: memberData.id,
         name: memberData.name || form.name.trim() || 'NALAYAK',
-        phone: memberData.phone || data.phone || phone,
-        email: '',
+        phone: memberData.phone || '',
+        email: memberData.email || data.email || email,
         verified: true,
         memberId: memberData.id,
         status: memberData.status,
@@ -941,7 +930,7 @@ export default function Account() {
     setUser(null);
     setOtp('');
     setOtpSent(false);
-    setForm({ name: '', phone: '' });
+    setForm({ name: '', email: '' });
 
     toast('Logged out. The clothes will remember you.');
   };
@@ -966,32 +955,29 @@ export default function Account() {
           {!otpSent ? (
             <>
               <p className="mt-3 text-smoke text-sm">
-                Your phone is your key. We’ll send a one-time code — no password, no nonsense.
+                Your email is your key. We’ll send a one-time code — no password, no nonsense.
               </p>
 
               <form onSubmit={sendOtp} className="mt-10 space-y-4" data-testid="signin-form">
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="NAME"
+                  placeholder="NAME (OPTIONAL)"
                   autoComplete="name"
                   data-testid="signin-name-input"
                   className="w-full border border-ink bg-transparent px-5 py-4 text-sm tracking-wide placeholder:text-smoke/70 focus:outline-none focus:ring-1 focus:ring-ink"
                 />
                 <input
-                  type="tel"
-                  inputMode="numeric"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="PHONE NUMBER"
-                  autoComplete="tel"
-                  maxLength={14}
-                  data-testid="signin-phone-input"
+                  type="email"
+                  inputMode="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="EMAIL ADDRESS"
+                  autoComplete="email"
+                  maxLength={254}
+                  data-testid="signin-email-input"
                   className="w-full border border-ink bg-transparent px-5 py-4 text-sm tracking-wide placeholder:text-smoke/70 focus:outline-none focus:ring-1 focus:ring-ink"
                 />
-                <p className="text-[10px] text-smoke tracking-wide">
-                  INDIA: 10 digits is enough. We’ll add +91.
-                </p>
                 <button
                   type="submit"
                   disabled={sendingOtp}
@@ -1005,7 +991,7 @@ export default function Account() {
           ) : (
             <>
               <p className="mt-3 text-smoke text-sm">
-                Enter the 6-digit code sent to <span className="text-ink font-medium">{form.phone}</span>.
+                Enter the 6-digit code sent to <span className="text-ink font-medium">{form.email}</span>.
               </p>
               <form onSubmit={verifyOtp} className="mt-10 space-y-4" data-testid="otp-form">
                 <input
@@ -1033,7 +1019,7 @@ export default function Account() {
                   onClick={() => { setOtp(''); setOtpSent(false); }}
                   className="w-full py-3 text-[10px] tracking-[0.25em] text-smoke hover:text-ink transition-colors"
                 >
-                  CHANGE NUMBER
+                  CHANGE EMAIL
                 </button>
               </form>
             </>

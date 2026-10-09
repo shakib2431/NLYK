@@ -33,8 +33,44 @@ async function adminFetch(path, key, options = {}) {
   return res.json();
 }
 
-const ORDER_NEXT = { placed: 'shipped', shipped: 'delivered' };
 const REQ_NEXT = { received: 'in-progress', 'in-progress': 'completed' };
+
+function AdminIrlImage({ id, api, adminKey, alt }) {
+  const [src, setSrc] = useState('');
+
+  useEffect(() => {
+    let objectUrl = '';
+
+    const loadImage = async () => {
+      try {
+        const res = await fetch(`${api}/api/admin/irl-file/${id}`, {
+          headers: { 'X-Admin-Key': adminKey },
+        });
+
+        if (!res.ok) return;
+
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
+      } catch {
+        // Keep the image blank if the request fails.
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [id, api, adminKey]);
+
+  return src ? (
+    <img src={src} alt={alt} className="h-full w-full object-cover" loading="lazy" />
+  ) : (
+    <div className="h-full w-full" aria-label={alt} />
+  );
+}
+
 
 function StatusButton({ label, onClick, testId }) {
   return (
@@ -59,70 +95,70 @@ export default function Admin() {
   const [tickets, setTickets] = useState(null);
   const [error, setError] = useState(false);
 
-const load = async (k) => {
-  try {
-    // Orders are currently backed by Supabase and are working.
-    const o = await adminFetch('/api/admin/orders', k);
-
-    setOrders(o.orders || []);
-    localStorage.setItem('nalayak_admin', k);
-    setKey(k);
-    setError(false);
-
-    // These two currently depend on local MongoDB.
-    // Don't let them prevent admin login.
+  const load = async (k) => {
     try {
-      const r = await adminFetch('/api/admin/custom-requests', k);
-      setRequests(r.requests || []);
+      // Orders are currently backed by Supabase and are working.
+      const o = await adminFetch('/api/admin/orders', k);
+
+      setOrders(o.orders || []);
+      localStorage.setItem('nalayak_admin', k);
+      setKey(k);
+      setError(false);
+
+      // These two currently depend on local MongoDB.
+      // Don't let them prevent admin login.
+      try {
+        const r = await adminFetch('/api/admin/custom-requests', k);
+        setRequests(r.requests || []);
+      } catch {
+        setRequests([]);
+      }
+
+      try {
+        const i = await adminFetch('/api/admin/irl', k);
+        setIrl(i.items || []);
+      } catch {
+        setIrl([]);
+      }
+      try {
+        const t = await adminFetch('/api/admin/support/tickets', k);
+        setTickets(t.tickets || []);
+      } catch {
+        setTickets([]);
+      }
     } catch {
-      setRequests([]);
+      setError(true);
+      if (!k) return;
+      localStorage.removeItem('nalayak_admin');
+      setKey('');
     }
-
-    try {
-      const i = await adminFetch('/api/admin/irl', k);
-      setIrl(i.items || []);
-    } catch {
-      setIrl([]);
-    }
-    try {
-  const t = await adminFetch('/api/admin/support/tickets', k);
-  setTickets(t.tickets || []);
-} catch {
-  setTickets([]);
-}
-  } catch {
-    setError(true);
-    if (!k) return;
-    localStorage.removeItem('nalayak_admin');
-    setKey('');
-  }
-};
+  };
 
   useEffect(() => {
     if (key) load(key);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {
-  fetch(
-    `${process.env.REACT_APP_BACKEND_URL}/api/support/tickets`,
-    {
-      credentials: 'include',
-    }
-  )
-    .then(async (res) => {
-      if (!res.ok) {
-        throw new Error('Failed to load support tickets');
-      }
 
-      return res.json();
-    })
-    .then((data) => {
-      setTickets(data.tickets || []);
-    })
-    .catch((error) => {
-      console.error('SUPPORT TICKETS ERROR:', error);
-      setTickets([]);
-    });
-}, []);
+  useEffect(() => {
+    fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/api/support/tickets`,
+      {
+        credentials: 'include',
+      }
+    )
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error('Failed to load support tickets');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setTickets(data.tickets || []);
+      })
+      .catch((error) => {
+        console.error('SUPPORT TICKETS ERROR:', error);
+        setTickets([]);
+      });
+  }, []);
 
   const act = async (fn, msg) => {
     try {
@@ -208,16 +244,53 @@ const load = async (k) => {
                   <p className="font-display font-bold tracking-tight">{o.order_id} <span className="text-smoke font-sans font-normal text-xs">— {o.email}</span></p>
                   <p className="text-[11px] text-smoke mt-0.5">{o.items?.map((i) => `${i.name} (${i.size})`).join(', ')} · ₹{(o.total || 0).toLocaleString('en-IN')}</p>
                 </div>
-                <span className="text-[10px] tracking-[0.25em] text-smoke">{(o.status || 'placed').toUpperCase()}</span>
-                {ORDER_NEXT[o.status || 'placed'] ? (
-                  <StatusButton
-                    label={`MARK ${ORDER_NEXT[o.status || 'placed'].toUpperCase()}`}
-                    testId={`admin-ship-${o.order_id}`}
-                    onClick={() => act(() => adminFetch(`/api/orders/${o.order_id}/status`, key, { method: 'POST', body: JSON.stringify({ status: ORDER_NEXT[o.status || 'placed'] }) }), `${o.order_id} → ${ORDER_NEXT[o.status || 'placed']}. Customer emailed.`)}
-                  />
-                ) : (
-                  <span className="text-[10px] tracking-[0.25em] text-smoke">DONE</span>
-                )}
+                
+                <div className="flex items-center justify-end gap-3 flex-wrap">
+                  <span className="text-[10px] tracking-[0.25em] text-smoke">
+                    {(o.status || 'placed').toUpperCase()}
+                  </span>
+
+                  {(o.status || 'placed') === 'placed' && (
+                    <StatusButton
+                      label="CREATE SHIPMENT"
+                      testId={`admin-create-shipment-${o.order_id}`}
+                      onClick={() =>
+                        toast.info(
+                          'SHIPROCKET NOT CONNECTED YET. SHIPMENT WORKFLOW IS READY.'
+                        )
+                      }
+                    />
+                  )}
+
+                  {(o.status || 'placed') === 'placed' && (
+                    <span className="text-[9px] tracking-[0.15em] text-smoke">
+                      SHIPROCKET READY
+                    </span>
+                  )}
+
+                  {o.status === 'shipped' && (
+                    <StatusButton
+                      label="MARK DELIVERED"
+                      testId={`admin-deliver-${o.order_id}`}
+                      onClick={() =>
+                        act(
+                          () =>
+                            adminFetch(`/api/orders/${o.order_id}/status`, key, {
+                              method: 'POST',
+                              body: JSON.stringify({ status: 'delivered' }),
+                            }),
+                          `${o.order_id} → DELIVERED. Customer emailed.`
+                        )
+                      }
+                    />
+                  )}
+
+                  {o.status === 'delivered' && (
+                    <span className="text-[10px] tracking-[0.2em] text-smoke">
+                      DONE
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -248,181 +321,181 @@ const load = async (k) => {
         )}
 
         {tab === 'support' && (
-  <div
-    className="divide-y divide-line border-y border-line"
-    data-testid="admin-support"
-  >
-    {(tickets || []).length === 0 && (
-      <p className="py-10 text-smoke text-sm">
-        No support tickets.
-      </p>
-    )}
-
-    {(tickets || []).map((ticket) => (
-      <div
-        key={ticket.ticket_number}
-        className="py-6"
-        data-testid={`admin-ticket-${ticket.ticket_number}`}
-      >
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-
-          {/* TICKET DETAILS */}
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <p className="font-display font-bold tracking-tight text-lg">
-                {ticket.ticket_number}
+          <div
+            className="divide-y divide-line border-y border-line"
+            data-testid="admin-support"
+          >
+            {(tickets || []).length === 0 && (
+              <p className="py-10 text-smoke text-sm">
+                No support tickets.
               </p>
+            )}
 
-              <span className="text-[10px] tracking-[0.25em] text-smoke">
-                {(ticket.status || 'open').toUpperCase()}
-              </span>
-            </div>
+            {(tickets || []).map((ticket) => (
+              <div
+                key={ticket.ticket_number}
+                className="py-6"
+                data-testid={`admin-ticket-${ticket.ticket_number}`}
+              >
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
 
-            <div className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <div>
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
-                  ORDER
-                </p>
-                <p>{ticket.order_id || '—'}</p>
-              </div>
+                  {/* TICKET DETAILS */}
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <p className="font-display font-bold tracking-tight text-lg">
+                        {ticket.ticket_number}
+                      </p>
 
-              <div>
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
-                  ISSUE
-                </p>
-                <p>{ticket.issue_type || '—'}</p>
-              </div>
+                      <span className="text-[10px] tracking-[0.25em] text-smoke">
+                        {(ticket.status || 'open').toUpperCase()}
+                      </span>
+                    </div>
 
-              <div>
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
-                  PRODUCT
-                </p>
-                <p>{ticket.product_name || '—'}</p>
-              </div>
+                    <div className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                      <div>
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                          ORDER
+                        </p>
+                        <p>{ticket.order_id || '—'}</p>
+                      </div>
 
-              <div>
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
-                  CREATED
-                </p>
-                <p>
-                  {ticket.created_at
-                    ? new Date(ticket.created_at).toLocaleString('en-IN')
-                    : '—'}
-                </p>
-              </div>
-            </div>
+                      <div>
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                          ISSUE
+                        </p>
+                        <p>{ticket.issue_type || '—'}</p>
+                      </div>
 
-            <div className="mt-5 border-l-2 border-ink pl-4">
-              <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
-                CUSTOMER MESSAGE
-              </p>
-              <p className="text-sm leading-relaxed text-ink/75">
-                {ticket.description}
-              </p>
-            </div>
+                      <div>
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                          PRODUCT
+                        </p>
+                        <p>{ticket.product_name || '—'}</p>
+                      </div>
 
-            {/* CUSTOMER IMAGES */}
-            {Array.isArray(ticket.images) && ticket.images.length > 0 && (
-              <div className="mt-5">
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-3">
-                  ATTACHMENTS
-                </p>
+                      <div>
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-1">
+                          CREATED
+                        </p>
+                        <p>
+                          {ticket.created_at
+                            ? new Date(ticket.created_at).toLocaleString('en-IN')
+                            : '—'}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="flex flex-wrap gap-3">
-                  {ticket.images.map((image, index) => (
-                    <a
-                      key={index}
-                      href={image}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block border border-line"
+                    <div className="mt-5 border-l-2 border-ink pl-4">
+                      <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
+                        CUSTOMER MESSAGE
+                      </p>
+                      <p className="text-sm leading-relaxed text-ink/75">
+                        {ticket.description}
+                      </p>
+                    </div>
+
+                    {/* CUSTOMER IMAGES */}
+                    {Array.isArray(ticket.images) && ticket.images.length > 0 && (
+                      <div className="mt-5">
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-3">
+                          ATTACHMENTS
+                        </p>
+
+                        <div className="flex flex-wrap gap-3">
+                          {ticket.images.map((image, index) => (
+                            <a
+                              key={index}
+                              href={image}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block border border-line"
+                            >
+                              <img
+                                src={image}
+                                alt={`Ticket attachment ${index + 1}`}
+                                className="w-24 h-24 object-cover"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* EXISTING ADMIN NOTE */}
+                    {ticket.admin_note && (
+                      <div className="mt-5">
+                        <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
+                          ADMIN NOTE
+                        </p>
+                        <p className="text-sm text-ink/70">
+                          {ticket.admin_note}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ADMIN ACTIONS */}
+                  <div className="w-full md:w-[260px] border border-line p-4">
+                    <p className="text-[10px] tracking-[0.25em] text-smoke mb-4">
+                      UPDATE TICKET
+                    </p>
+
+                    <select
+                      defaultValue={ticket.status || 'open'}
+                      id={`ticket-status-${ticket.ticket_number}`}
+                      className="w-full border border-line bg-transparent px-3 py-3 text-sm outline-none"
                     >
-                      <img
-                        src={image}
-                        alt={`Ticket attachment ${index + 1}`}
-                        className="w-24 h-24 object-cover"
-                      />
-                    </a>
-                  ))}
+                      <option value="open">OPEN</option>
+                      <option value="in-review">IN REVIEW</option>
+                      <option value="waiting-customer">WAITING FOR CUSTOMER</option>
+                      <option value="resolved">RESOLVED</option>
+                      <option value="closed">CLOSED</option>
+                    </select>
+
+                    <textarea
+                      id={`ticket-note-${ticket.ticket_number}`}
+                      defaultValue={ticket.admin_note || ''}
+                      placeholder="Internal note / response..."
+                      rows={4}
+                      className="mt-3 w-full border border-line bg-transparent px-3 py-3 text-sm outline-none resize-none"
+                    />
+
+                    <button
+                      onClick={() => {
+                        const status = document.getElementById(
+                          `ticket-status-${ticket.ticket_number}`
+                        ).value;
+
+                        const admin_note = document.getElementById(
+                          `ticket-note-${ticket.ticket_number}`
+                        ).value;
+
+                        act(
+                          () =>
+                            adminFetch(
+                              `/api/admin/support/tickets/${encodeURIComponent(ticket.ticket_number)}/status`,
+                              key,
+                              {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                  status,
+                                  admin_note,
+                                }),
+                              }
+                            ),
+                          `${ticket.ticket_number} updated.`
+                        );
+                      }}
+                      className="mt-3 w-full bg-ink text-paper py-3 text-[10px] tracking-[0.2em] font-medium hover:bg-ink/85 transition-colors"
+                    >
+                      SAVE UPDATE
+                    </button>
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* EXISTING ADMIN NOTE */}
-            {ticket.admin_note && (
-              <div className="mt-5">
-                <p className="text-[10px] tracking-[0.2em] text-smoke mb-2">
-                  ADMIN NOTE
-                </p>
-                <p className="text-sm text-ink/70">
-                  {ticket.admin_note}
-                </p>
-              </div>
-            )}
+            ))}
           </div>
-
-          {/* ADMIN ACTIONS */}
-          <div className="w-full md:w-[260px] border border-line p-4">
-            <p className="text-[10px] tracking-[0.25em] text-smoke mb-4">
-              UPDATE TICKET
-            </p>
-
-            <select
-              defaultValue={ticket.status || 'open'}
-              id={`ticket-status-${ticket.ticket_number}`}
-              className="w-full border border-line bg-transparent px-3 py-3 text-sm outline-none"
-            >
-              <option value="open">OPEN</option>
-<option value="in-review">IN REVIEW</option>
-<option value="waiting-customer">WAITING FOR CUSTOMER</option>
-<option value="resolved">RESOLVED</option>
-<option value="closed">CLOSED</option>
-            </select>
-
-            <textarea
-              id={`ticket-note-${ticket.ticket_number}`}
-              defaultValue={ticket.admin_note || ''}
-              placeholder="Internal note / response..."
-              rows={4}
-              className="mt-3 w-full border border-line bg-transparent px-3 py-3 text-sm outline-none resize-none"
-            />
-
-            <button
-              onClick={() => {
-                const status = document.getElementById(
-                  `ticket-status-${ticket.ticket_number}`
-                ).value;
-
-                const admin_note = document.getElementById(
-                  `ticket-note-${ticket.ticket_number}`
-                ).value;
-
-                act(
-                  () =>
-                    adminFetch(
-                      `/api/admin/support/tickets/${encodeURIComponent(ticket.ticket_number)}/status`,
-                      key,
-                      {
-                        method: 'POST',
-                        body: JSON.stringify({
-                          status,
-                          admin_note,
-                        }),
-                      }
-                    ),
-                  `${ticket.ticket_number} updated.`
-                );
-              }}
-              className="mt-3 w-full bg-ink text-paper py-3 text-[10px] tracking-[0.2em] font-medium hover:bg-ink/85 transition-colors"
-            >
-              SAVE UPDATE
-            </button>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
+        )}
 
         {tab === 'irl' && (
           <div data-testid="admin-irl">
@@ -431,7 +504,14 @@ const load = async (k) => {
               {(irl || []).map((u) => (
                 <div key={u.id} className="border border-line" data-testid={`admin-irl-${u.id}`}>
                   <div className="aspect-square bg-white overflow-hidden">
-                    <img src={`${API()}/api/admin/irl-file/${u.id}?auth=${encodeURIComponent(key)}`} alt={u.original_filename || 'IRL upload'} className="h-full w-full object-cover" loading="lazy" />
+                    
+<AdminIrlImage
+  id={u.id}
+  api={API()}
+  adminKey={key}
+  alt={u.original_filename || 'IRL upload'}
+/>
+
                   </div>
                   <div className="p-3">
                     <p className="text-[10px] tracking-[0.2em] text-smoke">{u.status.toUpperCase()} {u.order_id ? `· ${u.order_id}` : ''}</p>
@@ -467,18 +547,18 @@ const load = async (k) => {
                     testId={`admin-golive-${p.slug}`}
                     onClick={async () => {
                       try {
-                      const d = await adminFetch(
-  '/api/drops/go-live',
-  key,
-  {
-    method: 'POST',
-    body: JSON.stringify({
-      slug: p.slug,
-      name: p.name,
-      image: getDropImage(p.images?.[0]),
-    }),
-  }
-);
+                        const d = await adminFetch(
+                          '/api/drops/go-live',
+                          key,
+                          {
+                            method: 'POST',
+                            body: JSON.stringify({
+                              slug: p.slug,
+                              name: p.name,
+                              image: getDropImage(p.images?.[0]),
+                            }),
+                          }
+                        );
                         toast.success(`${d.sent} member${d.sent === 1 ? '' : 's'} emailed.`, { description: p.name });
                       } catch {
                         toast.error('Blast failed.');

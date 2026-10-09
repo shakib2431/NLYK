@@ -98,6 +98,7 @@ if (!checkoutAddress.trim()) {
 
     setOrder({
       id: data.orderId,
+      trackingToken: data.trackingToken,
       emailed: data.emailed,
       total: cartSubtotal + shipping,
     });
@@ -126,7 +127,7 @@ if (!checkoutAddress.trim()) {
         <p className="mt-2 text-sm font-semibold">Total — ₹{order.total.toLocaleString('en-IN')}</p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           <Link
-  to={`/track/${order.id}`}
+  to={`/track/${order.id}?token=${encodeURIComponent(order.trackingToken)}`}
   data-testid="order-track-btn"
   className="bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors"
 >

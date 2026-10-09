@@ -27,6 +27,7 @@ import Club from '@/pages/Club';
 import ClubDrops from '@/pages/ClubDrops';
 import FoundingCard from '@/pages/FoundingCard';
 import CustomDesign from '@/pages/CustomDesign';
+
 import { About, Contact, SizeGuide, Shipping, Returns, FaqPage } from '@/pages/InfoPages';
 
 function ScrollManager() {
@@ -68,6 +69,8 @@ function Shell() {
           <Route path="/club" element={<Club />} />
           <Route path="/club/drops" element={<ClubDrops />} />
           <Route path="/custom-design" element={<CustomDesign />} />
+          <Route
+/>
           <Route path="/account" element={<Account />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

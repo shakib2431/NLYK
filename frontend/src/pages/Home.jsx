@@ -83,28 +83,6 @@ function Hero() {
       </motion.div>
 
       <div className="relative z-10 h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8 max-w-[1600px] mx-auto">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-paper/80 text-[11px] tracking-[0.35em] mb-4"
-        >
-          {hero.kicker}
-        </motion.p>
-
-        <h1 className="font-display font-black uppercase text-paper tracking-tighter leading-[0.85] text-[17vw] md:text-[10vw]">
-          <MaskedLines lines={hero.lines} delay={0.25} />
-        </h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.85, duration: 0.8, ease }}
-          className="mt-5 text-paper/85 text-sm md:text-base max-w-md"
-        >
-          {hero.copy}
-        </motion.p>
-
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

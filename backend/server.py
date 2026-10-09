@@ -5,11 +5,15 @@ from starlette.middleware.cors import CORSMiddleware
 
 import os
 import logging
+import hashlib
+import hmac
+import secrets
+import re
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
@@ -88,6 +92,17 @@ class VerifyOTPRequest(BaseModel):
     phone: str = Field(..., min_length=1, max_length=64)
     code: str = Field(..., min_length=1, max_length=10)
     name: str = Field(default="NALAYAK", max_length=100)
+
+
+class SendEmailOTPRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=254)
+    name: str = Field(default="", max_length=100)
+
+
+class VerifyEmailOTPRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=254)
+    code: str = Field(..., min_length=1, max_length=10)
+    name: str = Field(default="", max_length=100)
 
 
 def normalize_phone(phone: str) -> str:
@@ -544,6 +559,423 @@ async def verify_otp(payload: VerifyOTPRequest, response: Response):
     }
 
 
+def normalize_login_email(value: str) -> str:
+    email = str(value or "").strip().lower()
+    if len(email) > 254 or not _re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        raise ValueError("invalid_email")
+    return email
+
+
+def email_otp_digest(email: str, code: str) -> str:
+    pepper = os.environ.get("SUPABASE_FUNCTION_SECRET", "").strip()
+    if not pepper:
+        raise RuntimeError("OTP signing secret is not configured")
+    message = f"nalayak-email-otp-v1:{email}:{code}".encode("utf-8")
+    return hmac.new(pepper.encode("utf-8"), message, hashlib.sha256).hexdigest()
+
+
+def postgrest_error_code(response) -> str | None:
+    try:
+        value = response.json().get("code")
+    except (ValueError, AttributeError):
+        return None
+    return value if isinstance(value, str) else None
+
+
+@api_router.post("/auth/send-email-otp")
+async def send_email_otp(payload: SendEmailOTPRequest):
+    try:
+        email = normalize_login_email(payload.email)
+    except ValueError:
+        return otp_error_response(400, "invalid_email", "Enter a valid email address.")
+
+    sender = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
+    missing_settings = []
+    if not RESEND_API_KEY:
+        missing_settings.append("RESEND_API_KEY")
+    if not sender:
+        missing_settings.append("EMAIL_FROM_ADDRESS")
+    elif sender.lower().endswith("@resend.dev"):
+        missing_settings.append("verified EMAIL_FROM_ADDRESS")
+
+    if missing_settings:
+        logging.getLogger(__name__).error(
+            "Email OTP configuration is incomplete settings=%s",
+            ",".join(missing_settings),
+        )
+        return otp_error_response(
+            503,
+            "email_sender_not_configured",
+            "Email sign-in is temporarily unavailable. Please contact support.",
+        )
+
+    try:
+        digest = email_otp_digest(email, "configuration-check")
+        collection = db["email_login_otps"]
+        await collection.create_index("expires_at", expireAfterSeconds=0)
+        now = datetime.now(timezone.utc)
+        existing = await collection.find_one(
+            {"_id": email},
+            {"created_at": 1},
+        )
+        created_at = existing.get("created_at") if existing else None
+        if created_at:
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=timezone.utc)
+            if now - created_at < timedelta(seconds=30):
+                return otp_error_response(
+                    429,
+                    "rate_limited",
+                    "Wait a few seconds before requesting another code.",
+                )
+
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        digest = email_otp_digest(email, code)
+        await collection.replace_one(
+            {"_id": email},
+            {
+                "_id": email,
+                "code_hash": digest,
+                "attempts": 0,
+                "created_at": now,
+                "expires_at": now + timedelta(minutes=10),
+            },
+            upsert=True,
+        )
+    except Exception as error:
+        logging.getLogger(__name__).error(
+            "Email OTP storage unavailable (%s)",
+            type(error).__name__,
+        )
+        return otp_error_response(
+            503,
+            "otp_unavailable",
+            "Email sign-in is temporarily unavailable. Please try again later.",
+        )
+
+    email_html = (
+        '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
+        'padding:32px;color:#171717">'
+        '<p style="font-size:12px;letter-spacing:3px">NALAYAK SIGN-IN</p>'
+        '<p>Your one-time sign-in code is:</p>'
+        f'<p style="font-size:32px;font-weight:700;letter-spacing:8px">{code}</p>'
+        '<p>This code expires in 10 minutes. Do not share it with anyone.</p>'
+        "</div>"
+    )
+
+    try:
+        await send_email(
+            to=email,
+            subject="Your NALAYAK sign-in code",
+            html=email_html,
+            safe_error_logging=True,
+        )
+    except HTTPException as error:
+        try:
+            await collection.delete_one({"_id": email, "code_hash": digest})
+        except Exception:
+            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+        logging.getLogger(__name__).error(
+            "Email OTP delivery failed status=%s",
+            error.status_code,
+        )
+        return otp_error_response(
+            502,
+            "email_delivery_failed",
+            "We could not send your sign-in code. Please try again later.",
+        )
+    except Exception as error:
+        try:
+            await collection.delete_one({"_id": email, "code_hash": digest})
+        except Exception:
+            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+        logging.getLogger(__name__).error(
+            "Email OTP delivery failed (%s)",
+            type(error).__name__,
+        )
+        return otp_error_response(
+            502,
+            "email_delivery_failed",
+            "We could not send your sign-in code. Please try again later.",
+        )
+
+    return {
+        "success": True,
+        "message": "If this address can receive sign-in mail, a code is on its way.",
+        "email": email,
+        "expires_in_seconds": 600,
+    }
+
+
+@api_router.post("/auth/verify-email-otp")
+async def verify_email_otp(payload: VerifyEmailOTPRequest, response: Response):
+    try:
+        email = normalize_login_email(payload.email)
+    except ValueError:
+        return otp_error_response(400, "invalid_email", "Enter a valid email address.")
+
+    code = payload.code.strip()
+    if not _re.fullmatch(r"\d{6}", code):
+        return otp_error_response(400, "invalid_code", "Enter the 6-digit code from your email.")
+
+    try:
+        digest = email_otp_digest(email, code)
+        collection = db["email_login_otps"]
+        now = datetime.now(timezone.utc)
+        consumed = await collection.find_one_and_delete(
+            {
+                "_id": email,
+                "code_hash": digest,
+                "expires_at": {"$gt": now},
+                "attempts": {"$lt": 5},
+            }
+        )
+        if not consumed:
+            pending = await collection.find_one(
+                {"_id": email, "expires_at": {"$gt": now}},
+                {"attempts": 1},
+            )
+            if pending and pending.get("attempts", 0) >= 5:
+                await collection.delete_one({"_id": email})
+                return otp_error_response(
+                    429,
+                    "rate_limited",
+                    "Too many incorrect codes. Request a new code to continue.",
+                )
+            if pending:
+                await collection.update_one(
+                    {
+                        "_id": email,
+                        "expires_at": {"$gt": now},
+                        "attempts": {"$lt": 5},
+                    },
+                    {"$inc": {"attempts": 1}},
+                )
+            return otp_error_response(
+                401,
+                "invalid_code",
+                "That code is invalid or expired. Request a new code and try again.",
+            )
+    except RuntimeError:
+        logging.getLogger(__name__).error("Email OTP signing secret is not configured")
+        return otp_error_response(
+            503,
+            "otp_unavailable",
+            "Email sign-in is temporarily unavailable. Please contact support.",
+        )
+    except Exception as error:
+        logging.getLogger(__name__).error(
+            "Email OTP verification storage failed (%s)",
+            type(error).__name__,
+        )
+        return otp_error_response(
+            503,
+            "otp_unavailable",
+            "Email sign-in is temporarily unavailable. Please try again later.",
+        )
+
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        member_resp = await client_http.get(
+            f"{base_url}/members",
+            params={"select": "*", "email": f"eq.{email}", "limit": "1"},
+            headers=headers,
+        )
+
+    if member_resp.status_code >= 400:
+        error_code = postgrest_error_code(member_resp)
+        if error_code in {"42703", "PGRST204"}:
+            logging.getLogger(__name__).error(
+                "Email login schema migration is not applied code=%s",
+                error_code,
+            )
+            return otp_error_response(
+                503,
+                "member_schema_not_ready",
+                "Email sign-in is being set up. Please try again later.",
+            )
+        logging.getLogger(__name__).error(
+            "Email member lookup failed status=%s code=%s",
+            member_resp.status_code,
+            error_code or "unknown",
+        )
+        return otp_error_response(
+            502,
+            "account_lookup_failed",
+            "We could not load your account. Please try again later.",
+        )
+
+    members = member_resp.json() or []
+    member = members[0] if members else None
+
+    if not member:
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            orders_resp = await client_http.get(
+                f"{base_url}/orders",
+                params={
+                    "select": "user_id",
+                    "email": f"eq.{email}",
+                    "user_id": "not.is.null",
+                    "limit": "1000",
+                },
+                headers=headers,
+            )
+
+        if orders_resp.status_code >= 400:
+            logging.getLogger(__name__).error(
+                "Email order-link lookup failed status=%s code=%s",
+                orders_resp.status_code,
+                postgrest_error_code(orders_resp) or "unknown",
+            )
+            return otp_error_response(
+                502,
+                "account_lookup_failed",
+                "We could not load your account. Please try again later.",
+            )
+
+        linked_member_ids = {
+            str(order["user_id"])
+            for order in (orders_resp.json() or [])
+            if order.get("user_id")
+        }
+        if len(linked_member_ids) > 1:
+            return otp_error_response(
+                409,
+                "email_account_conflict",
+                "This email is linked to multiple accounts. Contact support to protect your order history.",
+            )
+
+        if linked_member_ids:
+            linked_member_id = next(iter(linked_member_ids))
+            async with _httpx.AsyncClient(timeout=30) as client_http:
+                linked_resp = await client_http.get(
+                    f"{base_url}/members",
+                    params={"select": "*", "id": f"eq.{linked_member_id}", "limit": "1"},
+                    headers=headers,
+                )
+
+            if linked_resp.status_code >= 400 or not linked_resp.json():
+                logging.getLogger(__name__).error(
+                    "Email order link points to unavailable member status=%s",
+                    linked_resp.status_code,
+                )
+                return otp_error_response(
+                    409,
+                    "email_account_conflict",
+                    "We could not safely match this email to an account. Contact support.",
+                )
+
+            member = linked_resp.json()[0]
+            async with _httpx.AsyncClient(timeout=30) as client_http:
+                update_resp = await client_http.patch(
+                    f"{base_url}/members",
+                    params={"id": f"eq.{linked_member_id}"},
+                    headers={**headers, "Prefer": "return=representation"},
+                    json={"email": email},
+                )
+
+            if update_resp.status_code >= 400:
+                logging.getLogger(__name__).error(
+                    "Email member-link update failed status=%s code=%s",
+                    update_resp.status_code,
+                    postgrest_error_code(update_resp) or "unknown",
+                )
+                return otp_error_response(
+                    409,
+                    "email_account_conflict",
+                    "We could not safely link this email to your account. Contact support.",
+                )
+            updated_members = update_resp.json() or []
+            if updated_members:
+                member = updated_members[0]
+
+        else:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            member_doc = {
+                "email": email,
+                "phone": None,
+                "name": payload.name.strip() or email.split("@", 1)[0],
+                "status": "active",
+                "membership_type": "free",
+                "is_founding_member": False,
+                "joined_at": now_iso,
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            }
+            async with _httpx.AsyncClient(timeout=30) as client_http:
+                create_resp = await client_http.post(
+                    f"{base_url}/members",
+                    headers={**headers, "Prefer": "return=representation"},
+                    json=member_doc,
+                )
+
+            if create_resp.status_code >= 400:
+                logging.getLogger(__name__).error(
+                    "Email member creation failed status=%s code=%s",
+                    create_resp.status_code,
+                    postgrest_error_code(create_resp) or "unknown",
+                )
+                return otp_error_response(
+                    502,
+                    "account_create_failed",
+                    "We could not create your account. Please try again later.",
+                )
+            created_members = create_resp.json() or []
+            if not created_members:
+                return otp_error_response(
+                    502,
+                    "account_create_failed",
+                    "We could not create your account. Please try again later.",
+                )
+            member = created_members[0]
+
+    session_token = str(uuid.uuid4())
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    session_doc = {
+        "member_id": member["id"],
+        "token": session_token,
+        "expires_at": expires_at,
+    }
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        session_resp = await client_http.post(
+            f"{base_url}/member_sessions",
+            headers={**headers, "Prefer": "return=minimal"},
+            json=session_doc,
+        )
+
+    if session_resp.status_code >= 400:
+        logging.getLogger(__name__).error(
+            "Email member session creation failed status=%s code=%s",
+            session_resp.status_code,
+            postgrest_error_code(session_resp) or "unknown",
+        )
+        return otp_error_response(
+            502,
+            "session_create_failed",
+            "We could not complete sign-in. Please try again later.",
+        )
+
+    response.set_cookie(
+        key="nalayak_session",
+        value=session_token,
+        max_age=60 * 60 * 24 * 30,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
+
+    return {
+        "success": True,
+        "verified": True,
+        "email": email,
+        "expires_at": expires_at,
+        "member": member,
+    }
+
+
 @api_router.get("/auth/me")
 async def get_current_member(
     nalayak_session: str = Cookie(None),
@@ -663,10 +1095,7 @@ from urllib.parse import urlparse as _urlparse
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK").strip()
-EMAIL_FROM_ADDRESS = os.environ.get(
-    "EMAIL_FROM_ADDRESS",
-    "onboarding@resend.dev",
-).strip()
+EMAIL_FROM_ADDRESS = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
 SITE_URL = os.environ.get("SITE_URL", "").strip()
 
 _SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
@@ -735,13 +1164,16 @@ def _assert_safe_email(subject: str, html: str) -> None:
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK").strip()
-EMAIL_FROM_ADDRESS = os.environ.get(
-    "EMAIL_FROM_ADDRESS",
-    "onboarding@resend.dev",
-).strip()
+EMAIL_FROM_ADDRESS = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
 
 
-async def send_email(*, to: str, subject: str, html: str) -> str | None:
+async def send_email(
+    *,
+    to: str,
+    subject: str,
+    html: str,
+    safe_error_logging: bool = False,
+) -> str | None:
 
     _assert_safe_email(subject, html)
 
@@ -749,6 +1181,12 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
         raise HTTPException(
             status_code=503,
             detail="email_not_configured",
+        )
+
+    if not EMAIL_FROM_ADDRESS or EMAIL_FROM_ADDRESS.lower().endswith("@resend.dev"):
+        raise HTTPException(
+            status_code=503,
+            detail="email_sender_not_configured",
         )
 
     payload = {
@@ -770,10 +1208,22 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
             )
 
         if resp.status_code >= 400:
-            logger.error(
-                f"Resend email send failed: "
-                f"{resp.status_code} {resp.text}"
-            )
+            if safe_error_logging:
+                try:
+                    provider_error = resp.json()
+                    provider_code = provider_error.get("name") or provider_error.get("statusCode")
+                except (ValueError, AttributeError):
+                    provider_code = None
+                logger.error(
+                    "Resend email send failed status=%s code=%s",
+                    resp.status_code,
+                    provider_code or "unknown",
+                )
+            else:
+                logger.error(
+                    f"Resend email send failed: "
+                    f"{resp.status_code} {resp.text}"
+                )
             raise HTTPException(
                 status_code=502,
                 detail="Failed to send email",
@@ -792,7 +1242,10 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
         raise
 
     except Exception as e:
-        logger.exception("Email send failed: %s", e)
+        if safe_error_logging:
+            logger.error("Resend email send failed (%s)", type(e).__name__)
+        else:
+            logger.exception("Email send failed: %s", e)
         raise HTTPException(
             status_code=502,
             detail="Failed to send email",
@@ -1564,9 +2017,16 @@ async def create_order(
 
     now = datetime.now(timezone.utc).isoformat()
 
+    tracking_token = secrets.token_urlsafe(32)
+    tracking_token_hash = hashlib.sha256(
+        tracking_token.encode("utf-8")
+    ).hexdigest()
+
     doc = {
         "order_id": order_id,
+        "tracking_token_hash": tracking_token_hash,
         "user_id": member_id,
+
         "email": input.email,
         "name": input.name,
         "phone": input.phone,
@@ -1666,7 +2126,7 @@ async def create_order(
 
             '</table>'
 
-            f'<a href="{SITE_URL.rstrip("/")}/track/{order_id}" '
+            f'<a href="{SITE_URL.rstrip("/")}/track/{order_id}?token={tracking_token}" '
             'style="display:inline-block;background:#0A0A0A;color:#F7F7F5;'
             'font-size:11px;letter-spacing:3px;text-decoration:none;'
             'padding:14px 28px;margin-top:8px">'
@@ -1710,6 +2170,7 @@ async def create_order(
 
     return {
         "orderId": order_id,
+        "trackingToken": tracking_token,
         "emailed": emailed,
     }
 
@@ -1817,7 +2278,13 @@ async def list_orders(
 
 # ── Order tracking + shipping status ──
 @api_router.get("/orders/{order_id}")
-async def get_order(order_id: str):
+async def get_order(order_id: str, token: str = None):
+    if not token or len(token) > 256:
+        raise HTTPException(status_code=404, detail="not_found")
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
     headers = supabase_rest_headers()
     base_url = supabase_rest_url()
 
@@ -1826,8 +2293,12 @@ async def get_order(order_id: str):
             resp = await client_http.get(
                 f"{base_url}/orders",
                 params={
-                    "select": "*",
+                    "select": (
+                        "order_id,name,items,shipping,total,status,"
+                        "created_at,shipped_at,delivered_at"
+                    ),
                     "order_id": f"eq.{order_id}",
+                    "tracking_token_hash": f"eq.{token_hash}",
                     "limit": "1",
                 },
                 headers=headers,
@@ -1835,17 +2306,15 @@ async def get_order(order_id: str):
 
         if resp.status_code >= 400:
             logger.error(
-                "Supabase order lookup failed: "
-                f"{resp.status_code} {resp.text}"
+                "Supabase secure tracking lookup failed: %s",
+                resp.status_code,
             )
-
             raise HTTPException(
                 status_code=502,
                 detail="Failed to fetch order",
             )
 
         orders = resp.json() or []
-
         if not orders:
             raise HTTPException(
                 status_code=404,
@@ -1857,12 +2326,8 @@ async def get_order(order_id: str):
     except HTTPException:
         raise
 
-    except Exception as e:
-        logger.exception(
-            "Supabase order lookup failed: %s",
-            e,
-        )
-
+    except Exception:
+        logger.exception("Secure order tracking lookup failed")
         raise HTTPException(
             status_code=502,
             detail="Failed to fetch order",
@@ -2146,9 +2611,14 @@ def get_object(path: str):
         ),
     )
 
+
 def admin_guard(x_admin_key: str = Header(None)):
-    if ADMIN_KEY and x_admin_key != ADMIN_KEY:
+    if not ADMIN_KEY or not ADMIN_KEY.strip():
+        logger.error("ADMIN_KEY is not configured; admin access is disabled")
+        raise HTTPException(status_code=503, detail="admin_not_configured")
+    if not x_admin_key or not hmac.compare_digest(x_admin_key, ADMIN_KEY):
         raise HTTPException(status_code=401, detail="unauthorized")
+
 
 # ── IRL / Real Life uploads — Supabase Storage + Supabase Postgres ──
 
@@ -3196,9 +3666,9 @@ async def admin_irl_status(
 async def admin_irl_file(
     file_id: str,
     x_admin_key: str = Header(None),
-    auth: str = Query(None),
+    
 ):
-    admin_guard(x_admin_key or auth)
+    admin_guard(x_admin_key)
 
     headers = supabase_rest_headers()
     base_url = supabase_rest_url()

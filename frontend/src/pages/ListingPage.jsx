@@ -23,7 +23,6 @@ const PRICE_RANGES = [
 ];
 const CATEGORIES = ['tees', 'shirts', 'hoodies', 'bottoms', 'accessories'];
 const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
-
 function FilterGroup({ title, children }) {
   const [open, setOpen] = useState(true);
   return (
@@ -123,14 +122,28 @@ export default function ListingPage({ listingKey }) {
         <span className="mx-2">/</span>
         <span className="text-ink">{cfg.title}</span>
       </nav>
+        <Reveal y={16}>
+          <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">{cfg.kicker}</p>
 
-      <Reveal y={16}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">
+              {cfg.title}
+            </h1>
+
+            <p className="text-smoke text-sm max-w-sm">
+              {cfg.desc}
+            </p>
+          </div>
+        </Reveal>}
+
+      {/* <Reveal y={16}>
         <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">{cfg.kicker}</p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">{cfg.title}</h1>
           <p className="text-smoke text-sm max-w-sm">{cfg.desc}</p>
         </div>
-      </Reveal>
+      </Reveal> */}
+
 
       <div className="mt-10 flex items-center justify-between border-y border-line py-3">
         <div className="flex items-center gap-4">
@@ -221,3 +234,5 @@ export default function ListingPage({ listingKey }) {
     </main>
   );
 }
+
+

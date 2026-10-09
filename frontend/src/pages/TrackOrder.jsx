@@ -124,6 +124,8 @@ export function Timeline({ order }) {
 export default function TrackOrder() {
   useSeo('Track Order', 'Track your Nalayak order.');
   const { orderId } = useParams();
+  const searchParams = new URLSearchParams(window.location.search);
+  const trackingToken = searchParams.get('token');
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [order, setOrder] = useState(undefined);
@@ -131,11 +133,15 @@ export default function TrackOrder() {
   useEffect(() => {
     if (!orderId) return;
     setOrder(undefined);
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/orders/${encodeURIComponent(orderId.trim().toUpperCase())}`)
+    if (!trackingToken) {
+      setOrder(null);
+      return;
+    }
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/orders/${encodeURIComponent(orderId.trim().toUpperCase())}?token=${encodeURIComponent(trackingToken)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then(setOrder)
       .catch(() => setOrder(null));
-  }, [orderId]);
+  }, [orderId, trackingToken]);
 
   if (!orderId) {
     return (
