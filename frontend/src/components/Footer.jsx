@@ -7,8 +7,19 @@ export default function Footer() {
     <footer className="bg-ink text-paper" data-testid="site-footer">
       <div className="mx-auto max-w-[1600px] px-4 md:px-8 pt-16 md:pt-24 pb-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 md:gap-8 pb-16 border-b border-paper/15">
-          <div className="col-span-2">
-            <p className="text-[11px] tracking-[0.3em] text-paper/50 mb-4">THE FINE PRINT</p>
+
+<div className="col-span-2">
+  <Link to="/" aria-label="NALAYAK home" className="inline-block mb-6">
+    <img
+      src="/Gothic%20NA%E0%A4%B2Tayak%20Logo%20with%20Compass%20Star.png"
+      alt="NALAYAK"
+      className="block w-[180px] md:w-[220px] h-auto object-contain"
+    />
+  </Link>
+  <p className="text-[11px] tracking-[0.3em] text-paper/50 mb-4">
+    THE FINE PRINT
+  </p>
+
             <p className="text-sm text-paper/70 max-w-xs leading-relaxed">
               Clothes for the wrong crowd. Made in India, shipped everywhere, worn unapologetically.
             </p>
@@ -44,18 +55,19 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="py-12 md:py-16 overflow-hidden">
+        {/* <div className="py-12 md:py-16 overflow-hidden">
   <p
     className="font-display font-extrabold uppercase tracking-tight leading-none text-[clamp(4.5rem,8vw,9rem)] text-paper/95 select-none"
     aria-hidden="true"
   >
     NALAYAK
   </p>
-</div>
+</div> */}
+
 
         <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-paper/15">
           <p className="text-[11px] tracking-[0.15em] text-paper/50">
-            © {new Date().getFullYear()} {site.name}. ALL WRONGS RESERVED.
+            Â© {new Date().getFullYear()} {site.name}. ALL WRONGS RESERVED.
           </p>
           <div className="flex items-center gap-2">
             {['UPI', 'VISA', 'MASTERCARD', 'RUPAY', 'COD'].map((p) => (
@@ -69,8 +81,8 @@ export default function Footer() {
               className="bg-transparent border border-paper/25 px-2 py-1 text-paper/80 focus:outline-none"
               defaultValue="IN"
             >
-              <option value="IN" className="text-ink">INDIA (₹ INR)</option>
-              <option value="US" className="text-ink" disabled>GLOBAL — SOON</option>
+              <option value="IN" className="text-ink">INDIA (â‚¹ INR)</option>
+              <option value="US" className="text-ink" disabled>GLOBAL â€” SOON</option>
             </select>
           </div>
         </div>

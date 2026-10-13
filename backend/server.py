@@ -17,17 +17,17 @@ from datetime import datetime, timezone, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Environment
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # MongoDB connection
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 mongo_url = os.environ.get("MONGO_URL", "").strip()
 db_name = os.environ.get("DB_NAME", "").strip()
@@ -64,9 +64,9 @@ SHIPROCKET_CONFIGURED = bool(
     SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD
 )
 
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Twilio Verify OTP
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "").strip()
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "").strip()
@@ -420,9 +420,9 @@ async def verify_otp(payload: VerifyOTPRequest, response: Response):
             "That OTP is invalid or has expired. Request a new code and try again.",
         )
 
-    # ─────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Find or create Nalayak member
-    # ─────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     headers = supabase_rest_headers()
     base_url = supabase_rest_url()
@@ -501,9 +501,9 @@ async def verify_otp(payload: VerifyOTPRequest, response: Response):
 
         member = created[0]
 
-    # ─────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Create persistent session
-    # ─────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     session_token = str(uuid.uuid4())
 
@@ -582,129 +582,130 @@ def postgrest_error_code(response) -> str | None:
     return value if isinstance(value, str) else None
 
 
-@api_router.post("/auth/send-email-otp")
-async def send_email_otp(payload: SendEmailOTPRequest):
-    try:
-        email = normalize_login_email(payload.email)
-    except ValueError:
-        return otp_error_response(400, "invalid_email", "Enter a valid email address.")
-
-    sender = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
-    missing_settings = []
-    if not RESEND_API_KEY:
-        missing_settings.append("RESEND_API_KEY")
-    if not sender:
-        missing_settings.append("EMAIL_FROM_ADDRESS")
-    elif sender.lower().endswith("@resend.dev"):
-        missing_settings.append("verified EMAIL_FROM_ADDRESS")
-
-    if missing_settings:
-        logging.getLogger(__name__).error(
-            "Email OTP configuration is incomplete settings=%s",
-            ",".join(missing_settings),
-        )
-        return otp_error_response(
-            503,
-            "email_sender_not_configured",
-            "Email sign-in is temporarily unavailable. Please contact support.",
-        )
-
-    try:
-        digest = email_otp_digest(email, "configuration-check")
-        collection = db["email_login_otps"]
-        await collection.create_index("expires_at", expireAfterSeconds=0)
-        now = datetime.now(timezone.utc)
-        existing = await collection.find_one(
-            {"_id": email},
-            {"created_at": 1},
-        )
-        created_at = existing.get("created_at") if existing else None
-        if created_at:
-            if created_at.tzinfo is None:
-                created_at = created_at.replace(tzinfo=timezone.utc)
-            if now - created_at < timedelta(seconds=30):
-                return otp_error_response(
-                    429,
-                    "rate_limited",
-                    "Wait a few seconds before requesting another code.",
-                )
-
-        code = f"{secrets.randbelow(1_000_000):06d}"
-        digest = email_otp_digest(email, code)
-        await collection.replace_one(
-            {"_id": email},
-            {
-                "_id": email,
-                "code_hash": digest,
-                "attempts": 0,
-                "created_at": now,
-                "expires_at": now + timedelta(minutes=10),
-            },
-            upsert=True,
-        )
-    except Exception as error:
-        logging.getLogger(__name__).error(
-            "Email OTP storage unavailable (%s)",
-            type(error).__name__,
-        )
-        return otp_error_response(
-            503,
-            "otp_unavailable",
-            "Email sign-in is temporarily unavailable. Please try again later.",
-        )
-
-    email_html = (
-        '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
-        'padding:32px;color:#171717">'
-        '<p style="font-size:12px;letter-spacing:3px">NALAYAK SIGN-IN</p>'
-        '<p>Your one-time sign-in code is:</p>'
-        f'<p style="font-size:32px;font-weight:700;letter-spacing:8px">{code}</p>'
-        '<p>This code expires in 10 minutes. Do not share it with anyone.</p>'
-        "</div>"
-    )
-
-    try:
-        await send_email(
-            to=email,
-            subject="Your NALAYAK sign-in code",
-            html=email_html,
-            safe_error_logging=True,
-        )
-    except HTTPException as error:
+    @api_router.post("/auth/send-email-otp")
+    async def send_email_otp(payload: SendEmailOTPRequest):
         try:
-            await collection.delete_one({"_id": email, "code_hash": digest})
-        except Exception:
-            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
-        logging.getLogger(__name__).error(
-            "Email OTP delivery failed status=%s",
-            error.status_code,
-        )
-        return otp_error_response(
-            502,
-            "email_delivery_failed",
-            "We could not send your sign-in code. Please try again later.",
-        )
-    except Exception as error:
+            email = normalize_login_email(payload.email)
+        except ValueError:
+            return otp_error_response(400, "invalid_email", "Enter a valid email address.")
+
+        sender = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
+        missing_settings = []
+        if not RESEND_API_KEY:
+            missing_settings.append("RESEND_API_KEY")
+        if not sender:
+            missing_settings.append("EMAIL_FROM_ADDRESS")
+        elif sender.lower().endswith("@resend.dev"):
+            missing_settings.append("verified EMAIL_FROM_ADDRESS")
+
+        if missing_settings:
+            logging.getLogger(__name__).error(
+                "Email OTP configuration is incomplete settings=%s",
+                ",".join(missing_settings),
+            )
+            return otp_error_response(
+                503,
+                "email_sender_not_configured",
+                "Email sign-in is temporarily unavailable. Please contact support.",
+            )
+
         try:
-            await collection.delete_one({"_id": email, "code_hash": digest})
-        except Exception:
-            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
-        logging.getLogger(__name__).error(
-            "Email OTP delivery failed (%s)",
-            type(error).__name__,
-        )
-        return otp_error_response(
-            502,
-            "email_delivery_failed",
-            "We could not send your sign-in code. Please try again later.",
+            digest = email_otp_digest(email, "configuration-check")
+            collection = db["email_login_otps"]
+            await collection.create_index("expires_at", expireAfterSeconds=0)
+            now = datetime.now(timezone.utc)
+            existing = await collection.find_one(
+                {"_id": email},
+                {"created_at": 1},
+            )
+            created_at = existing.get("created_at") if existing else None
+            if created_at:
+                if created_at.tzinfo is None:
+                    created_at = created_at.replace(tzinfo=timezone.utc)
+                if now - created_at < timedelta(seconds=30):
+                    return otp_error_response(
+                        429,
+                        "rate_limited",
+                        "Wait a few seconds before requesting another code.",
+                    )
+
+            code = f"{secrets.randbelow(1_000_000):06d}"
+            digest = email_otp_digest(email, code)
+            await collection.replace_one(
+                {"_id": email},
+                {
+                    "_id": email,
+                    "code_hash": digest,
+                    "attempts": 0,
+                    "created_at": now,
+                    "expires_at": now + timedelta(minutes=10),
+                },
+                upsert=True,
+            )
+        except Exception as error:
+            logging.getLogger(__name__).error(
+                "Email OTP storage unavailable (%s)",
+                type(error).__name__,
+            )
+            return otp_error_response(
+                503,
+                "otp_unavailable",
+                "Email sign-in is temporarily unavailable. Please try again later.",
+            )
+
+        email_html = (
+            '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
+            'padding:32px;color:#171717">'
+            '<p style="font-size:12px;letter-spacing:3px">NALAYAK SIGN-IN</p>'
+            '<p>Your one-time sign-in code is:</p>'
+            f'<p style="font-size:32px;font-weight:700;letter-spacing:8px">{code}</p>'
+            '<p>This code expires in 10 minutes. Do not share it with anyone.</p>'
+            "</div>"
         )
 
-    return {
-        "success": True,
-        "message": "If this address can receive sign-in mail, a code is on its way.",
-        "email": email,
-        "expires_in_seconds": 600,
-    }
+        try:
+            await send_email(
+                to=email,
+                subject="Your NALAYAK sign-in code",
+                html=email_html,
+                safe_error_logging=True,
+            )
+        except HTTPException as error:
+            try:
+                await collection.delete_one({"_id": email, "code_hash": digest})
+            except Exception:
+                logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+            logging.getLogger(__name__).error(
+                "Email OTP delivery failed status=%s",
+                error.status_code,
+            )
+            return otp_error_response(
+                502,
+                "email_delivery_failed",
+                "We could not send your sign-in code. Please try again later.",
+            )
+        except Exception as error:
+            try:
+                await collection.delete_one({"_id": email, "code_hash": digest})
+            except Exception:
+                logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+            logging.getLogger(__name__).error(
+                "Email OTP delivery failed (%s)",
+                type(error).__name__,
+            )
+            return otp_error_response(
+                502,
+                "email_delivery_failed",
+                "We could not send your sign-in code. Please try again later.",
+            )
+
+        return {
+            "success": True,
+            "message": "If this address can receive sign-in mail, a code is on its way.",
+            "email": email,
+            "expires_in_seconds": 600,
+        }
+
 
 
 @api_router.post("/auth/verify-email-otp")
@@ -717,6 +718,7 @@ async def verify_email_otp(payload: VerifyEmailOTPRequest, response: Response):
     code = payload.code.strip()
     if not _re.fullmatch(r"\d{6}", code):
         return otp_error_response(400, "invalid_code", "Enter the 6-digit code from your email.")
+
 
     try:
         digest = email_otp_digest(email, code)
@@ -1085,7 +1087,7 @@ async def logout(response: Response):
 # Define Models
 
 
-# ── Transactional email via Resend ──
+# â”€â”€ Transactional email via Resend â”€â”€
 import re as _re
 import ipaddress as _ipaddress
 import httpx as _httpx
@@ -1264,7 +1266,7 @@ async def send_welcome_email(input: WelcomeEmailInput):
     existing = await db.welcome_emails.find_one({"email": input.email, "kind": kind}, {"_id": 0})
     if existing:
         return {"status": "already_sent"}
-    name = _escape((input.name or "").split()[0] or "there")
+    name = _escape(((input.name or "").strip().split() or ["there"])[0])
     base = SITE_URL.rstrip("/")
     if kind == "club":
         subject = "Welcome to Nalayak Club."
@@ -1276,7 +1278,7 @@ async def send_welcome_email(input: WelcomeEmailInput):
     else:
         subject = "You're in the wrong crowd."
         headline = "START WITH BELONGING."
-        body = ("Membership is free. The good stuff comes with it — first looks, "
+        body = ("Membership is free. The good stuff comes with it â€” first looks, "
                 "restock access and a status you earn, not buy.")
         cta_href = f"{base}/new-arrivals"
         cta_text = "SHOP NEW ARRIVALS"
@@ -1301,7 +1303,7 @@ async def send_welcome_email(input: WelcomeEmailInput):
     })
     return {"status": "sent", "email_id": email_id}
 
-# ── Drop alerts + custom design requests ──
+# â”€â”€ Drop alerts + custom design requests â”€â”€
 
 class AlertRegisterInput(BaseModel):
     email: str
@@ -1696,9 +1698,9 @@ async def create_custom_request(input: CustomRequestInput):
     emailed = False
 
     if RESEND_API_KEY:
-        garment = _escape(input.garment or "—")
-        size = _escape(input.size or "—")
-        subject = f"Request {ref} — received."
+        garment = _escape(input.garment or "â€”")
+        size = _escape(input.size or "â€”")
+        subject = f"Request {ref} â€” received."
 
         html = (
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
@@ -1709,8 +1711,8 @@ async def create_custom_request(input: CustomRequestInput):
             '<h1 style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0 0 16px">REQUEST RECEIVED.</h1>'
             f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 8px">Hi {_escape((input.name or "").split()[0] or "there")}. '
             'Your idea is now with the Nalayak team. We&#39;ll review it and get back to you with the next step.</p>'
-            f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 28px">Reference <strong>{ref}</strong> · '
-            f'{garment} · Size {size}</p>'
+            f'<p style="font-size:14px;color:#444;line-height:1.6;margin:0 0 28px">Reference <strong>{ref}</strong> Â· '
+            f'{garment} Â· Size {size}</p>'
             f'<p style="font-size:11px;color:#8C8C8C;margin:32px 0 0">Sent by {EMAIL_FROM_NAME}. '
             'We never ask for your password or card details by email.</p>'
             '</td></tr></table>'
@@ -1853,7 +1855,7 @@ async def update_custom_request_status(
         )
 
         subject = (
-            f"Request {ref} — "
+            f"Request {ref} â€” "
             f"{input.status.replace('-', ' ')}."
         )
 
@@ -1887,7 +1889,7 @@ async def update_custom_request_status(
         "emailed": emailed,
     }
 
-# ── Orders (mock checkout, real receipts) ──
+# â”€â”€ Orders (mock checkout, real receipts) â”€â”€
 class OrderInput(BaseModel):
     email: str
     name: str = ""
@@ -2064,18 +2066,18 @@ async def create_order(
             f'<td style="padding:8px 0;font-size:13px;color:#333">'
             f'{_escape(str(i.get("name", "")))} '
             f'<span style="color:#8C8C8C">'
-            f'· {_escape(str(i.get("size", "")))} × '
+            f'Â· {_escape(str(i.get("size", "")))} Ã— '
             f'{int(i.get("qty", 1))}'
             f'</span>'
             f'</td>'
             f'<td style="padding:8px 0;font-size:13px;color:#333;text-align:right">'
-            f'₹{int(i.get("price", 0)) * int(i.get("qty", 1)):,}'
+            f'â‚¹{int(i.get("price", 0)) * int(i.get("qty", 1)):,}'
             f'</td>'
             f'</tr>'
             for i in input.items
         )
 
-        subject = f"Order {order_id} — confirmed."
+        subject = f"Order {order_id} â€” confirmed."
 
         html = (
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
@@ -2110,7 +2112,7 @@ async def create_order(
             '</td>'
 
             f'<td style="padding:12px 0;font-size:13px;text-align:right;border-top:1px solid #E5E5E5">'
-            f'{"FREE" if input.shipping == 0 else f"₹{input.shipping:,}"}'
+            f'{"FREE" if input.shipping == 0 else f"â‚¹{input.shipping:,}"}'
             '</td>'
             '</tr>'
 
@@ -2120,7 +2122,7 @@ async def create_order(
             '</td>'
 
             f'<td style="padding:4px 0 12px;font-size:15px;font-weight:700;text-align:right">'
-            f'₹{input.total:,}'
+            f'â‚¹{input.total:,}'
             '</td>'
             '</tr>'
 
@@ -2276,7 +2278,7 @@ async def list_orders(
         )
 
 
-# ── Order tracking + shipping status ──
+# â”€â”€ Order tracking + shipping status â”€â”€
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str, token: str = None):
     if not token or len(token) > 256:
@@ -2448,7 +2450,7 @@ async def update_order_status(
             detail="Failed to update order",
         )
 
-# ── Admin orders list — Supabase ──
+# â”€â”€ Admin orders list â€” Supabase â”€â”€
 @api_router.get("/admin/orders")
 async def admin_orders(
     x_admin_key: str = Header(None),
@@ -2506,12 +2508,12 @@ async def admin_orders(
             detail="Failed to fetch orders",
         )
 
-# ── Object storage (Emergent) + IRL uploads + admin ──
+# â”€â”€ Object storage (Emergent) + IRL uploads + admin â”€â”€
 import uuid as _uuid
 import asyncio as _asyncio
 import requests as _requests
 
-# ── Supabase Storage ──
+# â”€â”€ Supabase Storage â”€â”€
 # IRL images are stored in the private Supabase "irl" bucket.
 # The backend uses the server-side secret key, so the browser never
 # gets direct unrestricted access to the bucket.
@@ -2620,7 +2622,7 @@ def admin_guard(x_admin_key: str = Header(None)):
         raise HTTPException(status_code=401, detail="unauthorized")
 
 
-# ── IRL / Real Life uploads — Supabase Storage + Supabase Postgres ──
+# â”€â”€ IRL / Real Life uploads â€” Supabase Storage + Supabase Postgres â”€â”€
 
 def supabase_storage_headers(content_type: str | None = None):
     secret = os.environ.get("SUPABASE_FUNCTION_SECRET", "")
@@ -2654,9 +2656,9 @@ def supabase_storage_url(path: str = ""):
 
     return url
 
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Support Tickets
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SupportTicketInput(BaseModel):
     order_id: str
@@ -2796,9 +2798,9 @@ async def create_support_ticket(
     headers = supabase_rest_headers()
     base_url = supabase_rest_url()
 
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Verify that this order belongs to member
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     async with _httpx.AsyncClient(timeout=30) as client_http:
         order_resp = await client_http.get(
@@ -2833,9 +2835,9 @@ async def create_support_ticket(
 
     order = orders[0]
 
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Only delivered orders can raise a ticket
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     if (order.get("status") or "").lower() != "delivered":
         raise HTTPException(
@@ -2843,9 +2845,9 @@ async def create_support_ticket(
             detail="support_available_after_delivery",
         )
 
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Prevent accidental duplicate open tickets
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     async with _httpx.AsyncClient(timeout=30) as client_http:
         existing_resp = await client_http.get(
@@ -2882,9 +2884,9 @@ async def create_support_ticket(
             },
         )
 
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Generate ticket number
-    # ─────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     ticket_number = None
 
@@ -3055,9 +3057,9 @@ async def get_my_support_ticket(
     }
 
 
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Admin Support Tickets
-# ─────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @api_router.get("/admin/support/tickets")
 async def admin_support_tickets(
@@ -3666,7 +3668,7 @@ async def admin_irl_status(
 async def admin_irl_file(
     file_id: str,
     x_admin_key: str = Header(None),
-    
+
 ):
     admin_guard(x_admin_key)
 
@@ -3747,13 +3749,13 @@ async def admin_irl_file(
             detail="Failed to fetch IRL file",
         )
 
-# ── Razorpay membership checkout ──
+# â”€â”€ Razorpay membership checkout â”€â”€
 # One-time membership purchase. Recurring Club subscriptions come later via
 # Razorpay Subscriptions API; activation is only marked after server-side
-# signature verification — never from frontend state alone.
+# signature verification â€” never from frontend state alone.
 CLUB_PLANS = {
-    "founding": {"amount": 99900, "description": "NALAYAK CLUB — Founding 500"},
-    "club-yearly": {"amount": 99900, "description": "NALAYAK CLUB — Yearly"},
+    "founding": {"amount": 99900, "description": "NALAYAK CLUB â€” Founding 500"},
+    "club-yearly": {"amount": 99900, "description": "NALAYAK CLUB â€” Yearly"},
 }
 
 def razorpay_client():
@@ -3836,12 +3838,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=[
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://localhost:3008",
-    "https://nlyk.vercel.app",
-    "https://nalayak.store",
-    "https://www.nalayak.store",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3008",
+        "https://nlyk.vercel.app",
+        "https://nalayak.store",
+        "https://www.nalayak.store",
     ],
     allow_methods=["*"],
     allow_headers=["*"],

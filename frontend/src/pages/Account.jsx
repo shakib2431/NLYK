@@ -753,6 +753,7 @@ export default function Account() {
         };
 
         setUser(u);
+        localStorage.setItem('nalayak_user', JSON.stringify(u));
         joinMember();
       } catch (error) {
         console.log('NO ACTIVE NALAYAK SESSION');
@@ -895,6 +896,7 @@ export default function Account() {
       };
 
       setUser(u);
+      localStorage.setItem('nalayak_user', JSON.stringify(u));
       joinMember();
 
       toast.success(
@@ -928,6 +930,7 @@ export default function Account() {
     }
 
     setUser(null);
+    localStorage.removeItem('nalayak_user');
     setOtp('');
     setOtpSent(false);
     setForm({ name: '', email: '' });

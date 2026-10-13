@@ -55,13 +55,19 @@ export default function Header() {
             >
               <Menu size={20} strokeWidth={1.5} />
             </button>
-            <Link to="/" data-testid="logo-link" className="font-display font-extrabold tracking-tight text-xl md:text-2xl">
-              NALAYAK
-            </Link>
+
+<Link to="/" data-testid="logo-link" className="flex items-center shrink-0" aria-label="NALAYAK Home">
+  <img
+    src="/nalayak-logo-black.png"
+    alt="NALAYAK"
+    className="h-14 md:h-16 w-auto object-contain"
+  />
+</Link>
+
           </div>
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
-            
+
             {nav.map((item) => (
               <NavLink
                 key={item.to}
