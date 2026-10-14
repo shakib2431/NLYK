@@ -11,7 +11,7 @@ export default function Footer() {
 <div className="col-span-2">
   <Link to="/" aria-label="NALAYAK home" className="inline-block mb-6">
     <img
-      src="/nalayak-logo-black.png"
+      src="/NALayak%20Compass%20Gothic%20Logo.png"
       alt="NALAYAK"
       className="block w-[180px] md:w-[220px] h-auto object-contain"
     />

@@ -58,7 +58,7 @@ export default function Header() {
 
 <Link to="/" data-testid="logo-link" className="flex items-center shrink-0" aria-label="NALAYAK Home">
   <img
-    src="/nalayak-logo-black.png"
+    src="/NALayak%20Compass%20Gothic%20Logo.png"
     alt="NALAYAK"
     className="h-14 md:h-16 w-auto object-contain"
   />
