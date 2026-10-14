@@ -34,7 +34,7 @@ export function StoreProvider({ children }) {
   }, [member]);
   useEffect(() => localStorage.setItem('nalayak_drop_alerts', JSON.stringify(dropAlerts)), [dropAlerts]);
 
-  const addToCart = (product, size, color, qty = 1) => {
+  const addToCart = (product, size, color, qty = 1, image = null) => {
     const key = `${product.slug}-${size}-${color.name}`;
     setCart((prev) => {
       const existing = prev.find((i) => i.key === key);
@@ -45,7 +45,7 @@ export function StoreProvider({ children }) {
         ...prev,
         {
           key, slug: product.slug, name: product.name, price: product.price,
-          image: product.images[0], size, color: color.name, qty,
+          image: image || product.colorImages?.[color.name] || product.images[0], size, color: color.name, qty,
         },
       ];
     });

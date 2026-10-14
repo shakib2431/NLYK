@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Heart, Minus, Plus, ChevronDown, Truck, RotateCcw, Box } from 'lucide-react';
+import { Heart, Minus, Plus, ChevronDown, Truck, RotateCcw, Box, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Viewer3D from '@/components/Viewer3D';
 import { toast } from 'sonner';
@@ -41,11 +41,13 @@ export default function ProductDetail() {
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
   const [show3D, setShow3D] = useState(false);
-  const selectedColorImage =
-  product?.colorImages?.[color?.name] || null;
+  const [showZoom, setShowZoom] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const selectedColorImage = product?.colorImages?.[color?.name] || null;
 
   useEffect(() => {
-    setImgIndex(0); setQty(1);
+    setImgIndex(0); 
+    setQty(1);
     setSize(null);
     if (product) {
       setColor(product.colors[0]);
@@ -112,34 +114,51 @@ export default function ProductDetail() {
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 px-4 md:px-8 py-8 md:py-12">
         <div>
-         <motion.div
-  key={`${imgIndex}-${color?.name || 'default'}`}
+          <motion.div
+            key={`${imgIndex}-${color?.name || 'default'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="relative bg-white border border-line aspect-[3/4] overflow-hidden"
+            className="relative bg-white border border-line aspect-[3/4] overflow-hidden group"
             data-testid="pdp-gallery"
           >
-  {selectedColorImage ? (
-  <img
-    src={selectedColorImage}
-    alt={`${product.name} — ${color?.name || ''}`}
-    className="h-full w-full object-cover"
-  />
-) : (
-  <SafeImg
-    id={product.images[imgIndex] || product.images[0]}
-    w={1400}
-    alt={`${product.name} — view ${imgIndex + 1}`}
-    className="h-full w-full object-cover"
-  />
-)}
+            <button
+              type="button"
+              onClick={() => {
+                setZoomLevel(1);
+                setShowZoom(true);
+              }}
+              className="absolute inset-0 z-0 cursor-zoom-in"
+              aria-label="Zoom product image"
+            >
+              {selectedColorImage ? (
+                <img
+                  src={selectedColorImage}
+                  alt={`${product.name} — ${color?.name || ''}`}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              ) : (
+                <SafeImg
+                  id={product.images[imgIndex] || product.images[0]}
+                  w={1400}
+                  alt={`${product.name} — view ${imgIndex + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              )}
+            </button>
+
+            <div className="pointer-events-none absolute bottom-3 right-3 z-10 flex items-center gap-2 bg-paper/90 px-3 py-2 text-[10px] tracking-[0.15em]">
+              <ZoomIn size={14} />
+              <span>CLICK TO ZOOM</span>
+            </div>
+
             {product.badge && (
-              <span className="absolute top-4 left-4 px-2 py-1 text-[10px] tracking-[0.2em] font-medium bg-paper border border-ink">
+              <span className="pointer-events-none absolute top-4 left-4 z-10 px-2 py-1 text-[10px] tracking-[0.2em] font-medium bg-paper border border-ink">
                 {product.badge}
               </span>
             )}
           </motion.div>
+          
           <div className="mt-3 flex gap-3">
             {product.images.map((id, i) => (
               <button
@@ -191,9 +210,9 @@ export default function ProductDetail() {
                     key={c.name}
                     data-testid={`pdp-color-${c.name.toLowerCase()}`}
                     onClick={() => {
-  setColor(c);
-  setImgIndex(0);
-}}
+                      setColor(c);
+                      setImgIndex(0);
+                    }}
                     title={c.name}
                     aria-label={`Colour ${c.name}`}
                     className={`h-9 w-9 border-2 transition-colors ${color?.name === c.name ? 'border-ink' : 'border-line hover:border-smoke'}`}
@@ -399,8 +418,102 @@ export default function ProductDetail() {
           </div>
         </section>
       )}
+
       <AnimatePresence>
         {show3D && <Viewer3D key="viewer-3d" product={product} onClose={() => setShow3D(false)} />}
+        {showZoom && (
+          <motion.div
+            key="product-zoom"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-3 md:p-8"
+            onClick={() => setShowZoom(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setShowZoom(false);
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Product image zoom viewer"
+            tabIndex={-1}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowZoom(false);
+              }}
+              className="absolute top-4 right-4 z-20 p-3 bg-white text-black"
+              aria-label="Close zoom viewer"
+            >
+              <X size={22} />
+            </button>
+
+            <div
+              className="absolute top-4 left-4 z-20 flex items-center gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setZoomLevel((z) => Math.max(1, z - 0.5))}
+                className="p-3 bg-white text-black disabled:opacity-40"
+                disabled={zoomLevel <= 1}
+                aria-label="Zoom out"
+              >
+                <ZoomOut size={18} />
+              </button>
+              <span className="text-white text-xs min-w-12 text-center">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => setZoomLevel((z) => Math.min(3, z + 0.5))}
+                className="p-3 bg-white text-black disabled:opacity-40"
+                disabled={zoomLevel >= 3}
+                aria-label="Zoom in"
+              >
+                <ZoomIn size={18} />
+              </button>
+            </div>
+
+            <div
+              className="h-full w-full overflow-auto flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className="flex items-center justify-center min-w-full min-h-full"
+                style={{ cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in' }}
+                onClick={() => setZoomLevel((z) => (z === 1 ? 2 : 1))}
+              >
+                {selectedColorImage ? (
+                  <img
+                    src={selectedColorImage}
+                    alt={`${product.name} — ${color?.name || ''}`}
+                    draggable="false"
+                    className="max-h-[85vh] max-w-full object-contain"
+                    style={{
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: 'center center',
+                      transition: 'transform 200ms ease',
+                    }}
+                  />
+                ) : (
+                  <SafeImg
+                    id={product.images[imgIndex] || product.images[0]}
+                    w={1800}
+                    alt={`${product.name} — enlarged view`}
+                    className="max-h-[85vh] max-w-full object-contain"
+                    style={{
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: 'center center',
+                      transition: 'transform 200ms ease',
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </main>
   );

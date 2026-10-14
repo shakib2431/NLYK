@@ -1,6 +1,8 @@
+import { motion } from 'framer-motion';
+import { Instagram, Twitter, Youtube, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Youtube } from 'lucide-react';
 import { footerLinks, site } from '@/data/storeData';
+
 
 export default function Footer() {
   return (
@@ -65,9 +67,34 @@ export default function Footer() {
 </div> */}
 
 
+
+<div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+  <p className="text-[10px] tracking-[0.3em] text-paper/50">
+    THE NALAYAK APP
+  </p>
+
+  <h3 className="text-xl font-bold uppercase tracking-wide text-paper">
+    Coming Soon.
+  </h3>
+
+  <p className="max-w-md text-sm text-paper/60">
+    Your crew. Your rules. The Nalayak experience is coming to mobile.
+  </p>
+
+
+<motion.span
+  className="app-coming-soon-glow mt-1 inline-flex items-center gap-2 px-5 py-3 text-[10px] font-semibold tracking-[0.2em]"
+>
+  <Smartphone size={15} />
+  STAY TUNED
+</motion.span>
+
+</div>
+
+
         <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-paper/15">
           <p className="text-[11px] tracking-[0.15em] text-paper/50">
-            Â© {new Date().getFullYear()} {site.name}. ALL WRONGS RESERVED.
+           © {new Date().getFullYear()} {site.name}. ALL WRONGS RESERVED.
           </p>
           <div className="flex items-center gap-2">
             {['UPI', 'VISA', 'MASTERCARD', 'RUPAY', 'COD'].map((p) => (
@@ -81,8 +108,14 @@ export default function Footer() {
               className="bg-transparent border border-paper/25 px-2 py-1 text-paper/80 focus:outline-none"
               defaultValue="IN"
             >
-              <option value="IN" className="text-ink">INDIA (â‚¹ INR)</option>
-              <option value="US" className="text-ink" disabled>GLOBAL â€” SOON</option>
+
+<option value="IN" className="text-ink">
+  INDIA (&#8377; INR)
+</option>
+<option value="US" className="text-ink" disabled>
+  GLOBAL &mdash; SOON
+</option>
+
             </select>
           </div>
         </div>

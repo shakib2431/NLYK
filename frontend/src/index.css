@@ -108,3 +108,41 @@
         scrollbar-width: none;
     }
 }
+
+.app-coming-soon-glow {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(
+    110deg,
+    #0b0b0b,
+    #24102e,
+    #3b101b,
+    #0b0b0b
+  );
+  background-size: 250% 100%;
+  animation: nalayak-color-flow 5s ease-in-out infinite,
+             nalayak-border-pulse 2.5s ease-in-out infinite;
+  transition: color 0.3s ease;
+}
+
+@keyframes nalayak-color-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes nalayak-border-pulse {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 rgba(139, 92, 246, 0);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.9);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-coming-soon-glow {
+    animation: none;
+  }
+}

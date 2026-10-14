@@ -22,8 +22,10 @@ const selectedImage =
     : 0;
 
   const quickAdd = (size) => {
-    addToCart(product, size, product.colors[0]);
-    toast.success(`${product.name} — added to bag`, { description: `Size ${size}` });
+    const color = product.colors.find((c) => c.name === selectedColor) || product.colors[0];
+    if (!color) { toast.error("This product has no available colour."); return; }
+    addToCart(product, size, color, 1, product.colorImages?.[color.name] || product.images[0]);
+    toast.success(`${product.name} — added to bag`, { description: `Size ${size} · ${color.name}` });
   };
 
   return (
