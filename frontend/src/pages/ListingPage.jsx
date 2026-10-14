@@ -134,7 +134,7 @@ export default function ListingPage({ listingKey }) {
               {cfg.desc}
             </p>
           </div>
-        </Reveal>}
+        </Reveal>
 
       {/* <Reveal y={16}>
         <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">{cfg.kicker}</p>
