@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { getProductBySlug } from '@/services/catalog';
-import { createFreeMembership, createFoundingMembership, startClubSubscription } from '@/services/membership';
+import { createFreeMembership, createFoundingMembership, startClubSubscription, mapBackendMember } from '@/services/membership';
 import { sendWelcomeEmail, registerDropAlert } from '@/services/email';
 
 const StoreContext = createContext(null);
@@ -107,12 +107,28 @@ export function StoreProvider({ children }) {
     [recentlyViewed]
   );
 
+  const refreshMember = async () => {
+    const base = process.env.REACT_APP_BACKEND_URL;
+    const response = await fetch(`${base}/api/auth/me`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Could not refresh membership from the server.');
+    const result = await response.json();
+    if (!result.authenticated || !result.member) {
+      throw new Error('The server did not return an authenticated member.');
+    }
+    const mappedMember = mapBackendMember(result.member);
+    setMember(mappedMember);
+    return mappedMember;
+  };
+
   const value = {
     cart, cartCount, cartSubtotal, addToCart, updateQty, removeFromCart, clearCart,
     wishlist, wishlistProducts, toggleWishlist,
     recentSearches, addRecentSearch, recentlyViewedProducts, addRecentlyViewed,
     cartOpen, setCartOpen, searchOpen, setSearchOpen, menuOpen, setMenuOpen,
-    member, joinMember, joinFounding, activateClub, dropAlerts, toggleDropAlert,
+    member, setMember, refreshMember, joinMember, joinFounding, activateClub, dropAlerts, toggleDropAlert,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

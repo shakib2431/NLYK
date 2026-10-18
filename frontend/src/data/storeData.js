@@ -572,3 +572,132 @@ export const customDesign = {
   budgets: ['UNDER ₹3,000', '₹3,000 — ₹6,000', '₹6,000 — ₹10,000', 'WHATEVER IT TAKES'],
 };
 
+// ─────────────────────────────────────────────────────────────
+// DEMO REVIEWS DATA LAYER (MOCK / DEVELOPMENT)
+// NOTE: These are pre-launch editorial mock reviews for design
+// & development. Replace with live review API / Supabase later.
+// ─────────────────────────────────────────────────────────────
+export const demoReviews = [
+  {
+    id: 'rev-01',
+    author: 'Rohan D.',
+    initials: 'RD',
+    location: 'Kolkata, WB',
+    piece: 'NALAYAK Standard Tee',
+    variant: 'Jet Black / Size L',
+    category: 'fabric',
+    categoryLabel: 'FABRIC & WEIGHT',
+    highlight: '240 GSM THAT HOLDS ITS SHAPE',
+    quote:
+      'The 240 GSM weight is no joke. Most Indian streetwear brands claim boxy and send you a limp regular tee. This holds its silhouette even after three hard washes in Kolkata humidity.',
+    specs: [
+      { label: 'WEIGHT', value: '240 GSM' },
+      { label: 'CUT', value: 'Drop Shoulder' },
+      { label: 'DURABILITY', value: 'Zero Shrinkage' },
+    ],
+    date: 'OCT 2026',
+    batch: 'BATCH 001 · ARCHIVE',
+  },
+  {
+    id: 'rev-02',
+    author: 'Ananya M.',
+    initials: 'AM',
+    location: 'Mumbai, MH',
+    piece: 'No Approval Oversized Tee',
+    variant: 'Chalk White / Size M',
+    category: 'identity',
+    categoryLabel: 'BRAND IDENTITY',
+    highlight: 'FAMILY UNCLE APPROVED? DEFINITELY NOT',
+    quote:
+      'Wore the No Approval tee to a family Diwali function. My uncle stared at the back graphic for two straight minutes without speaking. 10/10, brand promise fulfilled.',
+    specs: [
+      { label: 'GRAPHIC', value: 'High-Density Screen' },
+      { label: 'REACTION', value: 'Pure Disapproval' },
+      { label: 'SILHOUETTE', value: 'True Oversized' },
+    ],
+    date: 'SEP 2026',
+    batch: 'DROP 02 · VERBATIM',
+  },
+  {
+    id: 'rev-03',
+    author: 'Kabir S.',
+    initials: 'KS',
+    location: 'Delhi NCR',
+    piece: 'Chaos Club Tee',
+    variant: 'Ash Grey / Size XL',
+    category: 'fit',
+    categoryLabel: 'FIT & SILHOUETTE',
+    highlight: 'TRUE DROP SHOULDER WITHOUT EXCESS BAGGAGE',
+    quote:
+      'True drop shoulder that actually drapes down the tricep rather than just looking two sizes too big. Collar ribbing is tight 1.25" and doesn’t bacon after line drying.',
+    specs: [
+      { label: 'COLLAR', value: '1.25" Heavy Rib' },
+      { label: 'DRAPE', value: 'Structured Boxy' },
+      { label: 'ROTATION', value: 'Daily Essential' },
+    ],
+    date: 'AUG 2026',
+    batch: 'DROP 01 · CORE',
+  },
+  {
+    id: 'rev-04',
+    author: 'Tanya K.',
+    initials: 'TK',
+    location: 'Bengaluru, KA',
+    piece: 'Basically Famous Tee',
+    variant: 'Jet Black / Size S',
+    category: 'print',
+    categoryLabel: 'PRINT QUALITY',
+    highlight: 'SCREENPRINT IN THE FIBERS, NOT PLASTIC',
+    quote:
+      'The screenprint feels embedded into the cotton fibers instead of a thick rubbery sticker slapped on top. Breathable even when riding in 32° heat.',
+    specs: [
+      { label: 'PRINT TYPE', value: 'Discharge Inks' },
+      { label: 'FEEL', value: 'Soft Breathable' },
+      { label: 'FABRIC', value: '100% Combed' },
+    ],
+    date: 'OCT 2026',
+    batch: 'BATCH 003 · EDITORIAL',
+  },
+  {
+    id: 'rev-05',
+    author: 'Varun P.',
+    initials: 'VP',
+    location: 'Pune, MH',
+    piece: 'Acid Wash Oversized Hoodie',
+    variant: 'Vintage Charcoal / Size L',
+    category: 'fabric',
+    categoryLabel: 'WINTER WEIGHT',
+    highlight: 'DOUBLE-LAYER HOOD THAT ACTUALLY STANDS UP',
+    quote:
+      'Heaviest hoodie in my rotation. The double-layered hood actually stays upright and doesn’t collapse flat against your collarbones. Ribbed cuffs don’t stretch out.',
+    specs: [
+      { label: 'WEIGHT', value: '420 GSM Fleece' },
+      { label: 'HOOD', value: 'Double-Layered' },
+      { label: 'CUFFS', value: 'Form-Retaining' },
+    ],
+    date: 'SEP 2026',
+    batch: 'WINTER 26 · HEAVY',
+  },
+  {
+    id: 'rev-06',
+    author: 'Meera V.',
+    initials: 'MV',
+    location: 'Hyderabad, TS',
+    piece: 'Her Chaos Crop Tee',
+    variant: 'Paper White / Size M',
+    category: 'fit',
+    categoryLabel: 'PROPORTIONS & CUT',
+    highlight: 'SHARP BOXY CROP WITHOUT BEING FLIMSY',
+    quote:
+      'Most women’s streetwear crops are either paper-thin or cut like an awkward square box. This has proper structured shoulders and sits right at the high waistband.',
+    specs: [
+      { label: 'WEIGHT', value: '220 GSM' },
+      { label: 'CROP', value: 'High Waist Cut' },
+      { label: 'HEM', value: 'Reinforced Twin' },
+    ],
+    date: 'AUG 2026',
+    batch: 'DROP 02 · WOMENS',
+  },
+];
+
+

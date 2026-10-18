@@ -60,6 +60,35 @@ export const cancelClubSubscription = (member) => ({
 
 export const renewClubSubscription = (member) => startClubSubscription(member);
 
+export const mapBackendMember = (row) => {
+  if (!row) return null;
+  const isFoundingMember = row.is_founding_member === true;
+  const isClub = row.membership_type === 'club';
+  const joinedAt = row.joined_at || row.created_at || now();
+  return {
+    id: row.id,
+    name: row.name || '',
+    email: row.email || '',
+    phone: row.phone || '',
+    membershipType: isClub ? 'club' : (row.membership_type || 'free'),
+    membershipStatus: isClub ? 'active' : 'none',
+    membershipLevel: 'NALAYAK',
+    membershipNumber: row.id || '',
+    foundingNumber: null,
+    isFoundingMember,
+    foundingStatus: isFoundingMember ? 'permanent' : 'none',
+    clubMembershipStatus: isClub ? 'active' : 'none',
+    clubStartedAt: joinedAt,
+    clubExpiresAt: null,
+    startedAt: joinedAt,
+    since: new Date(joinedAt).getFullYear(),
+    level: 'NALAYAK',
+    progress: 0,
+    qualifyingOrders: 0,
+    benefits: [],
+  };
+};
+
 export const membershipTypeOf = (member) =>
   !member ? null : member.isFoundingMember ? 'founding' : member.membershipType || 'free';
 

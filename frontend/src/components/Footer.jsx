@@ -26,9 +26,18 @@ export default function Footer() {
               Clothes for the wrong crowd. Made in India, shipped everywhere, worn unapologetically.
             </p>
             <div className="flex gap-3 mt-6">
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" data-testid="social-instagram" aria-label="Instagram" className="p-2 border border-paper/25 hover:bg-paper hover:text-ink transition-colors duration-300">
-                <Instagram size={16} strokeWidth={1.5} />
-              </a>
+             
+<a
+  href="https://www.instagram.com/nalayak.store/"
+  target="_blank"
+  rel="noopener noreferrer"
+  data-testid="social-instagram"
+  aria-label="Instagram"
+  className="p-2 border border-paper/25 hover:bg-paper hover:text-ink transition-colors duration-300"
+>
+  <Instagram size={16} strokeWidth={1.5} />
+</a>
+
               <a href="https://twitter.com" target="_blank" rel="noreferrer" data-testid="social-twitter" aria-label="Twitter" className="p-2 border border-paper/25 hover:bg-paper hover:text-ink transition-colors duration-300">
                 <Twitter size={16} strokeWidth={1.5} />
               </a>

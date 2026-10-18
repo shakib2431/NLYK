@@ -582,130 +582,129 @@ def postgrest_error_code(response) -> str | None:
     return value if isinstance(value, str) else None
 
 
-    @api_router.post("/auth/send-email-otp")
-    async def send_email_otp(payload: SendEmailOTPRequest):
-        try:
-            email = normalize_login_email(payload.email)
-        except ValueError:
-            return otp_error_response(400, "invalid_email", "Enter a valid email address.")
+@api_router.post("/auth/send-email-otp")
+async def send_email_otp(payload: SendEmailOTPRequest):
+    try:
+        email = normalize_login_email(payload.email)
+    except ValueError:
+        return otp_error_response(400, "invalid_email", "Enter a valid email address.")
 
-        sender = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
-        missing_settings = []
-        if not RESEND_API_KEY:
-            missing_settings.append("RESEND_API_KEY")
-        if not sender:
-            missing_settings.append("EMAIL_FROM_ADDRESS")
-        elif sender.lower().endswith("@resend.dev"):
-            missing_settings.append("verified EMAIL_FROM_ADDRESS")
+    sender = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
+    missing_settings = []
+    if not RESEND_API_KEY:
+        missing_settings.append("RESEND_API_KEY")
+    if not sender:
+        missing_settings.append("EMAIL_FROM_ADDRESS")
+    elif sender.lower().endswith("@resend.dev"):
+        missing_settings.append("verified EMAIL_FROM_ADDRESS")
 
-        if missing_settings:
-            logging.getLogger(__name__).error(
-                "Email OTP configuration is incomplete settings=%s",
-                ",".join(missing_settings),
-            )
-            return otp_error_response(
-                503,
-                "email_sender_not_configured",
-                "Email sign-in is temporarily unavailable. Please contact support.",
-            )
-
-        try:
-            digest = email_otp_digest(email, "configuration-check")
-            collection = db["email_login_otps"]
-            await collection.create_index("expires_at", expireAfterSeconds=0)
-            now = datetime.now(timezone.utc)
-            existing = await collection.find_one(
-                {"_id": email},
-                {"created_at": 1},
-            )
-            created_at = existing.get("created_at") if existing else None
-            if created_at:
-                if created_at.tzinfo is None:
-                    created_at = created_at.replace(tzinfo=timezone.utc)
-                if now - created_at < timedelta(seconds=30):
-                    return otp_error_response(
-                        429,
-                        "rate_limited",
-                        "Wait a few seconds before requesting another code.",
-                    )
-
-            code = f"{secrets.randbelow(1_000_000):06d}"
-            digest = email_otp_digest(email, code)
-            await collection.replace_one(
-                {"_id": email},
-                {
-                    "_id": email,
-                    "code_hash": digest,
-                    "attempts": 0,
-                    "created_at": now,
-                    "expires_at": now + timedelta(minutes=10),
-                },
-                upsert=True,
-            )
-        except Exception as error:
-            logging.getLogger(__name__).error(
-                "Email OTP storage unavailable (%s)",
-                type(error).__name__,
-            )
-            return otp_error_response(
-                503,
-                "otp_unavailable",
-                "Email sign-in is temporarily unavailable. Please try again later.",
-            )
-
-        email_html = (
-            '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
-            'padding:32px;color:#171717">'
-            '<p style="font-size:12px;letter-spacing:3px">NALAYAK SIGN-IN</p>'
-            '<p>Your one-time sign-in code is:</p>'
-            f'<p style="font-size:32px;font-weight:700;letter-spacing:8px">{code}</p>'
-            '<p>This code expires in 10 minutes. Do not share it with anyone.</p>'
-            "</div>"
+    if missing_settings:
+        logging.getLogger(__name__).error(
+            "Email OTP configuration is incomplete settings=%s",
+            ",".join(missing_settings),
+        )
+        return otp_error_response(
+            503,
+            "email_sender_not_configured",
+            "Email sign-in is temporarily unavailable. Please contact support.",
         )
 
+    try:
+        digest = email_otp_digest(email, "configuration-check")
+        collection = db["email_login_otps"]
+        await collection.create_index("expires_at", expireAfterSeconds=0)
+        now = datetime.now(timezone.utc)
+        existing = await collection.find_one(
+            {"_id": email},
+            {"created_at": 1},
+        )
+        created_at = existing.get("created_at") if existing else None
+        if created_at:
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=timezone.utc)
+            if now - created_at < timedelta(seconds=30):
+                return otp_error_response(
+                    429,
+                    "rate_limited",
+                    "Wait a few seconds before requesting another code.",
+                )
+
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        digest = email_otp_digest(email, code)
+        await collection.replace_one(
+            {"_id": email},
+            {
+                "_id": email,
+                "code_hash": digest,
+                "attempts": 0,
+                "created_at": now,
+                "expires_at": now + timedelta(minutes=10),
+            },
+            upsert=True,
+        )
+    except Exception as error:
+        logging.getLogger(__name__).error(
+            "Email OTP storage unavailable (%s)",
+            type(error).__name__,
+        )
+        return otp_error_response(
+            503,
+            "otp_unavailable",
+            "Email sign-in is temporarily unavailable. Please try again later.",
+        )
+
+    email_html = (
+        '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
+        'padding:32px;color:#171717">'
+        '<p style="font-size:12px;letter-spacing:3px">NALAYAK SIGN-IN</p>'
+        '<p>Your one-time sign-in code is:</p>'
+        f'<p style="font-size:32px;font-weight:700;letter-spacing:8px">{code}</p>'
+        '<p>This code expires in 10 minutes. Do not share it with anyone.</p>'
+        "</div>"
+    )
+
+    try:
+        await send_email(
+            to=email,
+            subject="Your NALAYAK sign-in code",
+            html=email_html,
+            safe_error_logging=True,
+        )
+    except HTTPException as error:
         try:
-            await send_email(
-                to=email,
-                subject="Your NALAYAK sign-in code",
-                html=email_html,
-                safe_error_logging=True,
-            )
-        except HTTPException as error:
-            try:
-                await collection.delete_one({"_id": email, "code_hash": digest})
-            except Exception:
-                logging.getLogger(__name__).error("Unable to remove unsent email OTP")
-            logging.getLogger(__name__).error(
-                "Email OTP delivery failed status=%s",
-                error.status_code,
-            )
-            return otp_error_response(
-                502,
-                "email_delivery_failed",
-                "We could not send your sign-in code. Please try again later.",
-            )
-        except Exception as error:
-            try:
-                await collection.delete_one({"_id": email, "code_hash": digest})
-            except Exception:
-                logging.getLogger(__name__).error("Unable to remove unsent email OTP")
-            logging.getLogger(__name__).error(
-                "Email OTP delivery failed (%s)",
-                type(error).__name__,
-            )
-            return otp_error_response(
-                502,
-                "email_delivery_failed",
-                "We could not send your sign-in code. Please try again later.",
-            )
+            await collection.delete_one({"_id": email, "code_hash": digest})
+        except Exception:
+            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+        logging.getLogger(__name__).error(
+            "Email OTP delivery failed status=%s",
+            error.status_code,
+        )
+        return otp_error_response(
+            502,
+            "email_delivery_failed",
+            "We could not send your sign-in code. Please try again later.",
+        )
+    except Exception as error:
+        try:
+            await collection.delete_one({"_id": email, "code_hash": digest})
+        except Exception:
+            logging.getLogger(__name__).error("Unable to remove unsent email OTP")
+        logging.getLogger(__name__).error(
+            "Email OTP delivery failed (%s)",
+            type(error).__name__,
+        )
+        return otp_error_response(
+            502,
+            "email_delivery_failed",
+            "We could not send your sign-in code. Please try again later.",
+        )
 
-        return {
-            "success": True,
-            "message": "If this address can receive sign-in mail, a code is on its way.",
-            "email": email,
-            "expires_in_seconds": 600,
-        }
-
+    return {
+        "success": True,
+        "message": "If this address can receive sign-in mail, a code is on its way.",
+        "email": email,
+        "expires_in_seconds": 600,
+    }
 
 
 @api_router.post("/auth/verify-email-otp")
@@ -1167,6 +1166,12 @@ def _assert_safe_email(subject: str, html: str) -> None:
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "NALAYAK").strip()
 EMAIL_FROM_ADDRESS = os.environ.get("EMAIL_FROM_ADDRESS", "").strip()
+CONTACT_NOTIFICATION_EMAIL = os.environ.get("CONTACT_NOTIFICATION_EMAIL", "khanshakib0000@gmail.com").strip()
+GOOGLE_PLACES_API_KEY = os.environ.get("GOOGLE_PLACES_API_KEY", "").strip()
+GOOGLE_PLACE_ID = os.environ.get("GOOGLE_PLACE_ID", "").strip()
+REVIEWS_CACHE_TTL_SECONDS = int(os.environ.get("REVIEWS_CACHE_TTL_SECONDS", "86400") or "86400")
+REVIEWS_DEFAULT_SOURCE = os.environ.get("REVIEWS_DEFAULT_SOURCE", "auto").strip().lower()
+
 
 
 async def send_email(
@@ -1175,6 +1180,7 @@ async def send_email(
     subject: str,
     html: str,
     safe_error_logging: bool = False,
+    reply_to: str | None = None,
 ) -> str | None:
 
     _assert_safe_email(subject, html)
@@ -1197,6 +1203,9 @@ async def send_email(
         "subject": subject,
         "html": html,
     }
+    if reply_to:
+        payload["reply_to"] = reply_to
+
 
     try:
         async with _httpx.AsyncClient(timeout=30) as client_http:
@@ -1214,12 +1223,18 @@ async def send_email(
                 try:
                     provider_error = resp.json()
                     provider_code = provider_error.get("name") or provider_error.get("statusCode")
+                    provider_message = provider_error.get("message", "")
+                    if not isinstance(provider_message, str):
+                        provider_message = ""
+                    provider_message = provider_message[:200]
                 except (ValueError, AttributeError):
                     provider_code = None
+                    provider_message = ""
                 logger.error(
-                    "Resend email send failed status=%s code=%s",
+                    "Resend email send failed status=%s code=%s message=%s",
                     resp.status_code,
                     provider_code or "unknown",
+                    provider_message,
                 )
             else:
                 logger.error(
@@ -1582,7 +1597,7 @@ class CustomRequestInput(BaseModel):
 
 
 def supabase_rest_headers():
-    secret = os.environ.get("SUPABASE_FUNCTION_SECRET", "")
+    secret = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip() or os.environ.get("SUPABASE_FUNCTION_SECRET", "").strip()
     if not secret:
         raise HTTPException(
             status_code=503,
@@ -3183,7 +3198,722 @@ async def admin_update_support_ticket(
             **update_doc,
         },
     }
+
+
+# ---------------------------------------------------------
+# Contact Dispatch Messages
+# ---------------------------------------------------------
+
+class ContactMessageInput(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    email: str = Field(..., min_length=3, max_length=254)
+    topic: str = Field(..., min_length=1, max_length=50)
+    message: str = Field(..., min_length=5, max_length=3000)
+
+    # Topic: orders
+    order_number: str = Field(default="", max_length=50)
+
+    # Topic: custom
+    custom_garment: str = Field(default="", max_length=200)
+    quantity: str = Field(default="", max_length=50)
+    budget: str = Field(default="", max_length=50)
+
+    # Topic: general
+    sub_inquiry_type: str = Field(default="", max_length=50)
+    instagram_url: str = Field(default="", max_length=200)
+
+
+def build_contact_notification_email(doc: dict) -> tuple[str, str, str | None]:
+    """
+    Construct a branded, sanitized HTML email notification for the studio desk.
+    Treats all submitted form content as untrusted text using _escape to prevent HTML injection.
+    """
+    topic = (doc.get("topic") or "general").strip().lower()
+    topic_titles = {
+        "orders": "Orders & Shipping",
+        "custom": "Custom / Bespoke",
+        "general": "General / Editorial",
+    }
+    topic_title = topic_titles.get(topic, "General / Editorial")
+    ref = doc.get("ref", "NLC-0000")
+
+    # Clear subject line, e.g.: [NALAYAK Contact] Custom / Bespoke Inquiry — NLC-1234
+    subject = f"[NALAYAK Contact] {topic_title} Inquiry — {ref}"
+    subject = re.sub(r"[\r\n]+", " ", subject).strip()
+
+    name = _escape(str(doc.get("name", "")).strip())
+    email = _escape(str(doc.get("email", "")).strip())
+    message = _escape(str(doc.get("message", "")).strip())
+
+    # Build topic-specific rows
+    rows = []
+    if topic == "orders" and doc.get("order_number"):
+        rows.append(
+            f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Order Number</td>'
+            f'<td style="padding:10px 0;font-size:13px;font-weight:700;color:#111111;">{_escape(str(doc["order_number"]))}</td></tr>'
+        )
+    elif topic == "custom":
+        if doc.get("custom_garment"):
+            rows.append(
+                f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Garment Idea</td>'
+                f'<td style="padding:10px 0;font-size:13px;font-weight:700;color:#111111;">{_escape(str(doc["custom_garment"]))}</td></tr>'
+            )
+        if doc.get("quantity"):
+            rows.append(
+                f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Quantity</td>'
+                f'<td style="padding:10px 0;font-size:13px;color:#111111;">{_escape(str(doc["quantity"]))}</td></tr>'
+            )
+        if doc.get("budget"):
+            rows.append(
+                f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Budget Range</td>'
+                f'<td style="padding:10px 0;font-size:13px;color:#111111;">{_escape(str(doc["budget"]))}</td></tr>'
+            )
+    elif topic == "general":
+        if doc.get("sub_inquiry_type"):
+            rows.append(
+                f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Inquiry Type</td>'
+                f'<td style="padding:10px 0;font-size:13px;font-weight:700;color:#111111;">{_escape(str(doc["sub_inquiry_type"]))}</td></tr>'
+            )
+        if doc.get("instagram_url"):
+            rows.append(
+                f'<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Social / Portfolio</td>'
+                f'<td style="padding:10px 0;font-size:13px;color:#111111;">{_escape(str(doc["instagram_url"]))}</td></tr>'
+            )
+
+    extra_rows_html = "".join(rows)
+
+    html = (
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F7F5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;padding:32px 16px;">'
+        '<tr><td align="center">'
+        '<table role="presentation" width="100%" style="max-width:620px;background:#FFFFFF;border:1px solid #111111;">'
+        '<tr><td style="padding:28px 24px;background:#0A0A0A;">'
+        '<p style="color:#F7F7F5;font-size:24px;font-weight:900;letter-spacing:-0.5px;margin:0;text-transform:uppercase;">NALAYAK</p>'
+        '<p style="color:#8C8C8C;font-size:10px;letter-spacing:3px;margin:6px 0 0;text-transform:uppercase;">DIRECT DESK DISPATCH // INCOMING INQUIRY</p>'
+        '</td></tr>'
+        '<tr><td style="padding:32px 24px;">'
+        f'<p style="font-size:11px;letter-spacing:3px;color:#8C8C8C;margin:0 0 10px;text-transform:uppercase;">REFERENCE: {ref}</p>'
+        f'<h1 style="font-size:24px;font-weight:900;letter-spacing:-0.5px;color:#0A0A0A;margin:0 0 24px;text-transform:uppercase;">{topic_title} INQUIRY</h1>'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5;margin-bottom:24px;">'
+        '<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">From</td>'
+        f'<td style="padding:10px 0;font-size:13px;font-weight:700;color:#111111;">{name}</td></tr>'
+        '<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Sender Email</td>'
+        f'<td style="padding:10px 0;font-size:13px;color:#111111;"><a href="mailto:{email}" style="color:#0A0A0A;text-decoration:underline;">{email}</a></td></tr>'
+        '<tr><td style="padding:10px 0;font-size:13px;color:#8C8C8C;width:160px;vertical-align:top;">Topic</td>'
+        f'<td style="padding:10px 0;font-size:13px;font-weight:700;color:#111111;text-transform:uppercase;">{topic_title}</td></tr>'
+        f'{extra_rows_html}'
+        '</table>'
+        '<p style="font-size:11px;letter-spacing:2px;color:#8C8C8C;margin:0 0 8px;text-transform:uppercase;">MESSAGE CONTENT</p>'
+        f'<div style="background:#F9F9F8;border:1px solid #E5E5E5;padding:16px 20px;font-size:14px;color:#111111;line-height:1.6;white-space:pre-wrap;word-break:break-word;">{message}</div>'
+        '<p style="font-size:11px;color:#8C8C8C;margin:28px 0 0;line-height:1.6;">'
+        f'Logged at the NALAYAK studio desk in Kolkata. Reply directly to this email to respond to {email}.'
+        '</p>'
+        '</td></tr></table>'
+        '</td></tr></table>'
+    )
+
+    raw_email = str(doc.get("email", "")).strip()
+    reply_to = raw_email if re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", raw_email.lower()) else None
+    return subject, html, reply_to
+
+
+async def dispatch_contact_email_notification(doc_id, doc: dict) -> bool:
+    """
+    Dispatch email notification for a saved contact message to the studio desk.
+    Updates the MongoDB document with delivery results.
+    Never raises an exception, ensuring customer submission remains successful.
+    """
+    recipient = CONTACT_NOTIFICATION_EMAIL or "khanshakib0000@gmail.com"
+    if not recipient:
+        logger.warning("No notification recipient configured for contact %s", doc.get("ref"))
+        return False
+
+    # Avoid duplicate notification if already sent
+    if doc.get("notification_status") == "sent":
+        logger.info("Notification for %s already sent; skipping duplicate", doc.get("ref"))
+        return True
+
+    try:
+        subject, html, reply_to = build_contact_notification_email(doc)
+        email_id = await send_email(
+            to=recipient,
+            subject=subject,
+            html=html,
+            reply_to=reply_to,
+            safe_error_logging=True,
+        )
+
+        now_str = datetime.now(timezone.utc).isoformat()
+        await db.contact_messages.update_one(
+            {"_id": doc_id},
+            {
+                "$set": {
+                    "notification_status": "sent",
+                    "notification_recipient": recipient,
+                    "notification_email_id": email_id,
+                    "notification_sent_at": now_str,
+                    "notification_error": None,
+                    "updated_at": now_str,
+                }
+            },
+        )
+        logger.info(
+            "Contact dispatch email sent to %s for ref %s (id: %s)",
+            recipient,
+            doc.get("ref"),
+            email_id,
+        )
+        return True
+
+    except Exception as exc:
+        err_text = f"{type(exc).__name__}: {str(exc)}"[:300]
+        logger.error("Failed to send contact notification for %s: %s", doc.get("ref"), err_text)
+        try:
+            now_str = datetime.now(timezone.utc).isoformat()
+            await db.contact_messages.update_one(
+                {"_id": doc_id},
+                {
+                    "$set": {
+                        "notification_status": "failed",
+                        "notification_recipient": recipient,
+                        "notification_error": err_text,
+                        "notification_failed_at": now_str,
+                        "updated_at": now_str,
+                    }
+                },
+            )
+        except Exception as db_exc:
+            logger.error("Failed to update notification status in DB: %s", db_exc)
+        return False
+
+
+@api_router.post("/contact")
+async def create_contact_message(input: ContactMessageInput):
+    email = input.email.strip().lower()
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_email",
+        )
+
+    name = input.name.strip()
+    if not name:
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_name",
+        )
+
+    message = input.message.strip()
+    if len(message) < 5:
+        raise HTTPException(
+            status_code=400,
+            detail="message_too_short",
+        )
+    if len(message) > 3000:
+        raise HTTPException(
+            status_code=400,
+            detail="message_too_long",
+        )
+
+    topic = input.topic.strip().lower()
+    if topic not in ("orders", "custom", "general"):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid_topic",
+        )
+
+    # Topic-specific validation
+    order_number = input.order_number.strip().upper()[:50]
+    custom_garment = input.custom_garment.strip()[:200]
+    quantity = input.quantity.strip()[:50]
+    budget = input.budget.strip()[:50]
+    sub_inquiry_type = input.sub_inquiry_type.strip()[:50]
+    instagram_url = input.instagram_url.strip()[:200]
+
+    if topic == "custom":
+        if not custom_garment:
+            raise HTTPException(
+                status_code=400,
+                detail="custom_garment_required",
+            )
+        if len(custom_garment) < 2:
+            raise HTTPException(
+                status_code=400,
+                detail="custom_garment_too_short",
+            )
+
+    if topic == "general" and instagram_url:
+        if not re.match(
+            r"^(https?://[^\s]+|(?:www\.)?instagram\.com/[a-zA-Z0-9._]+/?|@[a-zA-Z0-9._]+|[a-zA-Z0-9._]+)$",
+            instagram_url,
+            re.IGNORECASE,
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="invalid_social_url",
+            )
+
+    # Anti-spam rate limiting: max 5 messages per 10 minutes per email
+    ten_mins_ago = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+    recent_submissions = await db.contact_messages.count_documents({
+        "email": email,
+        "created_at": {"$gte": ten_mins_ago}
+    })
+    if recent_submissions >= 5:
+        raise HTTPException(
+            status_code=429,
+            detail="too_many_requests",
+        )
+
+    # Generate unique reference identifier
+    import random
+    ref = f"NLC-{random.randint(1000, 9999)}"
+    for _ in range(10):
+        existing = await db.contact_messages.find_one({"ref": ref}, {"_id": 1})
+        if not existing:
+            break
+        ref = f"NLC-{random.randint(1000, 9999)}"
+
+    now = datetime.now(timezone.utc).isoformat()
+    recipient_email = CONTACT_NOTIFICATION_EMAIL or "khanshakib0000@gmail.com"
+    doc = {
+        "ref": ref,
+        "name": name,
+        "email": email,
+        "topic": topic,
+        "message": message,
+        "status": "unread",
+        "notification_status": "pending",
+        "notification_recipient": recipient_email,
+        "notification_email_id": None,
+        "notification_error": None,
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    if topic == "orders":
+        doc["order_number"] = order_number or None
+    elif topic == "custom":
+        doc["custom_garment"] = custom_garment
+        doc["quantity"] = quantity or None
+        doc["budget"] = budget or None
+    elif topic == "general":
+        doc["sub_inquiry_type"] = sub_inquiry_type or None
+        doc["instagram_url"] = instagram_url or None
+
+    try:
+        insert_result = await db.contact_messages.insert_one(doc)
+    except Exception as exc:
+        logging.getLogger(__name__).error(f"Failed to insert contact message: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail="database_error",
+        )
+
+    if not insert_result.inserted_id:
+        raise HTTPException(
+            status_code=500,
+            detail="failed_to_save_message",
+        )
+
+    # Dispatch email notification to studio desk
+    # If notification fails, the customer submission is NOT failed and ref is preserved
+    await dispatch_contact_email_notification(insert_result.inserted_id, doc)
+
+    return {
+        "success": True,
+        "ref": ref,
+        "topic": topic,
+        "message": "Message received by the studio.",
+        "created_at": now,
+    }
+
+
+@api_router.post("/contact/retry-notifications")
+async def retry_contact_notifications(admin_key: str = Header(None, alias="X-Admin-Key")):
+    """
+    Retry any pending or failed contact email notifications.
+    Deduplicates automatically so sent notifications are never duplicated.
+    """
+    expected_key = os.environ.get("ADMIN_KEY", "nalayak-admin-2026")
+    if not admin_key or admin_key != expected_key:
+        raise HTTPException(status_code=401, detail="unauthorized")
+
+    cursor = db.contact_messages.find({"notification_status": {"$in": ["pending", "failed"]}})
+    retried = 0
+    succeeded = 0
+    async for item in cursor:
+        retried += 1
+        ok = await dispatch_contact_email_notification(item["_id"], item)
+        if ok:
+            succeeded += 1
+
+    return {"retried": retried, "succeeded": succeeded}
+
+
+# =========================================================
+# CUSTOMER REVIEWS (GOOGLE PLACES API & COMMUNITY ARCHIVE)
+# =========================================================
+
+import time as _time
+
+_reviews_cache = {
+    "data": None,
+    "timestamp": 0.0,
+}
+
+COMMUNITY_REVIEWS_ARCHIVE = [
+    {
+        "id": "rev-01",
+        "source": "community",
+        "author": "Rohan D.",
+        "initials": "RD",
+        "avatar_url": None,
+        "location": "Kolkata, WB",
+        "piece": "NALAYAK Standard Tee",
+        "variant": "Jet Black / Size L",
+        "category": "fabric",
+        "category_label": "FABRIC & WEIGHT",
+        "highlight": "240 GSM THAT HOLDS ITS SHAPE",
+        "quote": "The 240 GSM weight is no joke. Most Indian streetwear brands claim boxy and send you a limp regular tee. This holds its silhouette even after three hard washes in Kolkata humidity.",
+        "specs": [
+            {"label": "WEIGHT", "value": "240 GSM"},
+            {"label": "CUT", "value": "Drop Shoulder"},
+            {"label": "DURABILITY", "value": "Zero Shrinkage"},
+        ],
+        "date": "OCT 2026",
+        "batch": "BATCH 001 · ARCHIVE",
+        "rating": None,
+        "attribution_url": None,
+    },
+    {
+        "id": "rev-02",
+        "source": "community",
+        "author": "Ananya M.",
+        "initials": "AM",
+        "avatar_url": None,
+        "location": "Mumbai, MH",
+        "piece": "No Approval Oversized Tee",
+        "variant": "Chalk White / Size M",
+        "category": "identity",
+        "category_label": "BRAND IDENTITY",
+        "highlight": "FAMILY UNCLE APPROVED? DEFINITELY NOT",
+        "quote": "Wore the No Approval tee to a family Diwali function. My uncle stared at the back graphic for two straight minutes without speaking. 10/10, brand promise fulfilled.",
+        "specs": [
+            {"label": "GRAPHIC", "value": "High-Density Screen"},
+            {"label": "REACTION", "value": "Pure Disapproval"},
+            {"label": "SILHOUETTE", "value": "True Oversized"},
+        ],
+        "date": "SEP 2026",
+        "batch": "DROP 02 · VERBATIM",
+        "rating": None,
+        "attribution_url": None,
+    },
+    {
+        "id": "rev-03",
+        "source": "community",
+        "author": "Kabir S.",
+        "initials": "KS",
+        "avatar_url": None,
+        "location": "Delhi NCR",
+        "piece": "Chaos Club Tee",
+        "variant": "Ash Grey / Size XL",
+        "category": "fit",
+        "category_label": "FIT & SILHOUETTE",
+        "highlight": "TRUE DROP SHOULDER WITHOUT EXCESS BAGGAGE",
+        "quote": 'True drop shoulder that actually drapes down the tricep rather than just looking two sizes too big. Collar ribbing is tight 1.25" and doesn’t bacon after line drying.',
+        "specs": [
+            {"label": "COLLAR", "value": '1.25" Heavy Rib'},
+            {"label": "DRAPE", "value": "Structured Boxy"},
+            {"label": "ROTATION", "value": "Daily Essential"},
+        ],
+        "date": "AUG 2026",
+        "batch": "DROP 01 · CORE",
+        "rating": None,
+        "attribution_url": None,
+    },
+    {
+        "id": "rev-04",
+        "source": "community",
+        "author": "Tanya K.",
+        "initials": "TK",
+        "avatar_url": None,
+        "location": "Bengaluru, KA",
+        "piece": "Basically Famous Tee",
+        "variant": "Jet Black / Size S",
+        "category": "print",
+        "category_label": "PRINT QUALITY",
+        "highlight": "SCREENPRINT IN THE FIBERS, NOT PLASTIC",
+        "quote": "The screenprint feels embedded into the cotton fibers instead of a thick rubbery sticker slapped on top. Breathable even when riding in 32° heat.",
+        "specs": [
+            {"label": "PRINT TYPE", "value": "Discharge Inks"},
+            {"label": "FEEL", "value": "Soft Breathable"},
+            {"label": "FABRIC", "value": "100% Combed"},
+        ],
+        "date": "OCT 2026",
+        "batch": "BATCH 003 · EDITORIAL",
+        "rating": None,
+        "attribution_url": None,
+    },
+    {
+        "id": "rev-05",
+        "source": "community",
+        "author": "Varun P.",
+        "initials": "VP",
+        "avatar_url": None,
+        "location": "Pune, MH",
+        "piece": "Acid Wash Oversized Hoodie",
+        "variant": "Vintage Charcoal / Size L",
+        "category": "fabric",
+        "category_label": "WINTER WEIGHT",
+        "highlight": "DOUBLE-LAYER HOOD THAT ACTUALLY STANDS UP",
+        "quote": "Heaviest hoodie in my rotation. The double-layered hood actually stays upright and doesn’t collapse flat against your neck. Ribbed cuffs don’t stretch out.",
+        "specs": [
+            {"label": "WEIGHT", "value": "420 GSM Fleece"},
+            {"label": "HOOD", "value": "Double-Layered"},
+            {"label": "CUFFS", "value": "Form-Retaining"},
+        ],
+        "date": "SEP 2026",
+        "batch": "WINTER 26 · HEAVY",
+        "rating": None,
+        "attribution_url": None,
+    },
+    {
+        "id": "rev-06",
+        "source": "community",
+        "author": "Meera V.",
+        "initials": "MV",
+        "avatar_url": None,
+        "location": "Hyderabad, TS",
+        "piece": "Her Chaos Crop Tee",
+        "variant": "Paper White / Size M",
+        "category": "fit",
+        "category_label": "PROPORTIONS & CUT",
+        "highlight": "SHARP BOXY CROP WITHOUT BEING FLIMSY",
+        "quote": "Most women’s streetwear crops are either paper-thin or cut like an awkward square box. This has proper structured shoulders and sits right at the high waistband.",
+        "specs": [
+            {"label": "WEIGHT", "value": "220 GSM"},
+            {"label": "CROP", "value": "High Waist Cut"},
+            {"label": "HEM", "value": "Reinforced Twin"},
+        ],
+        "date": "AUG 2026",
+        "batch": "DROP 02 · WOMENS",
+        "rating": None,
+        "attribution_url": None,
+    },
+]
+
+
+async def fetch_google_places_reviews(place_id: str, api_key: str) -> dict | None:
+    """
+    Fetch Place Details using the official Google Places API (New).
+    Endpoint: https://places.googleapis.com/v1/places/{placeId}
+    FieldMask: id,displayName,rating,userRatingCount,reviews,googleMapsUri
+    Guarantees API keys are never exposed in logs or exceptions.
+    """
+    if not place_id or not api_key:
+        return None
+
+    url = f"https://places.googleapis.com/v1/places/{place_id}"
+    headers = {
+        "X-Goog-Api-Key": api_key,
+        "X-Goog-FieldMask": "id,displayName,rating,userRatingCount,reviews,googleMapsUri",
+        "Accept": "application/json",
+    }
+
+    try:
+        async with _httpx.AsyncClient(timeout=10.0) as client_http:
+            resp = await client_http.get(url, headers=headers)
+
+        if resp.status_code != 200:
+            logger.warning(
+                "Google Places API request failed status=%s for place_id=%s",
+                resp.status_code,
+                place_id,
+            )
+            return None
+
+        return resp.json()
+
+    except Exception as exc:
+        logger.error("Google Places API connection error: %s", type(exc).__name__)
+        return None
+
+
+def normalize_google_places_response(data: dict) -> list[dict]:
+    """
+    Safely transform raw Google Places API (New) review objects into
+    the normalized NALAYAK review schema.
+    """
+    raw_reviews = data.get("reviews") or []
+    normalized = []
+
+    for idx, r in enumerate(raw_reviews):
+        author_attr = r.get("authorAttribution") or {}
+        author_name = (author_attr.get("displayName") or "Google Verified Reviewer").strip()
+        photo_uri = author_attr.get("photoUri") or None
+
+        name_parts = author_name.split()
+        if len(name_parts) >= 2:
+            initials = f"{name_parts[0][0]}{name_parts[-1][0]}".upper()
+        elif name_parts:
+            initials = name_parts[0][:2].upper()
+        else:
+            initials = "GV"
+
+        try:
+            rating = int(r.get("rating", 5))
+        except (ValueError, TypeError):
+            rating = 5
+
+        text_obj = r.get("text") or r.get("originalText") or {}
+        if isinstance(text_obj, dict):
+            quote_text = text_obj.get("text", "").strip()
+        elif isinstance(text_obj, str):
+            quote_text = text_obj.strip()
+        else:
+            quote_text = ""
+
+        if not quote_text:
+            continue
+
+        first_line = quote_text.split("\n")[0]
+        first_sentence = first_line.split(". ")[0].strip()
+        if len(first_sentence) > 65:
+            highlight = first_sentence[:62].rstrip() + "…"
+        else:
+            highlight = first_sentence
+
+        date_str = r.get("relativePublishTimeDescription") or "Recently"
+        publish_time = r.get("publishTime")
+        attribution_url = r.get("googleMapsUri") or data.get("googleMapsUri")
+
+        normalized.append({
+            "id": r.get("name") or f"google-{idx + 1}",
+            "source": "google",
+            "author": author_name,
+            "initials": initials,
+            "avatar_url": photo_uri,
+            "rating": rating,
+            "highlight": highlight.upper(),
+            "quote": quote_text,
+            "date": date_str.upper(),
+            "publish_time": publish_time,
+            "attribution_url": attribution_url,
+            "category": "google",
+            "category_label": "GOOGLE VERIFIED",
+            "specs": [
+                {"label": "SOURCE", "value": "Google Reviews"},
+                {"label": "RATING", "value": f"{rating}.0 / 5.0"},
+                {"label": "VERIFICATION", "value": "Google Maps"},
+            ],
+        })
+
+    return normalized
+
+
+@api_router.get("/reviews")
+async def get_reviews(
+    source: str = Query("auto", description="Provider mode: auto, google, or community"),
+    refresh: bool = Query(False, description="Bypass cache"),
+):
+    """
+    Returns customer reviews for NALAYAK STUDIOS.
+    Abstraction layer supporting:
+      1. Live Google Places API (New) verified reviews (when configured).
+      2. NALAYAK Community / Pre-Launch Dispatch Archive (fallback or explicit mode).
+    Cached with configurable TTL to respect Google API quota and terms.
+    Never exposes API keys or real customer contact details.
+    """
+    global _reviews_cache
+    now = _time.time()
+    effective_source = source.strip().lower() if source else "auto"
+    if effective_source not in ("auto", "google", "community"):
+        effective_source = "auto"
+
+    ttl = max(60, REVIEWS_CACHE_TTL_SECONDS)
+
+    if (
+        not refresh
+        and effective_source in ("auto", "google")
+        and _reviews_cache["data"] is not None
+        and (now - _reviews_cache["timestamp"]) < ttl
+    ):
+        cached_payload = dict(_reviews_cache["data"])
+        cached_payload["cached"] = True
+        return cached_payload
+
+    if effective_source == "community":
+        return {
+            "source_mode": "community",
+            "is_live_google": False,
+            "google_configured": bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID),
+            "attribution": "NALAYAK Community Dispatch Archive",
+            "disclaimer": "DEMO REVIEWS · PRE-LAUNCH FEEDBACK ARCHIVE",
+            "rating": None,
+            "user_ratings_total": None,
+            "reviews": COMMUNITY_REVIEWS_ARCHIVE,
+            "cached": False,
+        }
+
+    is_configured = bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID)
+    if is_configured:
+        places_data = await fetch_google_places_reviews(GOOGLE_PLACE_ID, GOOGLE_PLACES_API_KEY)
+        if places_data:
+            normalized_reviews = normalize_google_places_response(places_data)
+            if normalized_reviews:
+                place_name = (places_data.get("displayName") or {}).get("text") or "NALAYAK STUDIOS"
+                google_rating = places_data.get("rating")
+                total_ratings = places_data.get("userRatingCount")
+                google_maps_url = places_data.get("googleMapsUri") or f"https://www.google.com/maps/place/?q=place_id:{GOOGLE_PLACE_ID}"
+
+                payload = {
+                    "source_mode": "google",
+                    "is_live_google": True,
+                    "google_configured": True,
+                    "place_id": GOOGLE_PLACE_ID,
+                    "place_name": place_name,
+                    "google_maps_url": google_maps_url,
+                    "rating": float(google_rating) if google_rating is not None else None,
+                    "user_ratings_total": int(total_ratings) if total_ratings is not None else None,
+                    "attribution": "Powered by Google",
+                    "disclaimer": "GOOGLE VERIFIED CUSTOMER REVIEWS",
+                    "reviews": normalized_reviews,
+                    "cached": False,
+                }
+                _reviews_cache["data"] = payload
+                _reviews_cache["timestamp"] = now
+                return payload
+
+    return {
+        "source_mode": "community",
+        "is_live_google": False,
+        "google_configured": is_configured,
+        "attribution": "NALAYAK Community Dispatch Archive",
+        "disclaimer": "DEMO REVIEWS · PRE-LAUNCH FEEDBACK ARCHIVE",
+        "rating": None,
+        "user_ratings_total": None,
+        "reviews": COMMUNITY_REVIEWS_ARCHIVE,
+        "cached": False,
+    }
+
+
+@api_router.post("/reviews/purge-cache")
+async def purge_reviews_cache(admin_key: str = Header(None, alias="X-Admin-Key")):
+    """
+    Purge cached Google reviews for immediate refresh.
+    Protected by ADMIN_KEY.
+    """
+    expected_key = os.environ.get("ADMIN_KEY", "nalayak-admin-2026")
+    if not admin_key or admin_key != expected_key:
+        raise HTTPException(status_code=401, detail="unauthorized")
+    global _reviews_cache
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+    return {"purged": True}
+
+
 @api_router.post("/irl/upload")
+
 async def irl_upload(
     file: UploadFile = File(...),
     order_id: str = "",
@@ -3751,45 +4481,117 @@ async def admin_irl_file(
 
 # â”€â”€ Razorpay membership checkout â”€â”€
 # One-time membership purchase. Recurring Club subscriptions come later via
-# Razorpay Subscriptions API; activation is only marked after server-side
-# signature verification â€” never from frontend state alone.
+
+# NALAYAK CLUB — one-time lifetime membership.
+# No renewals or expiry. Founding 500 remains disabled until its
+# atomic database cap is configured.
+
 CLUB_PLANS = {
-    "founding": {"amount": 99900, "description": "NALAYAK CLUB â€” Founding 500"},
-    "club-yearly": {"amount": 99900, "description": "NALAYAK CLUB â€” Yearly"},
+    "club-yearly": {
+        "amount": 99900,
+        "description": "NALAYAK CLUB — Lifetime Membership",
+    },
+    # Deliberately disabled until a database-level atomic 500-member
+    # limit is implemented and verified.
 }
+
 
 def razorpay_client():
     key_id = os.environ.get("RAZORPAY_KEY_ID")
     key_secret = os.environ.get("RAZORPAY_KEY_SECRET")
     if not key_id or not key_secret:
         return None, key_id
+
     import razorpay
     return razorpay.Client(auth=(key_id, key_secret)), key_id
+
+
+async def _club_get_member(member_id: str):
+    headers = supabase_rest_headers()
+    base_url = supabase_rest_url()
+
+    async with _httpx.AsyncClient(timeout=30) as client_http:
+        response = await client_http.get(
+            f"{base_url}/members",
+            params={
+                "select": "id,membership_type,is_founding_member,joined_at,club_payment_order_id",
+                "id": f"eq.{member_id}",
+                "limit": "1",
+            },
+            headers=headers,
+        )
+
+    if response.status_code >= 400:
+        logger.error(
+            "Club member lookup failed: %s %s",
+            response.status_code,
+            response.text,
+        )
+        raise HTTPException(status_code=502, detail="member_lookup_failed")
+
+    members = response.json() or []
+    if not members:
+        raise HTTPException(status_code=401, detail="member_not_found")
+
+    return members[0]
+
 
 class CreateOrderInput(BaseModel):
     plan: str
 
+
 @api_router.post("/razorpay/create-order")
-async def create_razorpay_order(input: CreateOrderInput):
+async def create_razorpay_order(
+    input: CreateOrderInput,
+    nalayak_session: str = Cookie(None),
+):
+    member_id = str(await get_authenticated_member_id(nalayak_session))
+
+    # Only the normal lifetime Club plan is enabled for now.
     plan = CLUB_PLANS.get(input.plan)
     if not plan:
-        raise HTTPException(status_code=400, detail="unknown_plan")
+        raise HTTPException(status_code=409, detail="plan_unavailable")
+
+    member = await _club_get_member(member_id)
+    if member.get("membership_type") not in (None, "", "free"):
+        raise HTTPException(status_code=409, detail="membership_already_active")
+
     rzp, key_id = razorpay_client()
     if not rzp:
         raise HTTPException(status_code=503, detail="razorpay_not_configured")
-    order = rzp.order.create({
-        "amount": plan["amount"],
-        "currency": "INR",
-        "payment_capture": 1,
-        "notes": {"plan": input.plan},
-    })
-    await db.membership_orders.insert_one({
-        "order_id": order["id"],
-        "plan": input.plan,
-        "amount": plan["amount"],
-        "status": "created",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+
+    try:
+        order = await _asyncio.to_thread(
+            rzp.order.create,
+            {
+                "amount": plan["amount"],
+                "currency": "INR",
+                "payment_capture": 1,
+                "notes": {
+                    "plan": input.plan,
+                    "member_id": member_id,
+                },
+            },
+        )
+    except Exception:
+        logger.exception("Razorpay order creation failed")
+        raise HTTPException(status_code=502, detail="order_creation_failed")
+
+    try:
+        await db.membership_orders.insert_one({
+            "order_id": order["id"],
+            "member_id": member_id,
+            "plan": input.plan,
+            "amount": plan["amount"],
+            "currency": "INR",
+            "status": "created",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception:
+        logger.exception("Could not persist Club payment order")
+        # Do not expose an order that the backend cannot verify later.
+        raise HTTPException(status_code=502, detail="order_record_creation_failed")
+
     return {
         "id": order["id"],
         "amount": order["amount"],
@@ -3798,33 +4600,277 @@ async def create_razorpay_order(input: CreateOrderInput):
         "description": plan["description"],
     }
 
+
 class VerifyPaymentInput(BaseModel):
     razorpay_order_id: str
     razorpay_payment_id: str
     razorpay_signature: str
     plan: str
 
+
 @api_router.post("/razorpay/verify")
-async def verify_razorpay_payment(input: VerifyPaymentInput):
+async def verify_razorpay_payment(
+    input: VerifyPaymentInput,
+    nalayak_session: str = Cookie(None),
+):
+    member_id = str(await get_authenticated_member_id(nalayak_session))
+
+    plan = CLUB_PLANS.get(input.plan)
+    if not plan:
+        raise HTTPException(status_code=409, detail="plan_unavailable")
+
+    order_record = await db.membership_orders.find_one({
+        "order_id": input.razorpay_order_id,
+        "member_id": member_id,
+        "plan": input.plan,
+    })
+
+    if not order_record:
+        raise HTTPException(status_code=404, detail="order_not_found")
+
+    if (
+        order_record.get("amount") != plan["amount"]
+        or order_record.get("currency") != "INR"
+    ):
+        raise HTTPException(status_code=400, detail="order_amount_mismatch")
+
+    if order_record.get("status") == "paid":
+        if order_record.get("payment_id") == input.razorpay_payment_id:
+            return {"verified": True, "plan": input.plan}
+        raise HTTPException(status_code=409, detail="order_already_paid")
+
+    if order_record.get("status") not in (
+        "created", "activation_failed", "processing"
+    ):
+        raise HTTPException(status_code=409, detail="order_not_payable")
+
     rzp, _ = razorpay_client()
     if not rzp:
         raise HTTPException(status_code=503, detail="razorpay_not_configured")
+
+    # Verify Razorpay's signature and independently retrieve the payment.
     try:
-        rzp.utility.verify_payment_signature({
-            "razorpay_order_id": input.razorpay_order_id,
-            "razorpay_payment_id": input.razorpay_payment_id,
-            "razorpay_signature": input.razorpay_signature,
-        })
-    except Exception:
-        await db.membership_orders.update_one(
-            {"order_id": input.razorpay_order_id}, {"$set": {"status": "failed"}}
+        await _asyncio.to_thread(
+            rzp.utility.verify_payment_signature,
+            {
+                "razorpay_order_id": input.razorpay_order_id,
+                "razorpay_payment_id": input.razorpay_payment_id,
+                "razorpay_signature": input.razorpay_signature,
+            },
         )
-        raise HTTPException(status_code=400, detail="invalid_signature")
-    await db.membership_orders.update_one(
-        {"order_id": input.razorpay_order_id},
-        {"$set": {"status": "paid", "payment_id": input.razorpay_payment_id}},
+
+        payment = await _asyncio.to_thread(
+            rzp.payment.fetch,
+            input.razorpay_payment_id,
+        )
+
+        if payment.get("order_id") != input.razorpay_order_id:
+            raise ValueError("Payment order mismatch")
+        if payment.get("amount") != plan["amount"]:
+            raise ValueError("Payment amount mismatch")
+        if payment.get("currency") != "INR":
+            raise ValueError("Payment currency mismatch")
+        if payment.get("status") != "captured":
+            raise ValueError("Payment is not captured")
+
+    except Exception:
+        logger.exception("Razorpay payment verification failed")
+        raise HTTPException(
+            status_code=400,
+            detail="payment_verification_failed",
+        )
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Claim the order so concurrent requests cannot activate it twice.
+    # A processing order is not claimed again automatically: a crashed
+    # request must be reconciled safely rather than raced by another one.
+    claim = await db.membership_orders.update_one(
+        {
+            "order_id": input.razorpay_order_id,
+            "member_id": member_id,
+            "status": {"$in": ["created", "activation_failed"]},
+        },
+        {
+            "$set": {
+                "status": "processing",
+                "payment_id": input.razorpay_payment_id,
+                "verified_at": now,
+            }
+        },
     )
+
+    if claim.modified_count != 1:
+        latest_order = await db.membership_orders.find_one({
+            "order_id": input.razorpay_order_id,
+            "member_id": member_id,
+        })
+
+        if (
+            latest_order
+            and latest_order.get("status") == "paid"
+            and latest_order.get("payment_id") == input.razorpay_payment_id
+        ):
+            return {"verified": True, "plan": input.plan}
+
+        raise HTTPException(
+            status_code=409,
+            detail="order_processing_or_reconciliation_required",
+        )
+
+    try:
+        member = await _club_get_member(member_id)
+        current_type = member.get("membership_type")
+
+        # Recover only when Supabase links membership to this exact order.
+        if current_type == "club":
+            if (
+                member.get("club_payment_order_id") == input.razorpay_order_id
+                and not member.get("is_founding_member")
+            ):
+                final_update = await db.membership_orders.update_one(
+                    {
+                        "order_id": input.razorpay_order_id,
+                        "member_id": member_id,
+                        "status": "processing",
+                        "payment_id": input.razorpay_payment_id,
+                    },
+                    {
+                        "$set": {
+                            "status": "paid",
+                            "activated_at": datetime.now(timezone.utc).isoformat(),
+                        }
+                    },
+                )
+                latest_order = await db.membership_orders.find_one({
+                    "order_id": input.razorpay_order_id,
+                    "member_id": member_id,
+                })
+                if (
+                    final_update.modified_count == 1
+                    or (
+                        latest_order
+                        and latest_order.get("status") == "paid"
+                        and latest_order.get("payment_id") == input.razorpay_payment_id
+                    )
+                ):
+                    return {"verified": True, "plan": input.plan}
+                raise RuntimeError("payment_record_reconciliation_failed")
+
+            raise HTTPException(
+                status_code=409,
+                detail="membership_already_active_order_not_linked",
+            )
+
+        if current_type not in (None, "", "free"):
+            raise HTTPException(
+                status_code=409,
+                detail="membership_already_active",
+            )
+
+        membership_update = {
+            "membership_type": "club",
+            "is_founding_member": False,
+            "updated_at": now,
+        }
+        if not member.get("joined_at"):
+            membership_update["joined_at"] = now
+
+        headers = {
+            **supabase_rest_headers(),
+            "Prefer": "return=representation",
+        }
+
+        # Activate atomically and bind membership to this exact order.
+        async with _httpx.AsyncClient(timeout=30) as client_http:
+            activation_response = await client_http.post(
+                f"{supabase_rest_url()}/rpc/activate_lifetime_club_membership",
+                headers=supabase_rest_headers(),
+                json={
+                    "p_member_id": member_id,
+                    "p_order_id": input.razorpay_order_id,
+                },
+            )
+
+        if activation_response.status_code >= 400:
+            logger.error(
+                "Club activation RPC failed: %s",
+                activation_response.status_code,
+            )
+            raise RuntimeError("membership_activation_failed")
+
+        try:
+            activation_result = activation_response.json()
+        except Exception as exc:
+            raise RuntimeError("invalid_activation_rpc_response") from exc
+
+        if not isinstance(activation_result, dict) or activation_result.get("activated") is not True:
+            logger.warning("Club activation RPC returned a non-activated result")
+            raise HTTPException(
+                status_code=409,
+                detail="membership_activation_conflict",
+            )
+
+        final_update = await db.membership_orders.update_one(
+            {
+                "order_id": input.razorpay_order_id,
+                "member_id": member_id,
+                "status": "processing",
+                "payment_id": input.razorpay_payment_id,
+            },
+            {
+                "$set": {
+                    "status": "paid",
+                    "activated_at": datetime.now(timezone.utc).isoformat(),
+                }
+            },
+        )
+
+        if final_update.modified_count != 1:
+            raise RuntimeError("payment_record_finalization_failed")
+
+    except HTTPException:
+        await db.membership_orders.update_one(
+            {
+                "order_id": input.razorpay_order_id,
+                "member_id": member_id,
+                "status": "processing",
+                "payment_id": input.razorpay_payment_id,
+            },
+            {
+                "$set": {
+                    "status": "activation_failed",
+                    "last_activation_error_at": datetime.now(timezone.utc).isoformat(),
+                }
+            },
+        )
+        raise
+
+    except Exception:
+        logger.exception("Club activation failed after payment")
+        await db.membership_orders.update_one(
+            {
+                "order_id": input.razorpay_order_id,
+                "member_id": member_id,
+                "status": "processing",
+                "payment_id": input.razorpay_payment_id,
+            },
+            {
+                "$set": {
+                    "status": "activation_failed",
+                    "last_activation_error_at": datetime.now(timezone.utc).isoformat(),
+                }
+            },
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="payment_verified_activation_pending",
+        )
+
     return {"verified": True, "plan": input.plan}
+
+
+# Include the router in the main app
 
 # Include the router in the main app
 app.include_router(api_router)

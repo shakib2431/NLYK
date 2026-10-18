@@ -619,15 +619,15 @@ function MemberPanel({ member }) {
           )}
           {type === 'free' && (
             <>
-              <Link
+                           <Link
                 to="/club"
                 data-testid="panel-join-club-btn"
                 className="inline-block mt-6 bg-ink text-paper px-6 py-3.5 text-[11px] tracking-[0.25em] font-medium hover:bg-ink/85 transition-colors"
               >
-                JOIN THE CLUB — {formatINR(membershipConfig.foundingMemberPrice)} ONE-TIME
+                JOIN THE CLUB — {formatINR(999)} ONE-TIME
               </Link>
               <p className="text-[10px] tracking-[0.2em] text-smoke mt-3">
-                FOUNDING 500 — {membershipConfig.foundingMemberClaimed} OF {membershipConfig.foundingMemberLimit} CLAIMED
+                LIFETIME ACCESS · NO RENEWALS
               </p>
             </>
           )}

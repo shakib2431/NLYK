@@ -12,7 +12,9 @@ import {
   hero, marqueeItems, manifesto, campaign, story, newsletter,
   irlImages, categoryTiles, collections, customDesign,
 } from '@/data/storeData';
+import CustomerReviews from '@/components/CustomerReviews';
 import { useSeo } from '@/hooks/useSeo';
+
 
 function Hero() {
   const ref = useRef(null);
@@ -473,8 +475,10 @@ export default function Home() {
       <BrandStory />
       <CustomDesignSection />
       <IrlGrid />
+      <CustomerReviews />
       <MembershipStrip />
       <Newsletter />
+
     </main>
   );
 }

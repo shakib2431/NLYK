@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, MapPin, Clock, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import SafeImg from '@/components/SafeImg';
 import { Reveal } from '@/components/Reveal';
@@ -78,25 +79,546 @@ export function About() {
 }
 
 export function Contact() {
-  useSeo('Contact', 'Talk to Nalayak.');
-  const [form, setForm] = useState({ name: '', email: '', msg: '' });
-  const submit = (e) => {
+  useSeo('Contact', 'Talk to Nalayak — Direct line to the Kolkata studio.');
+  const [topic, setTopic] = useState('orders');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    orderNo: '',
+    customGarment: '',
+    quantity: '',
+    budget: '',
+    subInquiryType: '',
+    instagramUrl: '',
+    msg: '',
+  });
+  const [sending, setSending] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState(null);
+  const [submittedTopic, setSubmittedTopic] = useState('');
+
+  const topics = [
+    { id: 'orders', label: 'ORDERS & SHIPPING', hint: 'Tracking, delivery, exchanges & support' },
+    { id: 'custom', label: 'CUSTOM / BESPOKE', hint: '1-of-1 pieces, bulk orders & commissions' },
+    { id: 'general', label: 'GENERAL / EDITORIAL', hint: 'Collabs, press, creators & feedback' },
+  ];
+
+  const submit = async (e) => {
     e.preventDefault();
-    toast.success('Received. We reply fast — usually.', { description: 'Expect a response within 24 hours.' });
-    setForm({ name: '', email: '', msg: '' });
+
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const message = form.msg.trim();
+    const orderNo = form.orderNo.trim();
+    const customGarment = form.customGarment.trim();
+    const quantity = form.quantity.trim();
+    const budget = form.budget.trim();
+    const subInquiryType = form.subInquiryType.trim();
+    const instagramUrl = form.instagramUrl.trim();
+
+    if (!name) {
+      toast.error('Name required', { description: 'Please enter your full name.' });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      toast.error('Invalid email', { description: 'Please enter a valid email address.' });
+      return;
+    }
+
+    if (topic === 'custom' && (!customGarment || customGarment.length < 2)) {
+      toast.error('Garment idea required', {
+        description: 'Please describe the customization type or garment idea.',
+      });
+      return;
+    }
+
+    if (topic === 'general' && instagramUrl) {
+      const socialPattern = /^(https?:\/\/[^\s]+|(?:www\.)?instagram\.com\/[a-zA-Z0-9._]+\/?|@[a-zA-Z0-9._]+|[a-zA-Z0-9._]+)$/i;
+      if (!socialPattern.test(instagramUrl)) {
+        toast.error('Invalid link or handle', {
+          description: 'Please provide a valid website URL or Instagram @handle.',
+        });
+        return;
+      }
+    }
+
+    if (message.length < 5) {
+      toast.error('Message too short', { description: 'Please provide at least 5 characters for your message.' });
+      return;
+    }
+
+    const apiBase = process.env.REACT_APP_BACKEND_URL;
+    if (!apiBase) {
+      toast.error('Configuration error', { description: 'Backend service URL is not configured.' });
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      const response = await fetch(`${apiBase}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          topic,
+          message,
+          order_number: topic === 'orders' ? orderNo : '',
+          custom_garment: topic === 'custom' ? customGarment : '',
+          quantity: topic === 'custom' ? quantity : '',
+          budget: topic === 'custom' ? budget : '',
+          sub_inquiry_type: topic === 'general' ? subInquiryType : '',
+          instagram_url: topic === 'general' ? instagramUrl : '',
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        let errorMsg = 'Failed to transmit message. Please try again.';
+        if (response.status === 429 || data?.detail === 'too_many_requests') {
+          errorMsg = 'Too many requests. Please wait a few minutes before sending another message.';
+        } else if (data?.detail === 'custom_garment_required') {
+          errorMsg = 'Customization type or garment idea is required for bespoke inquiries.';
+        } else if (data?.detail === 'invalid_social_url') {
+          errorMsg = 'The provided Instagram or portfolio link is invalid.';
+        } else if (data?.detail === 'invalid_email') {
+          errorMsg = 'The email address provided is invalid.';
+        } else if (data?.detail) {
+          errorMsg = typeof data.detail === 'string' ? data.detail : errorMsg;
+        }
+
+        toast.error('Dispatch failed', { description: errorMsg });
+        // Preserve entered form data on error
+        setSending(false);
+        return;
+      }
+
+      // Backend confirmed receipt & storage
+      setSubmittedRef(data.ref);
+      setSubmittedTopic(topic);
+      setForm({
+        name: '',
+        email: '',
+        orderNo: '',
+        customGarment: '',
+        quantity: '',
+        budget: '',
+        subInquiryType: '',
+        instagramUrl: '',
+        msg: '',
+      });
+      toast.success('DISPATCH RECEIVED.', {
+        description: `Reference ${data.ref} — logged at the Kolkata studio desk.`,
+      });
+    } catch (err) {
+      console.error('Contact transmission error:', err);
+      toast.error('Transmission error', {
+        description: 'Unable to connect to the studio server. Please check your connection.',
+      });
+      // Preserve form data on error
+    } finally {
+      setSending(false);
+    }
   };
+
   return (
-    <PageShell kicker="TALK TO US" title="CONTACT" testId="contact-page">
-      <p>Complaints, compliments, conspiracy theories — all welcome at <span className="font-medium text-ink">hello@nalayak.in</span>. Or use the form. We actually read these.</p>
-      <form onSubmit={submit} className="space-y-4 pt-4" data-testid="contact-form">
-        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="NAME" data-testid="contact-name-input" className="w-full border border-ink bg-transparent px-5 py-4 text-sm placeholder:text-smoke/70 focus:outline-none focus:ring-1 focus:ring-ink" />
-        <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="EMAIL" data-testid="contact-email-input" className="w-full border border-ink bg-transparent px-5 py-4 text-sm placeholder:text-smoke/70 focus:outline-none focus:ring-1 focus:ring-ink" />
-        <textarea value={form.msg} onChange={(e) => setForm({ ...form, msg: e.target.value })} placeholder="WHAT'S THE PROBLEM" rows={5} data-testid="contact-message-input" className="w-full border border-ink bg-transparent px-5 py-4 text-sm placeholder:text-smoke/70 focus:outline-none focus:ring-1 focus:ring-ink" />
-        <button type="submit" data-testid="contact-submit-btn" className="bg-ink text-paper px-10 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300">
-          SEND IT
-        </button>
-      </form>
-    </PageShell>
+    <main className="px-4 md:px-8 max-w-[1400px] mx-auto py-10 md:py-20" data-testid="contact-page">
+      {/* Breadcrumb Navigation */}
+      <nav className="text-[10px] tracking-[0.25em] text-smoke mb-8" aria-label="Breadcrumb">
+        <Link to="/" className="hover:text-ink transition-colors">HOME</Link>
+        <span className="mx-2">/</span>
+        <span className="text-ink">CONTACT</span>
+      </nav>
+
+      {/* Hero Header */}
+      <Reveal y={16}>
+        <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-ink/15 pb-8 mb-12 gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-block w-2 h-2 bg-ink" />
+              <p className="text-[11px] tracking-[0.35em] text-smoke uppercase">
+                COMMUNICATIONS // DIRECT LINE
+              </p>
+            </div>
+            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.88] text-4xl sm:text-6xl md:text-7xl">
+              TALK TO THE<br />WRONG CROWD.
+            </h1>
+          </div>
+          <div className="max-w-md">
+            <p className="text-sm md:text-base text-smoke leading-relaxed">
+              No chatbot deflection labyrinths. Real humans in our Kolkata studio reading every single message.
+            </p>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Main Grid: Info Sidebar & Dynamic Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+        {/* Left Column: Studio Channels & Direct Access */}
+        <aside className="lg:col-span-5 space-y-6">
+          {/* Quick Channels Card */}
+          <div className="border border-ink bg-ink text-paper p-6 md:p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+              <span className="font-display font-black text-8xl text-paper">N</span>
+            </div>
+
+            <p className="text-[10px] tracking-[0.3em] text-paper/60 uppercase mb-4">
+              DIRECT DESK DISPATCH
+            </p>
+
+            <div className="space-y-5">
+              <div className="border-b border-paper/15 pb-4">
+                <p className="text-[11px] tracking-[0.2em] text-paper/70">ORDERS & DISPATCH</p>
+                <a
+                  href="mailto:orders@nalayak.in"
+                  className="font-display font-bold text-lg md:text-xl text-paper hover:underline decoration-1 underline-offset-4 flex items-center justify-between mt-1 group"
+                >
+                  <span>orders@nalayak.in</span>
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+                <p className="text-xs text-paper/60 mt-1">Average response &lt; 4 hours during studio shifts</p>
+              </div>
+
+              <div className="border-b border-paper/15 pb-4">
+                <p className="text-[11px] tracking-[0.2em] text-paper/70">GENERAL & COLLABORATIONS</p>
+                <a
+                  href="mailto:hello@nalayak.in"
+                  className="font-display font-bold text-lg md:text-xl text-paper hover:underline decoration-1 underline-offset-4 flex items-center justify-between mt-1 group"
+                >
+                  <span>hello@nalayak.in</span>
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+                <p className="text-xs text-paper/60 mt-1">Press, lookbooks, wholesale and creator queries</p>
+              </div>
+
+              <div>
+                <p className="text-[11px] tracking-[0.2em] text-paper/70">BESPOKE / CUSTOM COMMISSIONS</p>
+                <a
+                  href="mailto:custom@nalayak.in"
+                  className="font-display font-bold text-lg md:text-xl text-paper hover:underline decoration-1 underline-offset-4 flex items-center justify-between mt-1 group"
+                >
+                  <span>custom@nalayak.in</span>
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+                <p className="text-xs text-paper/60 mt-1">Or submit through our dedicated <Link to="/custom-design" className="underline text-paper">custom portal</Link></p>
+              </div>
+            </div>
+          </div>
+
+          {/* Studio Location & Shift Hours */}
+          <div className="border border-line bg-white p-6 md:p-8 space-y-4">
+            <div className="flex items-start gap-3">
+              <MapPin size={18} className="text-ink mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] tracking-[0.25em] text-smoke uppercase">ATELIER & HQ</p>
+                <p className="font-semibold text-sm text-ink mt-0.5">Kolkata, West Bengal, India</p>
+                <p className="text-xs text-smoke mt-1">Pattern cutting, design, and fulfillment under one roof.</p>
+              </div>
+            </div>
+
+            <div className="border-t border-line pt-4 flex items-start gap-3">
+              <Clock size={18} className="text-ink mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] tracking-[0.25em] text-smoke uppercase">STUDIO HOURS</p>
+                <p className="font-semibold text-sm text-ink mt-0.5">Monday – Saturday · 11:00 AM – 8:00 PM IST</p>
+                <p className="text-xs text-smoke mt-1">Sundays reserved for creative chaos.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Help Link */}
+          <div className="bg-line/40 border border-line p-5 flex items-center justify-between text-xs">
+            <span className="text-smoke">Looking for existing order tracking?</span>
+            <Link
+              to="/track"
+              className="font-semibold tracking-[0.15em] text-ink hover:underline uppercase inline-flex items-center gap-1"
+            >
+              TRACK ORDER →
+            </Link>
+          </div>
+        </aside>
+
+        {/* Right Column: High-Fashion Form or Confirmed Success */}
+        <section className="lg:col-span-7 bg-white border border-line p-6 sm:p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
+          {submittedRef ? (
+            <div className="border border-ink bg-paper p-8 sm:p-12 text-center" data-testid="contact-success-state">
+              <div className="w-12 h-12 bg-ink text-paper mx-auto flex items-center justify-center mb-6">
+                <Check size={24} />
+              </div>
+              <p className="text-[11px] tracking-[0.3em] text-smoke uppercase mb-2">
+                TRANSMISSION LOGGED // ATELIER DESK
+              </p>
+              <h2 className="font-display font-black uppercase tracking-tighter text-3xl sm:text-4xl text-ink mb-3">
+                DISPATCH CONFIRMED.
+              </h2>
+              <div className="inline-block border border-ink bg-white px-6 py-3 my-4">
+                <p className="text-[10px] tracking-[0.25em] text-smoke uppercase">REFERENCE NUMBER</p>
+                <p className="font-display font-black text-2xl md:text-3xl tracking-wider text-ink mt-0.5" data-testid="contact-ref-id">
+                  {submittedRef}
+                </p>
+              </div>
+              <p className="text-xs text-smoke uppercase tracking-wider mb-2">
+                INQUIRY TOPIC: <span className="text-ink font-semibold">{submittedTopic.toUpperCase()}</span>
+              </p>
+              <p className="text-sm text-smoke max-w-md mx-auto leading-relaxed mt-2">
+                Your inquiry has been stored in our studio system. A human from the wrong crowd will review your details and reply within 24 hours.
+              </p>
+              <div className="mt-8 pt-6 border-t border-line">
+                <button
+                  type="button"
+                  onClick={() => setSubmittedRef(null)}
+                  className="bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-ink/85 transition-colors duration-300"
+                >
+                  SEND ANOTHER NOTE
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-8">
+                <p className="text-[10px] tracking-[0.3em] text-smoke uppercase mb-2">
+                  DISPATCH NOTE
+                </p>
+                <h2 className="font-display font-extrabold uppercase tracking-tight text-2xl sm:text-3xl text-ink">
+                  SEND A MESSAGE
+                </h2>
+                <p className="mt-1 text-sm text-smoke">
+                  Select an inquiry type below to route your note directly to the right desk.
+                </p>
+              </div>
+
+              {/* Inquiry Topic Tabs */}
+              <div className="mb-8">
+                <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-3">
+                  SELECT TOPIC
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {topics.map((t) => {
+                    const active = topic === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        disabled={sending}
+                        onClick={() => setTopic(t.id)}
+                        className={`text-left p-3 border transition-all duration-200 ${
+                          active
+                            ? 'border-ink bg-ink text-paper shadow-sm'
+                            : 'border-line bg-paper/50 text-ink hover:border-ink/50'
+                        } ${sending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      >
+                        <p className="text-[11px] font-bold tracking-[0.15em] uppercase">{t.label}</p>
+                        <p className={`text-[10px] mt-0.5 leading-snug ${active ? 'text-paper/70' : 'text-smoke'}`}>
+                          {t.hint}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dynamic Form */}
+              <form onSubmit={submit} className="space-y-5" data-testid="contact-form">
+                {/* Common Fields: Name & Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                      YOUR NAME <span className="text-ink">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={sending}
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="e.g. Kabir Sen"
+                      data-testid="contact-name-input"
+                      className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                      EMAIL ADDRESS <span className="text-ink">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      disabled={sending}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="e.g. kabir@gmail.com"
+                      data-testid="contact-email-input"
+                      className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                {/* TAB 1: Orders & Shipping Fields */}
+                {topic === 'orders' && (
+                  <div>
+                    <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                      ORDER NUMBER <span className="text-smoke/60">(OPTIONAL BUT ENCOURAGED)</span>
+                    </label>
+                    <input
+                      type="text"
+                      disabled={sending}
+                      value={form.orderNo}
+                      onChange={(e) => setForm({ ...form, orderNo: e.target.value })}
+                      placeholder="e.g. NLO-1042"
+                      data-testid="contact-order-number-input"
+                      className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                    />
+                  </div>
+                )}
+
+                {/* TAB 2: Custom / Bespoke Fields */}
+                {topic === 'custom' && (
+                  <>
+                    <div>
+                      <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                        CUSTOMIZATION TYPE / GARMENT IDEA <span className="text-ink">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        disabled={sending}
+                        value={form.customGarment}
+                        onChange={(e) => setForm({ ...form, customGarment: e.target.value })}
+                        placeholder="e.g. Heavyweight hoodie embroidery, 1-of-1 distressed denim jacket"
+                        data-testid="contact-custom-garment-input"
+                        className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                          QUANTITY <span className="text-smoke/60">(OPTIONAL)</span>
+                        </label>
+                        <input
+                          type="text"
+                          disabled={sending}
+                          value={form.quantity}
+                          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                          placeholder="e.g. 1 piece (sample), 25 pieces (bulk)"
+                          data-testid="contact-quantity-input"
+                          className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                          BUDGET RANGE <span className="text-smoke/60">(OPTIONAL)</span>
+                        </label>
+                        <input
+                          type="text"
+                          disabled={sending}
+                          value={form.budget}
+                          onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                          placeholder="e.g. ₹2,500 – ₹5,000, Flexible"
+                          data-testid="contact-budget-input"
+                          className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* TAB 3: General / Editorial Fields */}
+                {topic === 'general' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                        INQUIRY TYPE <span className="text-smoke/60">(OPTIONAL)</span>
+                      </label>
+                      <select
+                        disabled={sending}
+                        value={form.subInquiryType}
+                        onChange={(e) => setForm({ ...form, subInquiryType: e.target.value })}
+                        data-testid="contact-sub-inquiry-select"
+                        className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                      >
+                        <option value="">Select Category...</option>
+                        <option value="Collaboration">Creator Collaboration</option>
+                        <option value="Press">Press & Media</option>
+                        <option value="Wholesale">Wholesale & Stockist</option>
+                        <option value="Feedback">Brand Feedback</option>
+                        <option value="Other">Other Query</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                        INSTAGRAM / PORTFOLIO <span className="text-smoke/60">(OPTIONAL)</span>
+                      </label>
+                      <input
+                        type="text"
+                        disabled={sending}
+                        value={form.instagramUrl}
+                        onChange={(e) => setForm({ ...form, instagramUrl: e.target.value })}
+                        placeholder="e.g. @yourhandle or https://..."
+                        data-testid="contact-instagram-input"
+                        className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Dynamic Message Textarea */}
+                <div>
+                  <label className="block text-[10px] tracking-[0.25em] text-smoke uppercase mb-1.5">
+                    {topic === 'orders'
+                      ? 'MESSAGE / ISSUE DETAILS'
+                      : topic === 'custom'
+                      ? 'DESIGN BRIEF & VISION'
+                      : 'PROPOSAL / MESSAGE'}{' '}
+                    <span className="text-ink">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={5}
+                    disabled={sending}
+                    value={form.msg}
+                    onChange={(e) => setForm({ ...form, msg: e.target.value })}
+                    placeholder={
+                      topic === 'orders'
+                        ? 'Tell us about your delivery, tracking, exchange or order issue…'
+                        : topic === 'custom'
+                        ? 'Describe your concept, vibe, artwork placement, colors, or deadlines…'
+                        : 'Tell us about your proposal, portfolio, vision, or query…'
+                    }
+                    data-testid="contact-message-input"
+                    className="w-full border border-line bg-paper px-4 py-3.5 text-sm text-ink placeholder:text-smoke/50 focus:outline-none focus:border-ink transition-colors resize-y leading-relaxed disabled:opacity-50"
+                  />
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    data-testid="contact-submit-btn"
+                    className="inline-flex items-center justify-center gap-2 bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-bold uppercase hover:bg-ink/85 disabled:opacity-50 transition-all duration-300 group"
+                  >
+                    <span>{sending ? 'DISPATCHING...' : 'TRANSMIT MESSAGE'}</span>
+                    <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </button>
+
+                  <span className="text-[11px] text-smoke">
+                    PRIVACY PROTECTED · NO SPAM
+                  </span>
+                </div>
+              </form>
+            </>
+          )}
+        </section>
+      </div>
+    </main>
   );
 }
 
