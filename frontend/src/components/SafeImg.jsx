@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { img, FALLBACK_IMG } from '@/data/storeData';
 
+function resolveSrc(value, w) {
+  if (!value) return img(FALLBACK_IMG, w);
+
+  // Local public images
+  if (value.startsWith('/')) return value;
+
+  // External images
+  if (value.startsWith('http')) return value;
+
+  // Existing image IDs
+  return img(value, w);
+}
+
 export default function SafeImg({ id, w = 1200, alt = '', className = '', ...rest }) {
-  const getSrc = (value) => {
-    if (!value) return img(FALLBACK_IMG, w);
+  const [src, setSrc] = useState(() => resolveSrc(id, w));
 
-    // Local public images
-    if (value.startsWith('/')) return value;
-
-    // External images
-    if (value.startsWith('http')) return value;
-
-    // Existing image IDs
-    return img(value, w);
-  };
-
-  const [src, setSrc] = useState(() => getSrc(id));
+  useEffect(() => {
+    setSrc(resolveSrc(id, w));
+  }, [id, w]);
 
   return (
     <img

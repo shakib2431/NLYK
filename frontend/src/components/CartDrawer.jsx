@@ -1,15 +1,34 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Minus, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { useStore } from '@/context/StoreContext';
-import { formatINR, FREE_SHIPPING_THRESHOLD } from '@/data/storeData';
+import { formatINR, FREE_SHIPPING_THRESHOLD, products } from '@/data/storeData';
 import SafeImg from '@/components/SafeImg';
 
 export default function CartDrawer() {
-  const { setCartOpen, cart, cartSubtotal, updateQty, removeFromCart } = useStore();
+  const { setCartOpen, cart, cartSubtotal, updateQty, removeFromCart, addToCart } = useStore();
 
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - cartSubtotal);
   const progress = Math.min(100, (cartSubtotal / FREE_SHIPPING_THRESHOLD) * 100);
+
+  // Verified accessory recommendations from real catalog data
+  const availableAccessories = useMemo(() => {
+    return products.filter(
+      (p) =>
+        p.category === 'accessories' &&
+        p.stock > 0 &&
+        !cart.some((item) => item.slug === p.slug)
+    );
+  }, [cart]);
+
+  const handleAddAccessory = (acc) => {
+    const defaultSize = acc.sizes?.[0] || 'OS';
+    const defaultColor = acc.colors?.[0] || { name: 'Default', hex: '#111111' };
+    addToCart(acc, defaultSize, defaultColor, 1);
+    toast.success('Added to bag', { description: `${acc.name} — ${defaultSize}` });
+  };
 
   return (
     <div className="fixed inset-0 z-50" data-testid="cart-drawer">
@@ -43,35 +62,98 @@ export default function CartDrawer() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5 divide-y divide-line">
-              {cart.map((item) => (
-                <div key={item.key} className="py-4 flex gap-4" data-testid={`cart-item-${item.key}`}>
-                  <Link to={`/product/${item.slug}`} onClick={() => setCartOpen(false)} className="h-24 w-[72px] bg-white border border-line overflow-hidden shrink-0">
-                    <SafeImg id={item.image} w={300} alt={item.name} className="h-full w-full object-cover" />
-                  </Link>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between gap-2">
-                      <p className="text-[13px] font-medium leading-snug">{item.name}</p>
-                      <button data-testid={`cart-remove-${item.key}`} onClick={() => removeFromCart(item.key)} aria-label="Remove item" className="text-smoke hover:text-ink transition-colors">
-                        <Trash2 size={15} strokeWidth={1.5} />
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-smoke mt-1 tracking-wide">{item.color} / {item.size}</p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <div className="flex items-center border border-ink">
-                        <button data-testid={`cart-dec-${item.key}`} onClick={() => updateQty(item.key, -1)} className="px-2 py-1 hover:bg-ink hover:text-paper transition-colors" aria-label="Decrease quantity">
-                          <Minus size={12} />
-                        </button>
-                        <span className="px-3 text-[12px] font-medium" data-testid={`cart-qty-${item.key}`}>{item.qty}</span>
-                        <button data-testid={`cart-inc-${item.key}`} onClick={() => updateQty(item.key, 1)} className="px-2 py-1 hover:bg-ink hover:text-paper transition-colors" aria-label="Increase quantity">
-                          <Plus size={12} />
+            <div className="flex-1 overflow-y-auto px-5">
+              <div className="divide-y divide-line">
+                {cart.map((item) => (
+                  <div key={item.key} className="py-4 flex gap-4" data-testid={`cart-item-${item.key}`}>
+                    <Link to={`/product/${item.slug}`} onClick={() => setCartOpen(false)} className="h-24 w-[72px] bg-white border border-line overflow-hidden shrink-0">
+                      <SafeImg id={item.image} w={300} alt={item.name} className="h-full w-full object-cover" />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between gap-2">
+                        <p className="text-[13px] font-medium leading-snug">{item.name}</p>
+                        <button data-testid={`cart-remove-${item.key}`} onClick={() => removeFromCart(item.key)} aria-label="Remove item" className="text-smoke hover:text-ink transition-colors">
+                          <Trash2 size={15} strokeWidth={1.5} />
                         </button>
                       </div>
-                      <span className="text-[13px] font-semibold">{formatINR(item.price * item.qty)}</span>
+                      <p className="text-[11px] text-smoke mt-1 tracking-wide">{item.color} / {item.size}</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex items-center border border-ink">
+                          <button data-testid={`cart-dec-${item.key}`} onClick={() => updateQty(item.key, -1)} className="px-2 py-1 hover:bg-ink hover:text-paper transition-colors" aria-label="Decrease quantity">
+                            <Minus size={12} />
+                          </button>
+                          <span className="px-3 text-[12px] font-medium" data-testid={`cart-qty-${item.key}`}>{item.qty}</span>
+                          <button data-testid={`cart-inc-${item.key}`} onClick={() => updateQty(item.key, 1)} className="px-2 py-1 hover:bg-ink hover:text-paper transition-colors" aria-label="Increase quantity">
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                        <span className="text-[13px] font-semibold">{formatINR(item.price * item.qty)}</span>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* In-drawer accessory recommendations */}
+              {availableAccessories.length > 0 && (
+                <div className="mt-4 pt-5 pb-5 border-t border-line" data-testid="cart-accessory-recommendations">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10px] tracking-[0.25em] font-bold text-ink uppercase">
+                      COMPLETE THE DROP
+                    </p>
+                    <span className="text-[9px] tracking-[0.15em] text-smoke uppercase">
+                      1-CLICK ADD
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {availableAccessories.slice(0, 3).map((acc) => (
+                      <div
+                        key={acc.id}
+                        className="flex items-center justify-between p-2.5 bg-white border border-line hover:border-ink transition-colors"
+                        data-testid={`cart-rec-${acc.slug}`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Link
+                            to={`/product/${acc.slug}`}
+                            onClick={() => setCartOpen(false)}
+                            className="h-12 w-10 bg-paper border border-line shrink-0 overflow-hidden"
+                          >
+                            <SafeImg
+                              id={acc.images[0]}
+                              w={120}
+                              alt={acc.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </Link>
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              to={`/product/${acc.slug}`}
+                              onClick={() => setCartOpen(false)}
+                              className="text-xs font-semibold uppercase tracking-tight text-ink hover:underline block truncate"
+                            >
+                              {acc.name}
+                            </Link>
+                            <p className="text-[11px] font-medium text-smoke mt-0.5">
+                              {formatINR(acc.price)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddAccessory(acc)}
+                          data-testid={`cart-rec-add-${acc.slug}`}
+                          className="ml-3 px-3 py-1.5 bg-ink text-paper text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-ink/85 transition-colors shrink-0"
+                          aria-label={`Add ${acc.name} to bag`}
+                        >
+                          + ADD
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="border-t border-ink px-5 py-5 space-y-4">

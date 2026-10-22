@@ -1,72 +1,75 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { SlidersHorizontal } from 'lucide-react';
+import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import { Reveal } from '@/components/Reveal';
+import AdvanceFilterDrawer from '@/components/AdvanceFilterDrawer';
 import { getListingProducts, sortProducts } from '@/services/catalog';
-import { listings } from '@/data/storeData';
+import { listings, formatINR } from '@/data/storeData';
 import { useSeo } from '@/hooks/useSeo';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
+
 const SORTS = [
-  { v: 'featured', label: 'FEATURED' },
-  { v: 'newest', label: 'NEWEST' },
-  { v: 'popular', label: 'MOST WANTED' },
-  { v: 'price-asc', label: 'PRICE: LOW TO HIGH' },
-  { v: 'price-desc', label: 'PRICE: HIGH TO LOW' },
+  { v: 'featured', label: 'Best selling' },
+  { v: 'newest', label: 'Newest' },
+  { v: 'popular', label: 'Most wanted' },
+  { v: 'price-asc', label: 'Price: Low to High' },
+  { v: 'price-desc', label: 'Price: High to Low' },
 ];
+
 const PRICE_RANGES = [
   { label: 'UNDER ₹1,000', test: (p) => p.price < 1000 },
   { label: '₹1,000 — ₹2,000', test: (p) => p.price >= 1000 && p.price <= 2000 },
   { label: 'ABOVE ₹2,000', test: (p) => p.price > 2000 },
 ];
-const CATEGORIES = ['tees', 'shirts', 'hoodies', 'bottoms', 'accessories'];
-const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
-function FilterGroup({ title, children }) {
-  const [open, setOpen] = useState(true);
-  return (
-    <div className="border-b border-line py-5">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between text-[11px] tracking-[0.25em] font-medium"
-        data-testid={`filter-toggle-${title.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        {title}
-        <ChevronDown size={14} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && <div className="pt-4 space-y-2">{children}</div>}
-    </div>
-  );
-}
 
-function Check({ label, checked, onChange, testId }) {
-  return (
-    <label className="flex items-center gap-3 text-sm cursor-pointer group" data-testid={testId}>
-      <span className={`h-4 w-4 border border-ink flex items-center justify-center transition-colors ${checked ? 'bg-ink' : 'group-hover:bg-line'}`}>
-        {checked && <span className="h-1.5 w-1.5 bg-paper" />}
-      </span>
-      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
-      <span className={checked ? 'font-medium' : 'text-ink/70'}>{label}</span>
-    </label>
-  );
-}
+const CATEGORIES = ['tees', 'shirts', 'hoodies', 'bottoms', 'accessories'];
+const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'OS', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11'];
+
+// Direct solid colors only (no color hues or shade clusters)
+const ALL_COLORS = [
+  { name: 'Jet', hex: '#111111', label: 'Jet Black' },
+  { name: 'Chalk', hex: '#F4F1EA', label: 'Chalk White' },
+  { name: 'Ash', hex: '#8C8C8C', label: 'Ash Grey' },
+  { name: 'Olive', hex: '#4A5340', label: 'Olive' },
+  { name: 'Maroon', hex: '#5C2E2E', label: 'Maroon' },
+];
+
+const CATEGORY_TABS = [
+  { id: 'ALL', label: 'View all' },
+  { id: 'tees', label: 'T-shirts' },
+  { id: 'shirts', label: 'Shirts' },
+  { id: 'hoodies', label: 'Hoodies' },
+  { id: 'bottoms', label: 'Pants & Cargos' },
+  { id: 'accessories', label: 'Accessories' },
+];
 
 export default function ListingPage({ listingKey }) {
   const cfg = listings[listingKey];
-  useSeo(cfg.title, cfg.desc);
+  useSeo(cfg?.title || 'Collection', cfg?.desc);
 
   const [sort, setSort] = useState('featured');
   const [cats, setCats] = useState([]);
   const [sizes, setSizes] = useState([]);
+  const [colors, setColors] = useState([]);
   const [prices, setPrices] = useState([]);
-  const [inStockOnly, setInStockOnly] = useState(false);
+  const [availability, setAvailability] = useState('all');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [denseView, setDenseView] = useState(false);
+  const [activeCategoryTab, setActiveCategoryTab] = useState('ALL');
 
   useEffect(() => {
-    setCats([]); setSizes([]); setPrices([]); setInStockOnly(false);
-    setVisible(PAGE_SIZE); setSort('featured');
+    setCats([]);
+    setSizes([]);
+    setColors([]);
+    setPrices([]);
+    setAvailability('all');
+    setVisible(PAGE_SIZE);
+    setSort('featured');
+    setActiveCategoryTab('ALL');
   }, [listingKey]);
 
   const base = useMemo(() => getListingProducts(listingKey), [listingKey]);
@@ -74,165 +77,308 @@ export default function ListingPage({ listingKey }) {
   const filtered = useMemo(() => {
     let list = base;
     if (cats.length) list = list.filter((p) => cats.includes(p.category));
-    if (sizes.length) list = list.filter((p) => p.sizes.some((s) => sizes.includes(s)));
-    if (prices.length) list = list.filter((p) => prices.some((i) => PRICE_RANGES[i].test(p)));
-    if (inStockOnly) list = list.filter((p) => p.stock > 0);
+    if (sizes.length) list = list.filter((p) => p.sizes && p.sizes.some((s) => sizes.includes(s)));
+    if (colors.length) list = list.filter((p) => p.colors && p.colors.some((c) => colors.includes(c.name)));
+    if (prices.length) list = list.filter((p) => prices.some((i) => PRICE_RANGES[i]?.test(p)));
+    if (availability === 'inStock') list = list.filter((p) => p.stock > 0);
+    if (availability === 'outOfStock') list = list.filter((p) => p.stock === 0);
     return sortProducts(list, sort);
-  }, [base, cats, sizes, prices, inStockOnly, sort]);
+  }, [base, cats, sizes, colors, prices, availability, sort]);
+
+  // Dense View Items with Category Break Markers (like BLUORNG)
+  const denseItems = useMemo(() => {
+    if (!denseView) return [];
+
+    if (activeCategoryTab !== 'ALL') {
+      return filtered
+        .filter((p) => p.category.toLowerCase() === activeCategoryTab.toLowerCase())
+        .map((p) => ({ type: 'product', data: p }));
+    }
+
+    const result = [];
+    const categoryOrder = ['tees', 'shirts', 'hoodies', 'bottoms', 'accessories'];
+
+    categoryOrder.forEach((cat) => {
+      const catProducts = filtered.filter((p) => p.category.toLowerCase() === cat);
+      if (catProducts.length > 0) {
+        result.push({
+          type: 'marker',
+          title: cat.toUpperCase(),
+          id: `marker-${cat}`,
+        });
+        catProducts.forEach((p) => {
+          result.push({ type: 'product', data: p });
+        });
+      }
+    });
+
+    const remaining = filtered.filter((p) => !categoryOrder.includes(p.category.toLowerCase()));
+    if (remaining.length > 0) {
+      result.push({ type: 'marker', title: 'MORE', id: 'marker-more' });
+      remaining.forEach((p) => result.push({ type: 'product', data: p }));
+    }
+
+    return result;
+  }, [denseView, activeCategoryTab, filtered]);
 
   const toggle = (arr, setArr, val) =>
     setArr(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
 
-  const filters = (
-    <div>
-      <FilterGroup title="CATEGORY">
-        {CATEGORIES.map((c) => (
-          <Check key={c} label={c.toUpperCase()} checked={cats.includes(c)} onChange={() => toggle(cats, setCats, c)} testId={`filter-cat-${c}`} />
-        ))}
-      </FilterGroup>
-      <FilterGroup title="SIZE">
-        <div className="flex flex-wrap gap-2">
-          {ALL_SIZES.map((s) => (
-            <button
-              key={s}
-              data-testid={`filter-size-${s.toLowerCase().replace(' ', '-')}`}
-              onClick={() => toggle(sizes, setSizes, s)}
-              className={`border px-3 py-1.5 text-[11px] tracking-wide transition-colors duration-200 ${sizes.includes(s) ? 'bg-ink text-paper border-ink' : 'border-line hover:border-ink'}`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </FilterGroup>
-      <FilterGroup title="PRICE">
-        {PRICE_RANGES.map((r, i) => (
-          <Check key={r.label} label={r.label} checked={prices.includes(i)} onChange={() => toggle(prices, setPrices, i)} testId={`filter-price-${i}`} />
-        ))}
-      </FilterGroup>
-      <FilterGroup title="AVAILABILITY">
-        <Check label="IN STOCK ONLY" checked={inStockOnly} onChange={() => setInStockOnly(!inStockOnly)} testId="filter-instock" />
-      </FilterGroup>
-    </div>
-  );
+  const handleResetAll = () => {
+    setCats([]);
+    setSizes([]);
+    setColors([]);
+    setPrices([]);
+    setAvailability('all');
+    setActiveCategoryTab('ALL');
+  };
+
+  const activeFiltersCount =
+    cats.length +
+    sizes.length +
+    colors.length +
+    prices.length +
+    (availability !== 'all' ? 1 : 0);
 
   return (
     <main className="px-4 md:px-8 max-w-[1600px] mx-auto py-10 md:py-16" data-testid={`listing-${listingKey}`}>
+      {/* Breadcrumb */}
       <nav className="text-[10px] tracking-[0.25em] text-smoke mb-6" aria-label="Breadcrumb">
-        <Link to="/" className="hover:text-ink transition-colors" data-testid="breadcrumb-home">HOME</Link>
+        <Link to="/" className="hover:text-ink transition-colors" data-testid="breadcrumb-home">
+          HOME
+        </Link>
         <span className="mx-2">/</span>
-        <span className="text-ink">{cfg.title}</span>
+        <span className="text-ink uppercase">{cfg?.title}</span>
       </nav>
-        <Reveal y={16}>
-          <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">{cfg.kicker}</p>
 
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">
-              {cfg.title}
-            </h1>
-
-            <p className="text-smoke text-sm max-w-sm">
-              {cfg.desc}
-            </p>
-          </div>
-        </Reveal>
-
-      {/* <Reveal y={16}>
-        <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">{cfg.kicker}</p>
+      {/* Header Banner */}
+      <Reveal y={16}>
+        <p className="text-[11px] tracking-[0.3em] text-smoke mb-2 uppercase">{cfg?.kicker}</p>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">{cfg.title}</h1>
-          <p className="text-smoke text-sm max-w-sm">{cfg.desc}</p>
+          <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">
+            {cfg?.title}
+          </h1>
+          <p className="text-smoke text-sm max-w-sm">{cfg?.desc}</p>
         </div>
-      </Reveal> */}
+      </Reveal>
 
+      {/* Control Bar */}
+      <div className="mt-10 flex items-center justify-between border-y border-line py-3.5">
+        <div className="flex items-center gap-3">
+          <span className="text-xs tracking-[0.2em] font-bold uppercase text-ink">
+            {cfg?.title}
+          </span>
+          <span className="text-[11px] tracking-[0.15em] font-mono text-smoke" data-testid="product-count">
+            ({filtered.length} {filtered.length === 1 ? 'PIECE' : 'PIECES'})
+          </span>
+        </div>
 
-      <div className="mt-10 flex items-center justify-between border-y border-line py-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          {activeFiltersCount > 0 && (
+            <button
+              onClick={handleResetAll}
+              className="text-[10px] tracking-[0.15em] font-mono text-smoke hover:text-ink underline uppercase hidden sm:inline-block cursor-pointer mr-1"
+            >
+              CLEAR ALL ({activeFiltersCount})
+            </button>
+          )}
+
+          {/* Compass Star "Show Everything" Dense View Toggle */}
+          <button
+            type="button"
+            data-testid="toggle-dense-view-btn"
+            onClick={() => setDenseView(!denseView)}
+            title={denseView ? 'Switch to Editorial View' : 'Show Everything · Dense Atelier View'}
+            className={`relative flex items-center justify-center h-9 w-9 rounded-full border transition-all duration-300 cursor-pointer ${
+              denseView
+                ? 'bg-ink text-paper border-ink shadow-md scale-105'
+                : 'bg-white text-ink border-neutral-300 hover:border-ink hover:bg-neutral-50 shadow-sm'
+            }`}
+            aria-pressed={denseView}
+            aria-label="Toggle Show Everything Dense View"
+          >
+            {/* NALAYAK Compass Star Logo */}
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill={denseView ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className={denseView ? 'animate-pulse' : ''}
+            >
+              <path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" />
+            </svg>
+            {denseView && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </button>
+
+          {/* Advance Filters Button */}
           <button
             data-testid="filter-drawer-btn"
             onClick={() => setDrawerOpen(true)}
-            className="lg:hidden flex items-center gap-2 text-[11px] tracking-[0.2em] font-medium"
+            className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase border border-neutral-300 bg-white hover:border-ink hover:bg-neutral-50 px-4 py-2 rounded-full shadow-sm transition-all cursor-pointer"
           >
-            <SlidersHorizontal size={14} /> FILTERS
+            <SlidersHorizontal size={13} strokeWidth={2} />
+            <span>Advance Filters</span>
+            {activeFiltersCount > 0 && (
+              <span className="h-4 w-4 rounded-full bg-ink text-paper text-[9px] flex items-center justify-center font-bold">
+                {activeFiltersCount}
+              </span>
+            )}
           </button>
-          <span className="text-[11px] tracking-[0.2em] text-smoke" data-testid="product-count">
-            {filtered.length} PRODUCT{filtered.length !== 1 ? 'S' : ''}
-          </span>
         </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          data-testid="sort-select"
-          className="bg-transparent text-[11px] tracking-[0.2em] font-medium focus:outline-none cursor-pointer"
-        >
-          {SORTS.map((s) => (
-            <option key={s.v} value={s.v}>{s.label}</option>
-          ))}
-        </select>
       </div>
 
-      <div className="grid lg:grid-cols-[240px_1fr] gap-10 mt-8">
-        <aside className="hidden lg:block">{filters}</aside>
+      {/* Horizontal Category Quick Tabs (Revealed in Dense View or Quick Filter) */}
+      {denseView && (
+        <div className="mt-5 flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
+          {CATEGORY_TABS.map((tab) => {
+            const isActive = activeCategoryTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveCategoryTab(tab.id)}
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'bg-ink text-paper shadow-sm'
+                    : 'bg-neutral-100 text-ink/80 hover:bg-neutral-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-        <div>
-          {filtered.length === 0 ? (
-            <div className="py-24 text-center" data-testid="listing-empty">
+      {/* DENSE ATELIER VIEW (Show Everything Multi-Column Grid) */}
+      {denseView ? (
+        <div className="mt-6">
+          {denseItems.length === 0 ? (
+            <div className="py-24 text-center">
               <p className="font-display font-extrabold uppercase tracking-tight text-3xl">NOTHING MATCHES.</p>
-              <p className="mt-3 text-smoke text-sm">Loosen the filters. Your standards, not ours.</p>
+              <button
+                onClick={handleResetAll}
+                className="mt-6 inline-block border border-ink px-8 py-3 text-xs tracking-widest font-semibold uppercase hover:bg-ink hover:text-paper transition-colors rounded-full cursor-pointer"
+              >
+                RESET ALL FILTERS
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 xl:grid-cols-4 md:grid-cols-3 gap-4 md:gap-5">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5 sm:gap-3">
+              {denseItems.map((item) => {
+                if (item.type === 'marker') {
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-center p-2.5 aspect-[3/4] rounded-xl bg-neutral-100/70 border border-dashed border-neutral-300 select-none"
+                    >
+                      <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink/75 text-center leading-tight">
+                        {item.title}
+                      </span>
+                    </div>
+                  );
+                }
+
+                const p = item.data;
+                return (
+                  <Link
+                    key={p.id}
+                    to={`/product/${p.slug}`}
+                    className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-neutral-100 border border-line/60 shadow-sm hover:shadow-md transition-all duration-300 block"
+                    title={`${p.name} — ${formatINR(p.price)}`}
+                  >
+                    <SafeImg
+                      id={p.images[0]}
+                      w={400}
+                      alt={p.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2 text-paper">
+                      <p className="text-[10px] font-bold uppercase tracking-tight truncate leading-tight">
+                        {p.name}
+                      </p>
+                      <p className="text-[9px] font-mono text-paper/85 mt-0.5">
+                        {formatINR(p.price)}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* STANDARD EDITORIAL GRID VIEW */
+        <div className="mt-8">
+          {filtered.length === 0 ? (
+            <div className="py-24 text-center" data-testid="listing-empty">
+              <p className="font-display font-extrabold uppercase tracking-tight text-3xl">
+                NOTHING MATCHES.
+              </p>
+              <p className="mt-3 text-smoke text-sm">
+                Loosen the filters. Your standards, not ours.
+              </p>
+              <button
+                onClick={handleResetAll}
+                className="mt-6 inline-block border border-ink px-8 py-3 text-xs tracking-widest font-semibold uppercase hover:bg-ink hover:text-paper transition-colors rounded-full cursor-pointer"
+              >
+                RESET ALL FILTERS
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filtered.slice(0, visible).map((p, i) => (
-                <Reveal key={p.id} delay={Math.min(i, 7) * 0.05}>
+                <Reveal key={p.id} delay={Math.min(i, 7) * 0.04}>
                   <ProductCard product={p} />
                 </Reveal>
               ))}
             </div>
           )}
+
+          {/* Load More Button */}
           {visible < filtered.length && (
             <div className="mt-14 text-center">
               <button
                 data-testid="load-more-btn"
                 onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                className="border border-ink px-10 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors duration-300"
+                className="border border-ink px-10 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors duration-300 rounded-full cursor-pointer"
               >
                 LOAD MORE ({filtered.length - visible} LEFT)
               </button>
             </div>
           )}
         </div>
-      </div>
+      )}
 
-      <AnimatePresence>
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden" data-testid="filter-drawer">
-            <motion.div className="absolute inset-0 bg-ink/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} />
-            <motion.aside
-              className="absolute left-0 top-0 h-full w-[85%] max-w-sm bg-paper flex flex-col"
-              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="flex items-center justify-between px-5 h-16 border-b border-line">
-                <span className="font-display font-extrabold uppercase text-xl">FILTERS</span>
-                <button data-testid="filter-drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close filters">
-                  <X size={20} strokeWidth={1.5} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-5">{filters}</div>
-              <div className="border-t border-ink p-5">
-                <button
-                  data-testid="filter-apply-btn"
-                  onClick={() => setDrawerOpen(false)}
-                  className="w-full bg-ink text-paper py-4 text-[11px] tracking-[0.3em] font-medium"
-                >
-                  SHOW {filtered.length} PRODUCTS
-                </button>
-              </div>
-            </motion.aside>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Advance Filter Drawer */}
+      <AdvanceFilterDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        totalProducts={base.length}
+        filteredCount={filtered.length}
+        selectedSizes={sizes}
+        onToggleSize={(s) => toggle(sizes, setSizes, s)}
+        allSizes={ALL_SIZES}
+        selectedCategories={cats}
+        onToggleCategory={(c) => toggle(cats, setCats, c)}
+        allCategories={CATEGORIES}
+        selectedColors={colors}
+        onToggleColor={(c) => toggle(colors, setColors, c)}
+        allColors={ALL_COLORS}
+        availability={availability}
+        onChangeAvailability={setAvailability}
+        selectedPrices={prices}
+        onTogglePrice={(i) => toggle(prices, setPrices, i)}
+        priceRanges={PRICE_RANGES}
+        sort={sort}
+        onChangeSort={setSort}
+        sortOptions={SORTS}
+        onResetAll={handleResetAll}
+      />
     </main>
   );
 }
-
-

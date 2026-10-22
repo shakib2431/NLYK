@@ -21,12 +21,13 @@ export const nav = [
   { label: 'MEN', to: '/men' },
   { label: 'WOMEN', to: '/women' },
   { label: 'TEES', to: '/tees' },
+  { label: 'SHIRTS', to: '/shirts' },
   { label: 'HOODIES', to: '/hoodies' },
   { label: 'BOTTOMS', to: '/bottoms' },
   { label: 'ACCESSORIES', to: '/accessories' },
   { label: 'COLLECTIONS', to: '/collections' },
+  { label: 'CLUB', to: '/club' },
   { label: 'CUSTOM', to: '/custom-design' },
-
 ];
 
 // export const hero = {
@@ -39,8 +40,8 @@ export const nav = [
 //   secondary: { label: 'EXPLORE COLLECTIONS', to: '/collections' },
 // };
 export const hero = {
-  desktop: 'photo-1515886657613-9f3515b0c78f',
-  mobile: 'photo-1509631179647-0177331693ae',
+  desktop: '/slide1.png',
+  mobile: '/slide1-mobile.png',
   kicker: 'AW26 — THE WRONG CROWD',
   lines: ['NOT FOR', 'EVERYONE.'],
   copy: 'Clothes for people who were never interested in fitting in.',
@@ -76,14 +77,14 @@ export const manifesto = [
 ];
 
 export const campaign = {
-  bg: 'photo-1445205170230-053b83016050',
+  bg: '/slide1.png',
   headline: 'WELCOME TO THE WRONG CROWD.',
   copy: 'For people who were never particularly interested in fitting in.',
   cta: { label: 'EXPLORE THE COLLECTION', to: '/collections/the-chaos-edit' },
 };
 
 export const story = {
-  image: 'photo-1441986300917-64674bd600d8',
+  image: '/editorial/about-atelier-craft.jpg',
   headline: "WE DON'T MAKE CLOTHES FOR EVERYONE.",
   paragraphs: [
     'NALAYAK exists for the people who never quite fit the mould.',
@@ -109,11 +110,11 @@ export const irlImages = [
 ];
 
 export const categoryTiles = [
-  { label: 'TEES', to: '/tees', image: 'photo-1523381210434-271e8be1f52b' },
-  { label: 'SHIRTS', to: '/shirts', image: 'photo-1596755094514-f87e34085b2c' },
-  { label: 'HOODIES', to: '/hoodies', image: 'photo-1556821840-3a63f95609a7' },
-  { label: 'BOTTOMS', to: '/bottoms', image: 'photo-1542272604-787c3835535d' },
-  { label: 'ACCESSORIES', to: '/accessories', image: 'photo-1511499767150-a48a237f0083' },
+  { label: 'TEES', spec: '240 GSM COMBED', to: '/tees', image: '/products/devanagari-chaos-tee-front.jpg' },
+  { label: 'SHIRTS', spec: 'HEAVY TWILL', to: '/shirts', image: 'photo-1596755094514-f87e34085b2c' },
+  { label: 'HOODIES', spec: '450 GSM FLEECE', to: '/hoodies', image: '/products/after-hours-stealth-hoodie-front.jpg' },
+  { label: 'BOTTOMS', spec: 'TACTICAL UTILITY', to: '/bottoms', image: '/female-jeans-chain.png' },
+  { label: 'ACCESSORIES', spec: 'HARDWARE & HEADWEAR', to: '/accessories', image: '/products/nalayak-chain-front.png' },
 ];
 
 const APPAREL_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
@@ -142,7 +143,7 @@ export const products = [
     id: 'p02', slug: 'wrong-crowd-tee', name: 'WRONG CROWD TEE',
     price: 1199, compareAt: null, category: 'tees', gender: 'unisex',
     desc: 'Membership has its privileges. Chest print, relaxed fit, and a back graphic your mother will ask about.',
-    images: ['photo-1618354691373-d851c5c3a990', 'photo-1583743814966-8936f5b7be1a'],
+    images: ['/products/wrong-crowd-tee-front.jpg'],
     sizes: APPAREL_SIZES, colors: [CHALK, JET], badge: 'NEW',
     stock: 21, newArrival: true, bestSeller: true, featured: false,
   },
@@ -187,20 +188,18 @@ export const products = [
     stock: 22, newArrival: true, bestSeller: false, featured: false,
   },
   {
-  id: 'p08', slug: 'her-chaos-crop-tee', name: 'HER CHAOS CROP TEE',
-  price: 999, compareAt: 1199, category: 'tees', gender: 'women',
-  desc: 'Cropped, not tamed. A sharper silhouette with the same terrible decision-making built in.',
-  images: ['photo-1503342217505-b0a15ec3261c', 'photo-1554568218-0f1715e72254'],
-  sizes: APPAREL_SIZES,
-  colors: [PAPER, JET, MAROON],
-
-  colorImages: {
-    Paper: '/her-chaos-crop-tee-white.png',
+    id: 'p08', slug: 'her-chaos-crop-tee', name: 'HER CHAOS CROP TEE',
+    price: 999, compareAt: 1199, category: 'tees', gender: 'women',
+    desc: 'Cropped, not tamed. A sharper silhouette with the same terrible decision-making built in.',
+    images: ['/products/her-chaos-crop-tee-front.jpg', '/products/her-chaos-crop-tee-back.jpg'],
+    sizes: APPAREL_SIZES,
+    colors: [PAPER, JET, MAROON],
+    colorImages: {
+      Paper: '/her-chaos-crop-tee-white.png',
+    },
+    badge: null,
+    stock: 25, newArrival: true, bestSeller: true, featured: false,
   },
-
-  badge: null,
-  stock: 25, newArrival: true, bestSeller: true, featured: false,
-},
   {
     id: 'p09', slug: 'off-record-overshirt', name: 'OFF RECORD OVERSHIRT',
     price: 1899, compareAt: null, category: 'shirts', gender: 'men',
@@ -341,7 +340,7 @@ export const products = [
   category: 'accessories',
   gender: 'women',
   desc: 'Not jewelry. A problem attached to your jeans. Heavy-link metal chain made for wearing things slightly wrong.',
-  images: ['/female-jeans-chain.png'],
+  images: ['/products/nalayak-chain-front.png'],
   sizes: ['OS'],
   colors: [JET],
   badge: 'NEW',
@@ -394,12 +393,48 @@ export const products = [
     clubReleaseAt: daysAgo(6),
     publicReleaseAt: daysAgo(2),
   },
+  {
+    id: 'p30', slug: 'devanagari-chaos-tee', name: 'THE DEVANAGARI CHAOS TEE',
+    price: 1499, compareAt: null, category: 'tees', gender: 'unisex',
+    desc: 'Heavyweight 240 GSM drop-shoulder tee in jet black. Minimal gothic compass star on the chest, raw distressed Devanagari lettering across the back.',
+    images: ['/products/devanagari-chaos-tee-front.jpg', '/products/devanagari-chaos-tee-back.jpg'],
+    sizes: APPAREL_SIZES, colors: [JET, ASH], badge: 'NEW',
+    stock: 25, newArrival: true, bestSeller: false, featured: true,
+    clubEarlyAccess: false,
+  },
+  {
+    id: 'p31', slug: 'after-hours-stealth-hoodie', name: 'AFTER HOURS STEALTH HOODIE',
+    price: 2899, compareAt: null, category: 'hoodies', gender: 'unisex',
+    desc: 'Heavyweight 450 GSM stealth boxy hoodie in washed mineral black. Concealed kangaroo pocket, tonal high-density compass badge, and midnight architectural typography on back.',
+    images: ['/products/after-hours-stealth-hoodie-front.jpg', '/products/after-hours-stealth-hoodie-back.jpg'],
+    sizes: APPAREL_SIZES, colors: [JET, ASH], badge: 'NEW',
+    stock: 20, newArrival: true, bestSeller: false, featured: true,
+    clubEarlyAccess: false,
+  },
+  {
+    id: 'p32', slug: 'everyday-nalayak-essential-tee', name: 'EVERYDAY NALAYAK ESSENTIAL TEE',
+    price: 1199, compareAt: null, category: 'tees', gender: 'unisex',
+    desc: 'Chalk-white 220 GSM combed cotton boxy tee. Minimal black embroidered compass emblem on the chest with tonal back stitch detailing.',
+    images: ['/products/everyday-nalayak-essential-tee-front.jpg', '/products/everyday-nalayak-essential-tee-back.jpg'],
+    sizes: APPAREL_SIZES, colors: [CHALK, JET], badge: 'NEW',
+    stock: 35, newArrival: true, bestSeller: false, featured: true,
+    clubEarlyAccess: false,
+  },
+  {
+    id: 'p33', slug: 'archive-specimen-series-001', name: 'ARCHIVE SPECIMEN SERIES 001 TEE',
+    price: 1699, compareAt: null, category: 'tees', gender: 'unisex',
+    desc: 'Vintage acid-wash charcoal oversized tee. Hand-treated marble finish, discharge ink gothic typography, and SERIES 001 woven archive labeling.',
+    images: ['/products/archive-specimen-series-001-front.jpg', '/products/archive-specimen-series-001-back.jpg'],
+    sizes: APPAREL_SIZES, colors: [ASH, JET], badge: 'LIMITED',
+    stock: 15, newArrival: true, bestSeller: false, featured: true,
+    clubEarlyAccess: false,
+  },
 ];
 
 const downloadedProductImages = ["/product-pack/WhatsApp Image 2026-10-08 at 2.25.24 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.51 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.25.59 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.00 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.00 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.01 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.01 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM (2).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.02 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.03 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.03 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.04 PM (1).jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.04 PM.jpeg", "/product-pack/WhatsApp Image 2026-10-08 at 2.26.05 PM.jpeg"];
 const applyDownloadedProductImages = () => {
   downloadedProductImages.forEach((image, index) => {
-    if (products[index]) {
+    if (products[index] && !products[index].images?.[0]?.startsWith('/products/')) {
       products[index].images = [image];
     }
   });
@@ -410,26 +445,26 @@ export const collections = [
   {
     slug: 'the-chaos-edit', title: 'THE CHAOS EDIT',
     desc: 'Prints, volume, and a complete disregard for subtlety.',
-    image: 'photo-1556905055-8f358a7a47b2',
-    products: ['chaos-club-tee', 'bad-decisions-hoodie', 'anti-normal-hoodie', 'wrong-crowd-tee', 'basically-famous-tee', 'off-duty-cargo'],
+    image: '/collections/the-chaos-edit.jpg',
+    products: ['devanagari-chaos-tee', 'chaos-club-tee', 'bad-decisions-hoodie', 'anti-normal-hoodie', 'wrong-crowd-tee', 'basically-famous-tee', 'wrong-crowd-hoodie', 'nalayak-chain', 'daily-chaos-sneakers', 'off-duty-cargo'],
   },
   {
     slug: 'after-hours', title: 'AFTER HOURS',
     desc: 'For the plans that start after midnight.',
-    image: 'photo-1638638977172-9f7169a77930',
-    products: ['after-dark-hoodie', 'after-hours-tee', 'night-shift-shirt', 'low-profile-sunnies'],
+    image: '/collections/after-hours.jpg',
+    products: ['after-hours-stealth-hoodie', 'after-dark-hoodie', 'after-hours-tee', 'midnight-cargo-tee', 'static-noise-overshirt', 'night-shift-shirt', 'low-profile-sunnies'],
   },
   {
     slug: 'everyday-nalayak', title: 'EVERYDAY NALAYAK',
     desc: 'The daily uniform of the unapologetic.',
-    image: 'photo-1441984904996-e0b6ba687e04',
-    products: ['nalayak-standard-tee', 'frequency-tee', 'daily-chaos-joggers', 'wrong-crowd-tote', 'denim-but-nalayak', 'summer-of-chaos-shirt'],
+    image: '/collections/everyday-nalayak.jpg',
+    products: ['everyday-nalayak-essential-tee', 'nalayak-standard-tee', 'frequency-tee', 'off-record-overshirt', 'daily-chaos-joggers', 'side-eye-cap', 'wrong-crowd-tote', 'denim-but-nalayak', 'summer-of-chaos-shirt'],
   },
   {
     slug: 'limited-drops', title: 'LIMITED DROPS',
     desc: 'Small runs. Big regret if you miss them.',
-    image: 'photo-1576775068668-c147f14c36f7',
-    products: ['no-approval-oversized-tee', 'quiet-riot-shirt', 'wrong-place-trousers', 'her-chaos-crop-tee'],
+    image: '/collections/limited-drops.jpg',
+    products: ['archive-specimen-series-001', 'no-approval-oversized-tee', 'the-500-hoodie', 'quiet-riot-shirt', 'off-script-denim', 'wrong-place-trousers', 'her-chaos-crop-tee'],
   },
 ];
 
@@ -439,6 +474,7 @@ export const footerLinks = {
     { label: 'Men', to: '/men' },
     { label: 'Women', to: '/women' },
     { label: 'Tees', to: '/tees' },
+    { label: 'Shirts', to: '/shirts' },
     { label: 'Hoodies', to: '/hoodies' },
     { label: 'Bottoms', to: '/bottoms' },
     { label: 'Accessories', to: '/accessories' },
@@ -456,7 +492,7 @@ export const footerLinks = {
     { label: 'Our Story', to: '/about' },
     { label: 'Members', to: '/membership' },
     { label: 'Custom Design', to: '/custom-design' },
-    { label: 'Instagram', to: '/about' },
+    { label: 'Instagram', to: 'https://www.instagram.com/nalayak.store/' },
     { label: 'Terms', to: '/faq' },
     { label: 'Privacy', to: '/faq' },
   ],
@@ -471,6 +507,8 @@ export const listings = {
   hoodies: { title: 'HOODIES', kicker: 'SHOP HOODIES', desc: 'Fleece thick enough to hide in.', filter: (p) => p.category === 'hoodies' },
   bottoms: { title: 'BOTTOMS', kicker: 'SHOP BOTTOMS', desc: 'From the waist down, fully unserious.', filter: (p) => p.category === 'bottoms' },
   accessories: { title: 'ACCESSORIES', kicker: 'SHOP ACCESSORIES', desc: 'The finishing touches of a bad influence.', filter: (p) => p.category === 'accessories' },
+  all: { title: 'ALL PIECES', kicker: 'ATELIER ARCHIVE', desc: 'The entire Nalayak catalog. No filters, no omissions.', filter: () => true },
+  shop: { title: 'SHOP ALL', kicker: 'ATELIER ARCHIVE', desc: 'The entire Nalayak catalog. No filters, no omissions.', filter: () => true },
 };
 
 export const formatINR = (n) =>

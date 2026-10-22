@@ -19,6 +19,7 @@ import { useSeo } from '@/hooks/useSeo';
 function Hero() {
   const ref = useRef(null);
   const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -30,34 +31,49 @@ function Hero() {
 
   const slides = [
     {
-      desktop: `https://images.unsplash.com/${hero.desktop}?q=80&w=2000&auto=format&fit=crop`,
-      mobile: `https://images.unsplash.com/${hero.mobile}?q=80&w=900&auto=format&fit=crop`,
+      desktop: '/slide1.png',
+      mobile: '/slide1-mobile.png',
+      kicker: 'AW26 // THE WRONG CROWD',
+      headline: ['NOT FOR', 'EVERYONE.'],
+      copy: 'Clothes for people who were never interested in fitting in.',
+      tag: 'DROP 01 · CHAOS EDIT',
     },
     {
       desktop: '/slide2.png',
-      mobile: '/slide2.png',
+      mobile: '/slide2-mobile.png',
+      kicker: 'WASHED HEAVYWEIGHT // 450 GSM',
+      headline: ['AFTER', 'HOURS.'],
+      copy: 'Stealth boxy cuts engineered for the plans that start past midnight.',
+      tag: 'DROP 02 · STEALTH FLEECE',
     },
     {
       desktop: '/slide3.png',
-      mobile: '/slide3.png',
+      mobile: '/slide3-mobile.png',
+      kicker: 'RAW KOLKATA ATELIER // ESSENTIALS',
+      headline: ['DAILY', 'DISRESPECT.'],
+      copy: 'Heavyweight combed cotton. Pre-shrunk so your size stays your size.',
+      tag: 'DROP 03 · EVERYDAY NALAYAK',
     },
   ];
 
   useEffect(() => {
+    if (paused) return;
     const timer = setInterval(() => {
       setSlide((current) => (current + 1) % slides.length);
-    }, 5000);
+    }, 5500);
 
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [paused, slides.length]);
 
   const currentSlide = slides[slide];
 
   return (
     <section
       ref={ref}
-      className="relative h-[92vh] min-h-[560px] overflow-hidden bg-ink"
+      className="relative h-[92vh] min-h-[620px] overflow-hidden bg-ink"
       data-testid="hero"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
       <motion.div
         className="absolute inset-0"
@@ -68,12 +84,11 @@ function Hero() {
             media="(max-width: 768px)"
             srcSet={currentSlide.mobile}
           />
-
           <motion.img
             key={currentSlide.desktop}
             src={currentSlide.desktop}
             alt="NALAYAK AW26 campaign — the wrong crowd"
-            className="h-full w-full object-cover opacity-90"
+            className="h-full w-full object-cover opacity-85"
             loading={slide === 0 ? 'eager' : 'lazy'}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -81,32 +96,84 @@ function Hero() {
           />
         </picture>
 
-        <div className="absolute inset-0 bg-ink/35" />
+        {/* High-legibility gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-95" />
+        <div className="absolute inset-0 bg-ink/20" />
       </motion.div>
 
-      <div className="relative z-10 h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8 max-w-[1600px] mx-auto">
+      <div className="relative z-10 h-full flex flex-col justify-end pb-12 md:pb-20 px-4 md:px-8 max-w-[1600px] mx-auto w-full">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          key={slide}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.8, ease }}
-          className="mt-8 flex flex-wrap gap-3"
+          transition={{ duration: 0.6, ease }}
+          className="max-w-3xl"
         >
-          <Link
-            to={hero.primary.to}
-            data-testid="hero-shop-new-btn"
-            className="bg-paper text-ink px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper border border-paper transition-colors duration-300"
-          >
-            {hero.primary.label}
-          </Link>
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span className="h-px w-8 bg-paper/60" />
+            <span className="text-[10px] md:text-[11px] tracking-[0.35em] uppercase font-medium text-paper/80">
+              {currentSlide.kicker}
+            </span>
+          </div>
 
-          <Link
-            to={hero.secondary.to}
-            data-testid="hero-explore-btn"
-            className="border border-paper text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-paper hover:text-ink transition-colors duration-300"
-          >
-            {hero.secondary.label}
-          </Link>
+          <h1 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-paper text-[12vw] sm:text-[9vw] md:text-[6.2vw] text-balance">
+            {currentSlide.headline.map((line, idx) => (
+              <span key={idx} className="block">
+                {line}
+              </span>
+            ))}
+          </h1>
+
+          <p className="mt-4 md:mt-5 text-sm md:text-base text-paper/80 max-w-md leading-relaxed font-sans">
+            {currentSlide.copy}
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              to={hero.primary.to}
+              data-testid="hero-shop-new-btn"
+              className="bg-paper text-ink px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper border border-paper transition-colors duration-300"
+            >
+              {hero.primary.label}
+            </Link>
+
+            <Link
+              to={hero.secondary.to}
+              data-testid="hero-explore-btn"
+              className="border border-paper text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-paper hover:text-ink transition-colors duration-300"
+            >
+              {hero.secondary.label}
+            </Link>
+          </div>
         </motion.div>
+
+        {/* Slide Selector & Progress Indicators */}
+        <div className="mt-10 pt-6 border-t border-paper/15 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {slides.map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSlide(idx)}
+                data-testid={`hero-slide-indicator-${idx}`}
+                aria-label={`Go to slide ${idx + 1}`}
+                className="group flex items-center gap-2 text-[10px] tracking-[0.25em] font-medium transition-colors"
+              >
+                <span className={slide === idx ? 'text-paper font-bold' : 'text-paper/40 group-hover:text-paper/80'}>
+                  0{idx + 1}
+                </span>
+                <span
+                  className={`h-[2px] transition-all duration-300 ${
+                    slide === idx ? 'w-10 md:w-16 bg-paper' : 'w-4 md:w-6 bg-paper/20 group-hover:bg-paper/50'
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+
+          <span className="hidden sm:inline-block text-[10px] tracking-[0.25em] text-paper/50 uppercase">
+            {currentSlide.tag}
+          </span>
+        </div>
       </div>
     </section>
   );
@@ -160,13 +227,30 @@ function NalayakEdit() {
 
 function Categories() {
   return (
-    <section className="py-20 md:py-28 border-t border-line" data-testid="shop-by-category">
-      <div className="px-4 md:px-8 max-w-[1600px] mx-auto">
-        <SectionHeader kicker="CATEGORIES" title="SHOP THE ESSENTIALS" />
+    <section className="py-16 md:py-24 border-t border-line bg-paper" data-testid="shop-by-category">
+      <div className="px-4 md:px-8 max-w-[1600px] mx-auto mb-8 md:mb-12">
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src="/NALayak%20Compass%20Gothic%20Logo.png"
+            alt="NALAYAK"
+            className="h-7 md:h-8 w-auto object-contain"
+          />
+          <span className="h-4 w-px bg-line" />
+          <span className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-smoke font-medium">
+            CORE SILHOUETTES · ATELIER SPECIMENS
+          </span>
+        </div>
+        <h2 className="font-display font-extrabold uppercase tracking-tight text-3xl md:text-5xl">
+          SHOP BY CATEGORY
+        </h2>
+        <p className="mt-3 text-smoke text-sm md:text-base max-w-lg">
+          Engineered with substantial weight, tight collars and boxy drapes.
+        </p>
       </div>
+
       <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 md:px-8 max-w-[1600px] mx-auto">
         {categoryTiles.map((tile, i) => (
-          <Reveal key={tile.label} delay={i * 0.06} className="shrink-0 w-[70vw] sm:w-[40vw] md:w-[19%] md:min-w-0 md:flex-1">
+          <Reveal key={tile.label} delay={i * 0.05} className="shrink-0 w-[68vw] sm:w-[38vw] md:w-[19%] md:min-w-0 md:flex-1">
             <Link
               to={tile.to}
               data-testid={`category-tile-${tile.label.toLowerCase()}`}
@@ -176,13 +260,110 @@ function Categories() {
                 id={tile.image} w={700} alt={tile.label}
                 className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-[1.05]"
               />
-              <div className="absolute inset-0 bg-ink/20 group-hover:bg-ink/40 transition-colors duration-500" />
+
+              {/* Official NALAYAK Brand Tag Pill */}
+              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 bg-ink/85 backdrop-blur-md border border-paper/25 shadow-sm">
+                <img
+                  src="/nalayak-icon.png"
+                  alt=""
+                  className="h-3 w-3 object-contain invert"
+                />
+                <span className="text-[8.5px] tracking-[0.25em] font-semibold text-paper uppercase">
+                  NALAYAK
+                </span>
+              </div>
+
+              {/* Animated Compass Star Watermark */}
+              <div className="absolute top-3 right-3 z-10 pointer-events-none">
+                <img
+                  src="/nalayak-icon.png"
+                  alt=""
+                  className="h-4 w-4 md:h-5 md:w-5 object-contain invert opacity-45 group-hover:opacity-100 group-hover:rotate-45 transition-all duration-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                />
+              </div>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent group-hover:from-ink/95 transition-colors duration-500" />
               <div className="absolute inset-x-0 bottom-0 p-5">
-                <h3 className="font-display font-extrabold uppercase tracking-tight text-paper text-xl md:text-2xl">
+                {tile.spec && (
+                  <p className="text-[9px] tracking-[0.25em] text-paper/60 uppercase mb-1">
+                    {tile.spec}
+                  </p>
+                )}
+                <h3 className="font-display font-black uppercase tracking-tight text-paper text-xl md:text-2xl">
                   {tile.label}
                 </h3>
-                <span className="text-[10px] tracking-[0.25em] text-paper/80 group-hover:translate-x-1 inline-block transition-transform duration-300">
-                  SHOP NOW →
+                <span className="text-[10px] tracking-[0.25em] text-paper/80 group-hover:translate-x-1 inline-block transition-transform duration-300 mt-2 font-medium">
+                  EXPLORE →
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ShopByDepartment() {
+  const departments = [
+    {
+      title: "MEN'S STREETWEAR",
+      kicker: 'DEPARTMENT 01',
+      desc: 'Heavyweight boxy drop-shoulders, wide-leg utility cargo & oversized fleece.',
+      to: '/men',
+      image: '/products/devanagari-chaos-tee-front.jpg',
+      cta: 'SHOP MEN →',
+    },
+    {
+      title: "WOMEN'S EDIT",
+      kicker: 'DEPARTMENT 02',
+      desc: 'Structured baby crops, relaxed open collars, tailored twill & jewelry.',
+      to: '/women',
+      image: '/products/her-chaos-crop-tee-front.jpg',
+      cta: 'SHOP WOMEN →',
+    },
+    {
+      title: 'UNISEX ARCHIVE',
+      kicker: 'DEPARTMENT 03',
+      desc: 'Signature heavyweight 240–450 GSM garments engineered for everyone.',
+      to: '/collections',
+      image: '/collections/the-chaos-edit.jpg',
+      cta: 'EXPLORE ALL →',
+    },
+  ];
+
+  return (
+    <section className="py-20 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="shop-by-department">
+      <SectionHeader
+        kicker="DEPARTMENTS"
+        title="BUILT FOR HOW YOU WEAR IT"
+        desc="Men's, women's, and unisex silhouettes engineered with real weight and posture."
+      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        {departments.map((d, i) => (
+          <Reveal key={d.title} delay={i * 0.08}>
+            <Link
+              to={d.to}
+              data-testid={`department-card-${d.to.replace('/', '')}`}
+              className="group relative block overflow-hidden bg-ink aspect-[3/4]"
+            >
+              <SafeImg
+                id={d.image}
+                w={900}
+                alt={d.title}
+                className="absolute inset-0 h-full w-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-[1.05]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-paper">
+                <p className="text-[10px] tracking-[0.3em] text-paper/60 mb-2">{d.kicker}</p>
+                <h3 className="font-display font-black uppercase tracking-tight text-2xl md:text-3xl leading-tight">
+                  {d.title}
+                </h3>
+                <p className="mt-2 text-xs md:text-sm text-paper/75 max-w-xs leading-relaxed">
+                  {d.desc}
+                </p>
+                <span className="mt-5 inline-block text-[11px] tracking-[0.25em] border-b border-paper pb-1 font-medium group-hover:translate-x-1 transition-transform duration-300">
+                  {d.cta}
                 </span>
               </div>
             </Link>
@@ -279,49 +460,24 @@ function CustomDesignSection() {
   );
 }
 
-function MembershipStrip() {
-  return (
-    <section className="bg-ink text-paper" data-testid="membership-strip">
-      <div className="px-4 md:px-8 py-20 md:py-28 max-w-[1600px] mx-auto">
-        <Reveal>
-          <p className="text-[11px] tracking-[0.3em] text-paper/60 mb-4">NALAYAK MEMBERS</p>
-          <h2 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-[10vw] md:text-[5.5vw]">
-            START WITH BELONGING.
-          </h2>
-          <p className="mt-5 text-paper/75 text-sm md:text-base max-w-md">
-            Membership is free. The good stuff comes with it.
-          </p>
-          <Link
-            to="/membership"
-            data-testid="membership-strip-btn"
-            className="inline-block mt-8 bg-paper text-ink px-8 py-4 text-[11px] tracking-[0.3em] font-medium border border-paper hover:bg-transparent hover:text-paper transition-colors duration-300"
-          >
-            EXPLORE MEMBERSHIP
-          </Link>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 function BrandStory() {
   return (
     <section className="grid md:grid-cols-2 border-t border-line" data-testid="brand-story">
       <div className="relative overflow-hidden min-h-[360px] md:min-h-[620px]">
         <SafeImg
-          id={story.image} w={1400} alt="Inside the NALAYAK studio"
+          id={story.image} w={1400} alt="Inside the NALAYAK atelier workbench"
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
       <div className="flex flex-col justify-center px-6 md:px-16 py-16 md:py-24 bg-white">
         <Reveal>
-          <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">THE BRAND</p>
+          <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">THE ATELIER</p>
           <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-3xl md:text-5xl text-balance">
             {story.headline}
           </h2>
           <div className="mt-6 space-y-4 max-w-md">
             {story.paragraphs.map((p, i) => (
-              <p key={i} className={`text-sm md:text-base leading-relaxed ${i === story.paragraphs.length - 1 ? 'font-semibold' : 'text-ink/70'}`}>
+              <p key={i} className={`text-sm md:text-base leading-relaxed ${i === story.paragraphs.length - 1 ? 'font-semibold text-ink' : 'text-ink/75'}`}>
                 {p}
               </p>
             ))}
@@ -331,7 +487,7 @@ function BrandStory() {
             data-testid="story-cta-btn"
             className="inline-block mt-8 border border-ink px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors duration-300"
           >
-            {story.cta.label}
+            {story.cta.label} →
           </Link>
         </Reveal>
       </div>
@@ -428,10 +584,17 @@ export default function Home() {
 
   return (
     <main>
+      {/* 1. Campaign Hero */}
       <Hero />
+
+      {/* 2. Editorial Marquee */}
       <EditorialMarquee />
 
-      <section className="py-20 md:py-32 px-4 md:px-8 max-w-[1600px] mx-auto" data-testid="new-arrivals-section">
+      {/* 3. Shop By Category (Immediate visual discovery) */}
+      <Categories />
+
+      {/* 4. Curated New Arrivals */}
+      <section className="py-20 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="new-arrivals-section">
         <SectionHeader
           kicker="JUST LANDED"
           title="NEW ARRIVALS"
@@ -448,17 +611,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 5. Distinct Men's, Women's & Unisex Discovery */}
+      <ShopByDepartment />
+
+      {/* 6. The Nalayak Edit (Collections Showcase) */}
       <NalayakEdit />
-      <Categories />
+
+      {/* 7. Campaign Parallax Banner */}
       <Campaign />
 
-      <section className="py-20 md:py-32" data-testid="best-sellers-section">
+      {/* 8. Best Sellers Rail */}
+      <section className="py-20 md:py-28 border-t border-line" data-testid="best-sellers-section">
         <div className="px-4 md:px-8 max-w-[1600px] mx-auto">
           <SectionHeader
             kicker="MOST WANTED"
             title="THE ONES EVERYONE WANTS"
             desc="Our most-wanted pieces. Statistically speaking, you’re late."
-            linkTo="/men"
+            linkTo="/collections"
             linkLabel="VIEW ALL"
           />
         </div>
@@ -471,14 +640,23 @@ export default function Home() {
         </div>
       </section>
 
-      <Manifesto />
+      {/* 9. Brand Story & Atelier Craft */}
       <BrandStory />
-      <CustomDesignSection />
-      <IrlGrid />
-      <CustomerReviews />
-      <MembershipStrip />
-      <Newsletter />
 
+      {/* 10. Custom Design Section */}
+      <CustomDesignSection />
+
+      {/* 11. Nalayak IRL (Community Lookbook) */}
+      <IrlGrid />
+
+      {/* 12. Customer Reviews (Transparent Archive) */}
+      <CustomerReviews />
+
+      {/* 13. Brand Manifesto (Anchoring brand philosophy) */}
+      <Manifesto />
+
+      {/* 14. Newsletter VIP Access */}
+      <Newsletter />
     </main>
   );
 }

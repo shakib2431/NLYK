@@ -93,3 +93,14 @@ frontend/node_modules/.cache/default-development/4.pack
 .vercel
 .env*
 supabase/.temp/
+*.bak
+*.backup
+scratch/
+email-backend-review.txt
+email-frontend-review.txt
+backend/fix_*.py
+backend/patch_*.py
+backend/secure_club_payments.py
+backend/server_mongo_backup.py
+backend/club_payment_section.txt
+*backup*

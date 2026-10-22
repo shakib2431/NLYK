@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Info, Star, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Star, ExternalLink } from 'lucide-react';
 import { Reveal } from '@/components/Reveal';
 import { demoReviews } from '@/data/storeData';
 
@@ -134,9 +134,9 @@ export default function CustomerReviews() {
           </p>
         </div>
 
-        {/* Trust Disclosure Badge / Google Verification Pill */}
-        <div className="flex flex-col sm:items-end gap-3">
-          {meta.isLiveGoogle ? (
+        {/* Google Verification Pill (rendered when live Google Reviews are active) */}
+        {meta.isLiveGoogle && (
+          <div className="flex flex-col sm:items-end gap-3">
             <a
               href={meta.googleMapsUrl || 'https://maps.google.com'}
               target="_blank"
@@ -148,24 +148,14 @@ export default function CustomerReviews() {
               <span>GOOGLE VERIFIED REVIEWS · POWERED BY GOOGLE</span>
               <ExternalLink size={11} className="transition-transform group-hover:translate-x-0.5" />
             </a>
-          ) : (
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 border border-line bg-white text-[10px] tracking-[0.25em] text-smoke uppercase self-start sm:self-auto"
-              data-testid="reviews-trust-badge"
-            >
-              <Info size={13} className="text-ink shrink-0" />
-              <span>DEMO REVIEWS · PRE-LAUNCH FEEDBACK ARCHIVE</span>
-            </div>
-          )}
 
-          <p className="text-[11px] text-smoke/70 max-w-xs text-left sm:text-right leading-normal">
-            {meta.isLiveGoogle
-              ? (meta.rating
-                  ? `★ ${meta.rating.toFixed(1)} rating across ${meta.userRatingsTotal || 0} reviews on Google Maps.`
-                  : 'Verified reviews imported via Google Places API.')
-              : 'Early feedback collected from studio wearers and test batches. Zero fabricated ratings.'}
-          </p>
-        </div>
+            {meta.rating && (
+              <p className="text-[11px] text-smoke/70 max-w-xs text-left sm:text-right leading-normal">
+                ★ {meta.rating.toFixed(1)} rating across {meta.userRatingsTotal || 0} reviews on Google Maps.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Category Filter Bar & Navigation Controls */}

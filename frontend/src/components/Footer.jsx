@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Instagram, Twitter, Youtube, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { footerLinks, site } from '@/data/storeData';
+import RotatingPackage3D from '@/components/RotatingPackage3D';
 
 
 export default function Footer() {
@@ -11,13 +12,18 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 md:gap-8 pb-16 border-b border-paper/15">
 
 <div className="col-span-2">
-  <Link to="/" aria-label="NALAYAK home" className="inline-block mb-6">
-    <img
-      src="/nalayak-logo-white.png"
-      alt="NALAYAK"
-      className="block w-[180px] md:w-[220px] h-auto object-contain"
-    />
-  </Link>
+  <div className="flex items-center gap-4 sm:gap-6 mb-6">
+    <Link to="/" aria-label="NALAYAK home" className="inline-block shrink-0">
+      <img
+        src="/nalayak-logo-white.png"
+        alt="NALAYAK"
+        className="block w-[160px] md:w-[200px] h-auto object-contain"
+      />
+    </Link>
+    <div className="shrink-0 flex items-center" data-testid="footer-3d-package">
+      <RotatingPackage3D className="w-[80px] h-[95px] sm:w-[90px] sm:h-[105px] md:w-[100px] md:h-[115px]" />
+    </div>
+  </div>
   <p className="text-[11px] tracking-[0.3em] text-paper/50 mb-4">
     THE FINE PRINT
   </p>
@@ -52,13 +58,25 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 {links.map((l) => (
                   <li key={l.label}>
-                    <Link
-                      to={l.to}
-                      data-testid={`footer-${col.toLowerCase()}-${l.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="text-sm text-paper/75 hover:text-paper transition-colors duration-300"
-                    >
-                      {l.label}
-                    </Link>
+                    {l.to.startsWith('http') ? (
+                      <a
+                        href={l.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid={`footer-${col.toLowerCase()}-${l.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        className="text-sm text-paper/75 hover:text-paper transition-colors duration-300"
+                      >
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link
+                        to={l.to}
+                        data-testid={`footer-${col.toLowerCase()}-${l.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        className="text-sm text-paper/75 hover:text-paper transition-colors duration-300"
+                      >
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

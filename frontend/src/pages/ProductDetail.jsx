@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Heart, Minus, Plus, ChevronDown, Truck, RotateCcw, Box, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Viewer3D from '@/components/Viewer3D';
+import SizeGuideModal from '@/components/SizeGuideModal';
+import MobileStickyPurchaseBar from '@/components/MobileStickyPurchaseBar';
+import { ProductSpecBadges, ProductSpecDetails } from '@/components/ProductSpecs';
 import { toast } from 'sonner';
 import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
@@ -34,7 +37,7 @@ function Accordion({ title, children, testId }) {
 export default function ProductDetail() {
   const { slug } = useParams();
   const product = getProductBySlug(slug);
-  const { addToCart, wishlist, toggleWishlist, addRecentlyViewed, recentlyViewedProducts, member, dropAlerts, toggleDropAlert } = useStore();
+  const { addToCart, wishlist, toggleWishlist, addRecentlyViewed, recentlyViewedProducts, member, dropAlerts, toggleDropAlert, cartOpen } = useStore();
 
   const [imgIndex, setImgIndex] = useState(0);
   const [color, setColor] = useState(null);
@@ -42,16 +45,95 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [show3D, setShow3D] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const sizeGuideTriggerRef = useRef(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const mainPurchaseRef = useRef(null);
+  const sizeSectionRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const selectedColorImage = product?.colorImages?.[color?.name] || null;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mq = window.matchMedia('(hover: none), (pointer: coarse)');
+      setIsTouchDevice(mq.matches);
+      const listener = (e) => setIsTouchDevice(e.matches);
+      mq.addEventListener('change', listener);
+      return () => mq.removeEventListener('change', listener);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = mainPurchaseRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Bar appears on mobile when main purchase controls scroll out of the viewport
+        const isPastCta = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        setShowStickyBar(isPastCta);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [slug]);
+
+  useEffect(() => {
+    setIsHovered(false);
+    setMousePos({ x: 50, y: 50 });
+  }, [imgIndex, color, slug]);
+
+  const handlePointerMove = (e) => {
+    if (e.pointerType === 'touch') return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    setMousePos({ x, y });
+    setIsHovered(true);
+  };
+
+  const handlePointerEnter = (e) => {
+    if (e.pointerType === 'touch') return;
+    setIsHovered(true);
+  };
+
+  const handlePointerLeave = (e) => {
+    if (e.pointerType === 'touch') return;
+    setIsHovered(false);
+    setMousePos({ x: 50, y: 50 });
+  };
+
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+
+  const zoomStyle = {
+    transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+    transform: isHovered && !prefersReducedMotion ? 'scale(1.85)' : 'scale(1)',
+    transition: isHovered
+      ? 'transform 200ms cubic-bezier(0.2, 0, 0.2, 1)'
+      : 'transform 300ms cubic-bezier(0.2, 0, 0.2, 1), transform-origin 0ms',
+    willChange: isHovered ? 'transform, transform-origin' : 'auto',
+  };
 
   useEffect(() => {
     setImgIndex(0); 
     setQty(1);
-    setSize(null);
+    setShowStickyBar(false);
     if (product) {
       setColor(product.colors[0]);
       addRecentlyViewed(product.slug);
+      if (product.sizes?.length === 1) {
+        setSize(product.sizes[0]);
+      } else {
+        setSize(null);
+      }
     }
   }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -100,8 +182,21 @@ export default function ProductDetail() {
     toast.success(buyNow ? 'Straight to checkout energy.' : 'Added to bag', { description: `${product.name} — ${size}` });
   };
 
+  const handleStickyAdd = () => {
+    if (dropState === 'locked' || dropState === 'coming-soon') {
+      mainPurchaseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!size) {
+      mainPurchaseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast.error('Pick a size first.', { description: 'Even rebels need the right fit.' });
+      return;
+    }
+    tryAdd(false);
+  };
+
   return (
-    <main className="max-w-[1600px] mx-auto" data-testid={`pdp-${product.slug}`}>
+    <main className="max-w-[1600px] mx-auto pb-24 md:pb-0" data-testid={`pdp-${product.slug}`}>
       <div className="px-4 md:px-8 pt-8">
         <nav className="text-[10px] tracking-[0.25em] text-smoke" aria-label="Breadcrumb">
           <Link to="/" className="hover:text-ink transition-colors">HOME</Link>
@@ -119,7 +214,7 @@ export default function ProductDetail() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="relative bg-white border border-line aspect-[3/4] overflow-hidden group"
+            className="relative bg-white border border-line aspect-[3/4] overflow-hidden group select-none"
             data-testid="pdp-gallery"
           >
             <button
@@ -128,28 +223,45 @@ export default function ProductDetail() {
                 setZoomLevel(1);
                 setShowZoom(true);
               }}
-              className="absolute inset-0 z-0 cursor-zoom-in"
-              aria-label="Zoom product image"
+              onPointerEnter={handlePointerEnter}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+              onMouseEnter={handlePointerEnter}
+              onMouseMove={handlePointerMove}
+              onMouseLeave={handlePointerLeave}
+              className="absolute inset-0 z-0 overflow-hidden cursor-crosshair sm:cursor-zoom-in text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-ink"
+              aria-label="Expand product image in fullscreen"
             >
               {selectedColorImage ? (
                 <img
                   src={selectedColorImage}
                   alt={`${product.name} — ${color?.name || ''}`}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="h-full w-full object-cover select-none pointer-events-none"
+                  style={zoomStyle}
+                  draggable="false"
                 />
               ) : (
                 <SafeImg
                   id={product.images[imgIndex] || product.images[0]}
                   w={1400}
                   alt={`${product.name} — view ${imgIndex + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="h-full w-full object-cover select-none pointer-events-none"
+                  style={zoomStyle}
+                  draggable="false"
                 />
               )}
             </button>
 
-            <div className="pointer-events-none absolute bottom-3 right-3 z-10 flex items-center gap-2 bg-paper/90 px-3 py-2 text-[10px] tracking-[0.15em]">
-              <ZoomIn size={14} />
-              <span>CLICK TO ZOOM</span>
+            {/* Subtle hover zoom hint on desktop, tap to enlarge hint on touch */}
+            <div
+              className={`pointer-events-none absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-paper/90 backdrop-blur-sm px-2.5 py-1 text-[9px] tracking-[0.2em] font-medium uppercase text-smoke border border-line/60 transition-opacity duration-300 ${
+                isHovered ? 'opacity-0' : 'opacity-85 group-hover:opacity-100'
+              }`}
+              aria-hidden="true"
+            >
+              <ZoomIn size={12} className="text-ink" />
+              <span className="hidden sm:inline">HOVER TO EXPLORE</span>
+              <span className="sm:hidden">TAP TO EXPAND</span>
             </div>
 
             {product.badge && (
@@ -164,7 +276,11 @@ export default function ProductDetail() {
               <button
                 key={id}
                 data-testid={`pdp-thumb-${i}`}
-                onClick={() => setImgIndex(i)}
+                onClick={() => {
+                  setImgIndex(i);
+                  setIsHovered(false);
+                  setMousePos({ x: 50, y: 50 });
+                }}
                 className={`h-20 w-16 bg-white border overflow-hidden transition-colors ${i === imgIndex ? 'border-ink' : 'border-line hover:border-smoke'}`}
                 aria-label={`View image ${i + 1}`}
               >
@@ -200,6 +316,9 @@ export default function ProductDetail() {
             </div>
             <p className="mt-1 text-[11px] text-smoke tracking-wide">MRP incl. of all taxes</p>
 
+            {/* Verified atelier specification badges */}
+            <ProductSpecBadges product={product} />
+
             <div className="mt-8">
               <p className="text-[11px] tracking-[0.25em] font-medium mb-3">
                 COLOUR — <span className="text-smoke">{color?.name.toUpperCase()}</span>
@@ -212,6 +331,8 @@ export default function ProductDetail() {
                     onClick={() => {
                       setColor(c);
                       setImgIndex(0);
+                      setIsHovered(false);
+                      setMousePos({ x: 50, y: 50 });
                     }}
                     title={c.name}
                     aria-label={`Colour ${c.name}`}
@@ -222,12 +343,20 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <div className="mt-8">
+            <div ref={sizeSectionRef} className="mt-8" data-testid="pdp-size-section">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[11px] tracking-[0.25em] font-medium">SIZE</p>
-                <Link to="/size-guide" data-testid="pdp-size-guide-link" className="text-[11px] tracking-[0.15em] text-smoke underline underline-offset-4 hover:text-ink transition-colors">
+                <button
+                  ref={sizeGuideTriggerRef}
+                  type="button"
+                  onClick={() => setShowSizeGuide(true)}
+                  data-testid="pdp-size-guide-link"
+                  aria-haspopup="dialog"
+                  aria-expanded={showSizeGuide}
+                  className="text-[11px] tracking-[0.15em] text-smoke underline underline-offset-4 hover:text-ink transition-colors cursor-pointer"
+                >
                   SIZE GUIDE
-                </Link>
+                </button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => (
@@ -261,72 +390,74 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {dropState === 'locked' || dropState === 'coming-soon' ? (
-              <div className="mt-8 border border-ink p-6 md:p-8 text-center" data-testid="pdp-locked">
-                <p className="text-[11px] tracking-[0.25em] text-smoke mb-2">
-                  {dropState === 'coming-soon'
-                    ? `COMING SOON — CLUB ACCESS ${formatReleaseLabel(product.clubReleaseAt)}`
-                    : 'CLUB ACCESS ONLY'}
-                </p>
-                <p className="font-display font-extrabold uppercase tracking-tight text-2xl">
-                  THIS PIECE ISN'T PUBLIC YET.
-                </p>
-                <Link
-                  to="/club"
-                  data-testid="pdp-join-club-btn"
-                  className="inline-block mt-5 bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300"
-                >
-                  JOIN THE CLUB
-                </Link>
-                {dropState === 'coming-soon' && (
-                  <button
-                    onClick={toggleNotify}
-                    data-testid="pdp-notify-btn"
-                    className="block mx-auto mt-4 text-[11px] tracking-[0.25em] text-smoke hover:text-ink transition-colors underline underline-offset-4"
-                  >
-                    {subscribed ? "YOU'RE ON THE LIST." : 'NOTIFY ME AT PUBLIC RELEASE'}
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                {dropState === 'club-live' && (
-                  <p className="mt-8 text-[11px] tracking-[0.25em] text-smoke" data-testid="pdp-club-live">
-                    CLUB EARLY ACCESS — YOU'RE IN FIRST.
+            <div ref={mainPurchaseRef} data-testid="pdp-purchase-section">
+              {dropState === 'locked' || dropState === 'coming-soon' ? (
+                <div className="mt-8 border border-ink p-6 md:p-8 text-center" data-testid="pdp-locked">
+                  <p className="text-[11px] tracking-[0.25em] text-smoke mb-2">
+                    {dropState === 'coming-soon'
+                      ? `COMING SOON — CLUB ACCESS ${formatReleaseLabel(product.clubReleaseAt)}`
+                      : 'CLUB ACCESS ONLY'}
                   </p>
-                )}
-                <div className={`${dropState === 'club-live' ? 'mt-3' : 'mt-8'} grid grid-cols-[1fr_auto] gap-3`}>
-                  <button
-                    data-testid="pdp-add-to-bag"
-                    disabled={soldOut}
-                    onClick={() => tryAdd(false)}
-                    className="bg-ink text-paper py-4 text-[12px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  <p className="font-display font-extrabold uppercase tracking-tight text-2xl">
+                    THIS PIECE ISN'T PUBLIC YET.
+                  </p>
+                  <Link
+                    to="/club"
+                    data-testid="pdp-join-club-btn"
+                    className="inline-block mt-5 bg-ink text-paper px-8 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300"
                   >
-                    {soldOut ? 'SOLD OUT' : 'ADD TO BAG'}
-                  </button>
-                  <button
-                    data-testid="pdp-wishlist-btn"
-                    onClick={() => {
-                      toggleWishlist(product.slug);
-                      toast(wished ? 'Removed from wishlist' : 'Saved for later regret', { description: product.name });
-                    }}
-                    aria-label="Toggle wishlist"
-                    className="border border-ink px-5 hover:bg-ink hover:text-paper transition-colors duration-300"
-                  >
-                    <Heart size={17} strokeWidth={1.5} className={wished ? 'fill-current' : ''} />
-                  </button>
+                    JOIN THE CLUB
+                  </Link>
+                  {dropState === 'coming-soon' && (
+                    <button
+                      onClick={toggleNotify}
+                      data-testid="pdp-notify-btn"
+                      className="block mx-auto mt-4 text-[11px] tracking-[0.25em] text-smoke hover:text-ink transition-colors underline underline-offset-4"
+                    >
+                      {subscribed ? "YOU'RE ON THE LIST." : 'NOTIFY ME AT PUBLIC RELEASE'}
+                    </button>
+                  )}
                 </div>
-                {!soldOut && (
-                  <button
-                    data-testid="pdp-buy-now"
-                    onClick={() => tryAdd(true)}
-                    className="mt-3 w-full border border-ink py-4 text-[12px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors duration-300"
-                  >
-                    BUY NOW
-                  </button>
-                )}
-              </>
-            )}
+              ) : (
+                <>
+                  {dropState === 'club-live' && (
+                    <p className="mt-8 text-[11px] tracking-[0.25em] text-smoke" data-testid="pdp-club-live">
+                      CLUB EARLY ACCESS — YOU'RE IN FIRST.
+                    </p>
+                  )}
+                  <div className={`${dropState === 'club-live' ? 'mt-3' : 'mt-8'} grid grid-cols-[1fr_auto] gap-3`}>
+                    <button
+                      data-testid="pdp-add-to-bag"
+                      disabled={soldOut}
+                      onClick={() => tryAdd(false)}
+                      className="bg-ink text-paper py-4 text-[12px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {soldOut ? 'SOLD OUT' : 'ADD TO BAG'}
+                    </button>
+                    <button
+                      data-testid="pdp-wishlist-btn"
+                      onClick={() => {
+                        toggleWishlist(product.slug);
+                        toast(wished ? 'Removed from wishlist' : 'Saved for later regret', { description: product.name });
+                      }}
+                      aria-label="Toggle wishlist"
+                      className="border border-ink px-5 hover:bg-ink hover:text-paper transition-colors duration-300"
+                    >
+                      <Heart size={17} strokeWidth={1.5} className={wished ? 'fill-current' : ''} />
+                    </button>
+                  </div>
+                  {!soldOut && (
+                    <button
+                      data-testid="pdp-buy-now"
+                      onClick={() => tryAdd(true)}
+                      className="mt-3 w-full border border-ink py-4 text-[12px] tracking-[0.3em] font-medium hover:bg-ink hover:text-paper transition-colors duration-300"
+                    >
+                      BUY NOW
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
 
             <div className="mt-6 space-y-3 text-sm text-ink/70">
               <p className="flex items-center gap-3"><Truck size={15} strokeWidth={1.5} /> Free shipping above ₹999. Dispatched in 48 hours.</p>
@@ -363,6 +494,9 @@ export default function ProductDetail() {
 
             <div className="mt-8 border-t border-line">
               <Accordion title="DESCRIPTION" testId="pdp-acc-description">{product.desc}</Accordion>
+              <Accordion title="FABRIC & SPECIFICATIONS" testId="pdp-acc-specs">
+                <ProductSpecDetails product={product} />
+              </Accordion>
               <Accordion title="DELIVERY" testId="pdp-acc-delivery">
                 Dispatched within 48 hours from Kolkata. Metro cities: 2–4 days. Everywhere else: 4–7 days. Tracking lands in your inbox the moment it ships.
               </Accordion>
@@ -515,6 +649,32 @@ export default function ProductDetail() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Product Size Guide & Fit Advisory Modal */}
+      <SizeGuideModal
+        isOpen={showSizeGuide}
+        onClose={() => {
+          setShowSizeGuide(false);
+          sizeGuideTriggerRef.current?.focus();
+        }}
+        product={product}
+        selectedSize={size}
+        onSelectSize={(s) => setSize(s)}
+      />
+
+      {/* Mobile Sticky Add to Bag Bar */}
+      <MobileStickyPurchaseBar
+        isVisible={showStickyBar && !showSizeGuide && !showZoom && !cartOpen}
+        product={product}
+        size={size}
+        setSize={setSize}
+        color={color}
+        selectedColorImage={selectedColorImage}
+        imgIndex={imgIndex}
+        soldOut={soldOut}
+        dropState={dropState}
+        onAddToCart={handleStickyAdd}
+      />
     </main>
   );
 }

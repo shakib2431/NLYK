@@ -31,52 +31,7 @@ function Faq({ q, a, testId }) {
   );
 }
 
-export function About() {
-  useSeo('Our Story', 'Why Nalayak exists.');
-  return (
-    <main data-testid="about-page">
-      <section className="grid md:grid-cols-2 border-b border-line min-h-[70vh]">
-        <div className="relative overflow-hidden min-h-[360px]">
-          <SafeImg
-            id="photo-1441984904996-e0b6ba687e04"
-            w={1400}
-            alt="Inside the Nalayak studio — racks of the current drop"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </div>
-        <div className="flex flex-col justify-center px-6 md:px-16 py-16 md:py-24">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">THE BRAND</p>
-            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-4xl md:text-6xl">
-              WE DON'T MAKE CLOTHES FOR EVERYONE.
-            </h1>
-            <p className="mt-6 text-sm md:text-base text-ink/70 leading-relaxed max-w-md">
-              NALAYAK started the way most bad decisions do — with complete conviction and zero outside approval. We looked at Indian fashion and saw two options: play it safe, or play it imported. We chose neither.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="px-4 md:px-8 py-20 md:py-28 max-w-[900px] mx-auto">
-        <Reveal>
-          <p className="text-[11px] tracking-[0.3em] text-smoke mb-3">THE STORY</p>
-          <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-3xl md:text-5xl mb-10">
-            BORN IN kolkata. RAISED BY THE WRONG CROWD.
-          </h2>
-          <div className="space-y-5 text-sm md:text-base leading-relaxed text-ink/80">
-            <p>
-              We make heavyweight, well-built clothes in kolkata for the people who never quite fit the mould. The ones who question the rules. The ones who make their own. The ones who would rather be remembered than approved.
-            </p>
-            <p>
-              Every drop is small on purpose. Every graphic earns its place. Fabric is sourced like we have to wear it ourselves — because we do. If your relatives approve of your outfit, we've failed — and so, respectfully, have you.
-            </p>
-            <p className="font-semibold text-ink">Not for everyone. On purpose.</p>
-          </div>
-        </Reveal>
-      </section>
-    </main>
-  );
-}
+export { default as About } from './About';
 
 export function Contact() {
   useSeo('Contact', 'Talk to Nalayak — Direct line to the Kolkata studio.');

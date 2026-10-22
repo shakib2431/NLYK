@@ -22,10 +22,9 @@ const selectedImage =
     : 0;
 
   const quickAdd = (size) => {
-    const color = product.colors.find((c) => c.name === selectedColor) || product.colors[0];
-    if (!color) { toast.error("This product has no available colour."); return; }
-    addToCart(product, size, color, 1, product.colorImages?.[color.name] || product.images[0]);
-    toast.success(`${product.name} — added to bag`, { description: `Size ${size} · ${color.name}` });
+    const color = product.colors?.find((c) => c.name === selectedColor) || product.colors?.[0] || { name: 'Standard', hex: '#000000' };
+    addToCart(product, size, color, 1, product.colorImages?.[color?.name] || product.images[0]);
+    toast.success(`${product.name} — added to bag`, { description: `Size ${size} · ${color?.name || 'Standard'}` });
   };
 
   return (
@@ -83,25 +82,62 @@ const selectedImage =
           </Link>
         ) : !soldOut ? (
           <div
-            className={`absolute inset-x-0 bottom-0 bg-paper border-t border-ink transition-transform duration-300 ${hover ? 'translate-y-0' : 'translate-y-full'} hidden md:block`}
+            className={`absolute inset-x-0 bottom-0 bg-paper/95 backdrop-blur-md border-t border-ink transition-transform duration-300 ${
+              hover ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'
+            } hidden md:block z-10`}
           >
-            <div className="flex items-center justify-between px-3 py-2">
-              <span className="text-[10px] tracking-[0.2em] font-medium flex items-center gap-1">
-                <Plus size={12} /> QUICK ADD
-              </span>
-              <div className="flex gap-2">
-                {product.sizes.map((s) => (
+            {product.sizes && product.sizes.length > 1 ? (
+              <div className="p-2 space-y-1.5">
+                <div className="flex items-center justify-between px-0.5">
                   <button
-                    key={s}
-                    data-testid={`quick-add-${product.slug}-${s}`}
-                    onClick={() => quickAdd(s)}
-                    className="text-[11px] px-1.5 py-0.5 hover:bg-ink hover:text-paper transition-colors duration-200"
+                    type="button"
+                    data-testid={`quick-add-btn-${product.slug}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const def = product.sizes.includes('M') ? 'M' : product.sizes[0];
+                      quickAdd(def);
+                    }}
+                    className="text-[10px] tracking-[0.2em] font-bold uppercase flex items-center gap-1 text-ink hover:text-smoke active:scale-95 transition-all cursor-pointer"
                   >
-                    {s}
+                    <Plus size={11} strokeWidth={2.5} /> QUICK ADD
                   </button>
-                ))}
+                  <span className="text-[9px] tracking-[0.15em] text-smoke uppercase font-mono">
+                    SELECT SIZE
+                  </span>
+                </div>
+                <div className="grid grid-flow-col auto-cols-fr gap-1">
+                  {product.sizes.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      data-testid={`quick-add-${product.slug}-${s}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        quickAdd(s);
+                      }}
+                      className="text-[10.5px] font-semibold py-1 bg-white border border-ink/30 hover:border-ink hover:bg-ink hover:text-paper active:scale-95 transition-all duration-150 text-center cursor-pointer"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <button
+                type="button"
+                data-testid={`quick-add-btn-${product.slug}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  quickAdd(product.sizes?.[0] || 'OS');
+                }}
+                className="w-full py-2.5 px-3 flex items-center justify-center gap-2 text-[11px] tracking-[0.22em] font-bold uppercase bg-ink text-paper hover:bg-ink/85 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Plus size={12} strokeWidth={2.5} /> QUICK ADD {product.sizes?.[0] ? `· ${product.sizes[0]}` : ''}
+              </button>
+            )}
           </div>
         ) : (
           <div className="absolute inset-x-0 bottom-0 bg-ink text-paper text-center py-2 text-[10px] tracking-[0.25em]">
