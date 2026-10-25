@@ -36,7 +36,7 @@ export const megaMenuData = {
       {
         title: 'THE WRONG CROWD',
         subtitle: 'EDITORIAL CAMPAIGN',
-        image: '/slide1.png',
+        image: '/hero/hero-chaos-edit.jpg',
         to: '/collections',
       },
       {
@@ -55,7 +55,7 @@ export const megaMenuData = {
       {
         title: 'AW26 ARRIVALS',
         subtitle: 'FRESH STREETWEAR RUN',
-        image: '/slide2.png',
+        image: '/hero/hero-after-hours.jpg',
         to: '/new-arrivals',
       },
       {
@@ -85,14 +85,14 @@ export const megaMenuData = {
       {
         title: 'JOIN THE CLUB',
         subtitle: 'MEMBER EXCLUSIVE ACCESS',
-        image: '/slide3.png',
+        image: '/hero/hero-everyday-nalayak.jpg',
         to: '/club',
       },
     ],
   },
   CATEGORIES: {
     label: 'CATEGORIES',
-    viewAllLink: '/collections',
+    viewAllLink: '/shop',
     viewAllText: 'EXPLORE FULL CATALOGUE',
     items: [
       {

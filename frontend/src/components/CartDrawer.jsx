@@ -194,6 +194,22 @@ export default function CartDrawer() {
             >
               SHOP NEW ARRIVALS
             </Link>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {[
+                { label: 'TEES', to: '/tees' },
+                { label: 'HOODIES', to: '/hoodies' },
+                { label: 'COLLECTIONS', to: '/collections' },
+              ].map((c) => (
+                <Link
+                  key={c.label}
+                  to={c.to}
+                  onClick={() => setCartOpen(false)}
+                  className="px-3 py-1.5 border border-line text-[10px] tracking-[0.2em] font-medium hover:border-ink hover:text-ink transition-colors"
+                >
+                  {c.label}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </motion.aside>

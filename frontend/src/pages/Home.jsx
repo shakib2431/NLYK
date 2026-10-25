@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
@@ -7,7 +7,7 @@ import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import SectionHeader from '@/components/SectionHeader';
 import { Reveal, MaskedLines, ease } from '@/components/Reveal';
-import { getNewArrivals, getBestSellers } from '@/services/catalog';
+import { getNewArrivals, getBestSellers, useLiveCatalog } from '@/services/catalog';
 import {
   hero, marqueeItems, manifesto, campaign, story, newsletter,
   irlImages, categoryTiles, collections, customDesign,
@@ -31,24 +31,24 @@ function Hero() {
 
   const slides = [
     {
-      desktop: '/slide1.png',
-      mobile: '/slide1-mobile.png',
+      desktop: '/hero/hero-chaos-edit.jpg',
+      mobile: '/hero/hero-chaos-edit.jpg',
       kicker: 'AW26 // THE WRONG CROWD',
       headline: ['NOT FOR', 'EVERYONE.'],
       copy: 'Clothes for people who were never interested in fitting in.',
       tag: 'DROP 01 · CHAOS EDIT',
     },
     {
-      desktop: '/slide2.png',
-      mobile: '/slide2-mobile.png',
+      desktop: '/hero/hero-after-hours.jpg',
+      mobile: '/hero/hero-after-hours.jpg',
       kicker: 'WASHED HEAVYWEIGHT // 450 GSM',
       headline: ['AFTER', 'HOURS.'],
       copy: 'Stealth boxy cuts engineered for the plans that start past midnight.',
       tag: 'DROP 02 · STEALTH FLEECE',
     },
     {
-      desktop: '/slide3.png',
-      mobile: '/slide3-mobile.png',
+      desktop: '/hero/hero-everyday-nalayak.jpg',
+      mobile: '/hero/hero-everyday-nalayak.jpg',
       kicker: 'RAW KOLKATA ATELIER // ESSENTIALS',
       headline: ['DAILY', 'DISRESPECT.'],
       copy: 'Heavyweight combed cotton. Pre-shrunk so your size stays your size.',
@@ -88,7 +88,7 @@ function Hero() {
             key={currentSlide.desktop}
             src={currentSlide.desktop}
             alt="NALAYAK AW26 campaign — the wrong crowd"
-            className="h-full w-full object-cover opacity-85"
+            className="h-full w-full object-cover opacity-95"
             loading={slide === 0 ? 'eager' : 'lazy'}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -97,8 +97,7 @@ function Hero() {
         </picture>
 
         {/* High-legibility gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-95" />
-        <div className="absolute inset-0 bg-ink/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/30 to-transparent" />
       </motion.div>
 
       <div className="relative z-10 h-full flex flex-col justify-end pb-12 md:pb-20 px-4 md:px-8 max-w-[1600px] mx-auto w-full">
@@ -184,7 +183,7 @@ function EditorialMarquee() {
       <Marquee speed={35} gradient={false} pauseOnHover>
         {marqueeItems.map((item) => (
           <span key={item} className="mx-8 font-display font-bold uppercase tracking-[0.2em] text-lg md:text-xl whitespace-nowrap">
-            {item} <span className="text-paper/40 mx-4">✕</span>
+            {item} <span className="text-paper/40 mx-5 text-sm">✦</span>
           </span>
         ))}
       </Marquee>
@@ -579,8 +578,9 @@ function Newsletter() {
 
 export default function Home() {
   useSeo(null, 'NALAYAK — contemporary Indian streetwear. Clothes for people who were never interested in fitting in.');
-  const newArrivals = getNewArrivals().slice(0, 4);
-  const bestSellers = getBestSellers().slice(0, 8);
+  const { products } = useLiveCatalog();
+  const newArrivals = useMemo(() => (products || []).filter((p) => p.newArrival).slice(0, 4), [products]);
+  const bestSellers = useMemo(() => (products || []).filter((p) => p.bestSeller).slice(0, 8), [products]);
 
   return (
     <main>
@@ -627,7 +627,7 @@ export default function Home() {
             kicker="MOST WANTED"
             title="THE ONES EVERYONE WANTS"
             desc="Our most-wanted pieces. Statistically speaking, you’re late."
-            linkTo="/collections"
+            linkTo="/shop"
             linkLabel="VIEW ALL"
           />
         </div>

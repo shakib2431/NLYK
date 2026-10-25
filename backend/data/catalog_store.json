@@ -1,0 +1,4832 @@
+{
+  "products": {
+    "p01": {
+      "id": "p01",
+      "slug": "nalayak-standard-tee",
+      "name": "NALAYAK STANDARD TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 999,
+      "compareAt": 1299,
+      "cost_price": 400,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "BEST SELLER",
+      "desc": "The tee that started the disrespect. Heavyweight 240 GSM cotton, boxy fit, zero apologies. Pre-shrunk so your size stays your size.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.24 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        },
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p01_XS_Jet",
+          "sku": "NLYK-NALAYAK-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_S_Jet",
+          "sku": "NLYK-NALAYAK-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_M_Jet",
+          "sku": "NLYK-NALAYAK-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_L_Jet",
+          "sku": "NLYK-NALAYAK-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_XL_Jet",
+          "sku": "NLYK-NALAYAK-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_XS_Chalk",
+          "sku": "NLYK-NALAYAK-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_S_Chalk",
+          "sku": "NLYK-NALAYAK-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_M_Chalk",
+          "sku": "NLYK-NALAYAK-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_L_Chalk",
+          "sku": "NLYK-NALAYAK-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_XL_Chalk",
+          "sku": "NLYK-NALAYAK-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_XS_Ash",
+          "sku": "NLYK-NALAYAK-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_S_Ash",
+          "sku": "NLYK-NALAYAK-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_M_Ash",
+          "sku": "NLYK-NALAYAK-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_L_Ash",
+          "sku": "NLYK-NALAYAK-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p01_XL_Ash",
+          "sku": "NLYK-NALAYAK-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 30,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": true,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p02": {
+      "id": "p02",
+      "slug": "wrong-crowd-tee",
+      "name": "WRONG CROWD TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1199,
+      "compareAt": null,
+      "cost_price": 480,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "Membership has its privileges. Chest print, relaxed fit, and a back graphic your mother will ask about.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/wrong-crowd-tee-front.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p02_XS_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_S_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_M_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_L_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_XL_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_XS_Jet",
+          "sku": "NLYK-WRONG-CR-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_S_Jet",
+          "sku": "NLYK-WRONG-CR-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_M_Jet",
+          "sku": "NLYK-WRONG-CR-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_L_Jet",
+          "sku": "NLYK-WRONG-CR-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p02_XL_Jet",
+          "sku": "NLYK-WRONG-CR-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": true,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p03": {
+      "id": "p03",
+      "slug": "no-approval-oversized-tee",
+      "name": "NO APPROVAL OVERSIZED TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1299,
+      "compareAt": 1599,
+      "cost_price": 520,
+      "category": "tees",
+      "gender": "men",
+      "badge": null,
+      "desc": "Dropped shoulders, dropped standards. An oversized fit for people who stopped asking for permission years ago.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM (2).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Olive",
+          "hex": "#4A5340"
+        },
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p03_XS_Jet",
+          "sku": "NLYK-NO-APPRO-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_S_Jet",
+          "sku": "NLYK-NO-APPRO-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_M_Jet",
+          "sku": "NLYK-NO-APPRO-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_L_Jet",
+          "sku": "NLYK-NO-APPRO-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_XL_Jet",
+          "sku": "NLYK-NO-APPRO-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_XS_Olive",
+          "sku": "NLYK-NO-APPRO-OLI-XS",
+          "size": "XS",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_S_Olive",
+          "sku": "NLYK-NO-APPRO-OLI-S",
+          "size": "S",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_M_Olive",
+          "sku": "NLYK-NO-APPRO-OLI-M",
+          "size": "M",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_L_Olive",
+          "sku": "NLYK-NO-APPRO-OLI-L",
+          "size": "L",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_XL_Olive",
+          "sku": "NLYK-NO-APPRO-OLI-XL",
+          "size": "XL",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_XS_Paper",
+          "sku": "NLYK-NO-APPRO-PAP-XS",
+          "size": "XS",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_S_Paper",
+          "sku": "NLYK-NO-APPRO-PAP-S",
+          "size": "S",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_M_Paper",
+          "sku": "NLYK-NO-APPRO-PAP-M",
+          "size": "M",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_L_Paper",
+          "sku": "NLYK-NO-APPRO-PAP-L",
+          "size": "L",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p03_XL_Paper",
+          "sku": "NLYK-NO-APPRO-PAP-XL",
+          "size": "XL",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 15,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p04": {
+      "id": "p04",
+      "slug": "chaos-club-tee",
+      "name": "CHAOS CLUB TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1199,
+      "compareAt": null,
+      "cost_price": 480,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "First rule of Chaos Club: tell everyone. Garment-dyed, slightly faded, fully unbothered.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.25 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p04_XS_Ash",
+          "sku": "NLYK-CHAOS-CL-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_S_Ash",
+          "sku": "NLYK-CHAOS-CL-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_M_Ash",
+          "sku": "NLYK-CHAOS-CL-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_L_Ash",
+          "sku": "NLYK-CHAOS-CL-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_XL_Ash",
+          "sku": "NLYK-CHAOS-CL-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_XS_Jet",
+          "sku": "NLYK-CHAOS-CL-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_S_Jet",
+          "sku": "NLYK-CHAOS-CL-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_M_Jet",
+          "sku": "NLYK-CHAOS-CL-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_L_Jet",
+          "sku": "NLYK-CHAOS-CL-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p04_XL_Jet",
+          "sku": "NLYK-CHAOS-CL-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": true,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p05": {
+      "id": "p05",
+      "slug": "basically-famous-tee",
+      "name": "BASICALLY FAMOUS TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1099,
+      "compareAt": null,
+      "cost_price": 440,
+      "category": "tees",
+      "gender": "men",
+      "badge": null,
+      "desc": "For the main character in a film nobody funded. Soft-hand print, regular fit, unreasonable confidence included.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p05_XS_Paper",
+          "sku": "NLYK-BASICALL-PAP-XS",
+          "size": "XS",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_S_Paper",
+          "sku": "NLYK-BASICALL-PAP-S",
+          "size": "S",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_M_Paper",
+          "sku": "NLYK-BASICALL-PAP-M",
+          "size": "M",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_L_Paper",
+          "sku": "NLYK-BASICALL-PAP-L",
+          "size": "L",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_XL_Paper",
+          "sku": "NLYK-BASICALL-PAP-XL",
+          "size": "XL",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_XS_Jet",
+          "sku": "NLYK-BASICALL-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_S_Jet",
+          "sku": "NLYK-BASICALL-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_M_Jet",
+          "sku": "NLYK-BASICALL-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_L_Jet",
+          "sku": "NLYK-BASICALL-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p05_XL_Jet",
+          "sku": "NLYK-BASICALL-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p06": {
+      "id": "p06",
+      "slug": "frequency-tee",
+      "name": "FREQUENCY TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 999,
+      "compareAt": null,
+      "cost_price": 400,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Tune in, opt out. A tonal graphic tee for people whose vibe is legally distinct from everyone else’s.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.26 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Maroon",
+          "hex": "#5C2E2E"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p06_XS_Jet",
+          "sku": "NLYK-FREQUENC-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_S_Jet",
+          "sku": "NLYK-FREQUENC-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_M_Jet",
+          "sku": "NLYK-FREQUENC-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_L_Jet",
+          "sku": "NLYK-FREQUENC-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_XL_Jet",
+          "sku": "NLYK-FREQUENC-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_XS_Maroon",
+          "sku": "NLYK-FREQUENC-MAR-XS",
+          "size": "XS",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_S_Maroon",
+          "sku": "NLYK-FREQUENC-MAR-S",
+          "size": "S",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_M_Maroon",
+          "sku": "NLYK-FREQUENC-MAR-M",
+          "size": "M",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_L_Maroon",
+          "sku": "NLYK-FREQUENC-MAR-L",
+          "size": "L",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 4,
+          "price_override": null
+        },
+        {
+          "id": "var_p06_XL_Maroon",
+          "sku": "NLYK-FREQUENC-MAR-XL",
+          "size": "XL",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 4,
+          "price_override": null
+        }
+      ],
+      "stock": 40,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p07": {
+      "id": "p07",
+      "slug": "after-hours-tee",
+      "name": "AFTER HOURS TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1149,
+      "compareAt": null,
+      "cost_price": 460,
+      "category": "tees",
+      "gender": "women",
+      "badge": "NEW",
+      "desc": "Cut for the hours that don’t make it to the group chat. Cropped boxy fit, midnight-grade cotton.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p07_XS_Jet",
+          "sku": "NLYK-AFTER-HO-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_S_Jet",
+          "sku": "NLYK-AFTER-HO-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_M_Jet",
+          "sku": "NLYK-AFTER-HO-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_L_Jet",
+          "sku": "NLYK-AFTER-HO-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_XL_Jet",
+          "sku": "NLYK-AFTER-HO-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_XS_Paper",
+          "sku": "NLYK-AFTER-HO-PAP-XS",
+          "size": "XS",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_S_Paper",
+          "sku": "NLYK-AFTER-HO-PAP-S",
+          "size": "S",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_M_Paper",
+          "sku": "NLYK-AFTER-HO-PAP-M",
+          "size": "M",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_L_Paper",
+          "sku": "NLYK-AFTER-HO-PAP-L",
+          "size": "L",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p07_XL_Paper",
+          "sku": "NLYK-AFTER-HO-PAP-XL",
+          "size": "XL",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.557914+00:00",
+      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+    },
+    "p08": {
+      "id": "p08",
+      "slug": "her-chaos-crop-tee",
+      "name": "HER CHAOS CROP TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 999,
+      "compareAt": 1199,
+      "cost_price": 400,
+      "category": "tees",
+      "gender": "women",
+      "badge": null,
+      "desc": "Cropped, not tamed. A sharper silhouette with the same terrible decision-making built in.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/her-chaos-crop-tee-front.jpg",
+        "/products/her-chaos-crop-tee-back.jpg"
+      ],
+      "colorImages": {
+        "Paper": "/her-chaos-crop-tee-white.png"
+      },
+      "colors": [
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Maroon",
+          "hex": "#5C2E2E"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p08_XS_Paper",
+          "sku": "NLYK-HER-CHAO-PAP-XS",
+          "size": "XS",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_S_Paper",
+          "sku": "NLYK-HER-CHAO-PAP-S",
+          "size": "S",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_M_Paper",
+          "sku": "NLYK-HER-CHAO-PAP-M",
+          "size": "M",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_L_Paper",
+          "sku": "NLYK-HER-CHAO-PAP-L",
+          "size": "L",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_XL_Paper",
+          "sku": "NLYK-HER-CHAO-PAP-XL",
+          "size": "XL",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_XS_Jet",
+          "sku": "NLYK-HER-CHAO-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_S_Jet",
+          "sku": "NLYK-HER-CHAO-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_M_Jet",
+          "sku": "NLYK-HER-CHAO-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_L_Jet",
+          "sku": "NLYK-HER-CHAO-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_XL_Jet",
+          "sku": "NLYK-HER-CHAO-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_XS_Maroon",
+          "sku": "NLYK-HER-CHAO-MAR-XS",
+          "size": "XS",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_S_Maroon",
+          "sku": "NLYK-HER-CHAO-MAR-S",
+          "size": "S",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_M_Maroon",
+          "sku": "NLYK-HER-CHAO-MAR-M",
+          "size": "M",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_L_Maroon",
+          "sku": "NLYK-HER-CHAO-MAR-L",
+          "size": "L",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p08_XL_Maroon",
+          "sku": "NLYK-HER-CHAO-MAR-XL",
+          "size": "XL",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 15,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": true,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.562218+00:00",
+      "updated_at": "2026-10-25T14:08:07.562218+00:00"
+    },
+    "p09": {
+      "id": "p09",
+      "slug": "off-record-overshirt",
+      "name": "OFF RECORD OVERSHIRT",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1899,
+      "compareAt": null,
+      "cost_price": 760,
+      "category": "shirts",
+      "gender": "men",
+      "badge": null,
+      "desc": "Nothing you said while wearing this can be used against you. Brushed twill, boxy cut, two chest pockets for secrets.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Olive",
+          "hex": "#4A5340"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p09_XS_Olive",
+          "sku": "NLYK-OFF-RECO-OLI-XS",
+          "size": "XS",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_S_Olive",
+          "sku": "NLYK-OFF-RECO-OLI-S",
+          "size": "S",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_M_Olive",
+          "sku": "NLYK-OFF-RECO-OLI-M",
+          "size": "M",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_L_Olive",
+          "sku": "NLYK-OFF-RECO-OLI-L",
+          "size": "L",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_XL_Olive",
+          "sku": "NLYK-OFF-RECO-OLI-XL",
+          "size": "XL",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_XS_Jet",
+          "sku": "NLYK-OFF-RECO-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_S_Jet",
+          "sku": "NLYK-OFF-RECO-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_M_Jet",
+          "sku": "NLYK-OFF-RECO-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_L_Jet",
+          "sku": "NLYK-OFF-RECO-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p09_XL_Jet",
+          "sku": "NLYK-OFF-RECO-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "shirts",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.562218+00:00",
+      "updated_at": "2026-10-25T14:08:07.562218+00:00"
+    },
+    "p10": {
+      "id": "p10",
+      "slug": "quiet-riot-shirt",
+      "name": "QUIET RIOT SHIRT",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1699,
+      "compareAt": 1999,
+      "cost_price": 680,
+      "category": "shirts",
+      "gender": "men",
+      "badge": null,
+      "desc": "Rebellion, but make it business casual. A camp-collar shirt that behaves in meetings and nowhere else.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p10_XS_Jet",
+          "sku": "NLYK-QUIET-RI-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_S_Jet",
+          "sku": "NLYK-QUIET-RI-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_M_Jet",
+          "sku": "NLYK-QUIET-RI-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_L_Jet",
+          "sku": "NLYK-QUIET-RI-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_XL_Jet",
+          "sku": "NLYK-QUIET-RI-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_XS_Chalk",
+          "sku": "NLYK-QUIET-RI-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_S_Chalk",
+          "sku": "NLYK-QUIET-RI-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_M_Chalk",
+          "sku": "NLYK-QUIET-RI-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_L_Chalk",
+          "sku": "NLYK-QUIET-RI-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p10_XL_Chalk",
+          "sku": "NLYK-QUIET-RI-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        }
+      ],
+      "stock": 150,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "shirts",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.562633+00:00",
+      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+    },
+    "p11": {
+      "id": "p11",
+      "slug": "night-shift-shirt",
+      "name": "NIGHT SHIFT SHIRT",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1799,
+      "compareAt": null,
+      "cost_price": 720,
+      "category": "shirts",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "For the 9pm to 4am economy. Fluid drape, dark tones, zero interest in your 9am standup.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p11_XS_Jet",
+          "sku": "NLYK-NIGHT-SH-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p11_S_Jet",
+          "sku": "NLYK-NIGHT-SH-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p11_M_Jet",
+          "sku": "NLYK-NIGHT-SH-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p11_L_Jet",
+          "sku": "NLYK-NIGHT-SH-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p11_XL_Jet",
+          "sku": "NLYK-NIGHT-SH-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "shirts",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.562633+00:00",
+      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+    },
+    "p12": {
+      "id": "p12",
+      "slug": "summer-of-chaos-shirt",
+      "name": "SUMMER OF CHAOS SHIRT",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1599,
+      "compareAt": null,
+      "cost_price": 640,
+      "category": "shirts",
+      "gender": "women",
+      "badge": null,
+      "desc": "Breathable, unbothered, slightly wrinkled on purpose. The shirt equivalent of leaving the party without saying bye.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.51 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        },
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p12_XS_Chalk",
+          "sku": "NLYK-SUMMER-O-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_S_Chalk",
+          "sku": "NLYK-SUMMER-O-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_M_Chalk",
+          "sku": "NLYK-SUMMER-O-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_L_Chalk",
+          "sku": "NLYK-SUMMER-O-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_XL_Chalk",
+          "sku": "NLYK-SUMMER-O-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_XS_Paper",
+          "sku": "NLYK-SUMMER-O-PAP-XS",
+          "size": "XS",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_S_Paper",
+          "sku": "NLYK-SUMMER-O-PAP-S",
+          "size": "S",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_M_Paper",
+          "sku": "NLYK-SUMMER-O-PAP-M",
+          "size": "M",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_L_Paper",
+          "sku": "NLYK-SUMMER-O-PAP-L",
+          "size": "L",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p12_XL_Paper",
+          "sku": "NLYK-SUMMER-O-PAP-XL",
+          "size": "XL",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "shirts",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.562633+00:00",
+      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+    },
+    "p13": {
+      "id": "p13",
+      "slug": "anti-normal-hoodie",
+      "name": "ANTI-NORMAL HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2499,
+      "compareAt": null,
+      "cost_price": 1000,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": "BEST SELLER",
+      "desc": "400 GSM brushed fleece with a hood big enough to hide from small talk. The uniform of the unapologetic.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p13_XS_Jet",
+          "sku": "NLYK-ANTI-NOR-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_S_Jet",
+          "sku": "NLYK-ANTI-NOR-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_M_Jet",
+          "sku": "NLYK-ANTI-NOR-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_L_Jet",
+          "sku": "NLYK-ANTI-NOR-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_XL_Jet",
+          "sku": "NLYK-ANTI-NOR-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_XS_Ash",
+          "sku": "NLYK-ANTI-NOR-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_S_Ash",
+          "sku": "NLYK-ANTI-NOR-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_M_Ash",
+          "sku": "NLYK-ANTI-NOR-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_L_Ash",
+          "sku": "NLYK-ANTI-NOR-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p13_XL_Ash",
+          "sku": "NLYK-ANTI-NOR-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 3,
+          "price_override": null
+        }
+      ],
+      "stock": 30,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": true,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.562633+00:00",
+      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+    },
+    "p14": {
+      "id": "p14",
+      "slug": "bad-decisions-hoodie",
+      "name": "BAD DECISIONS HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2599,
+      "compareAt": 2999,
+      "cost_price": 1040,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Warm enough for the walk home you should not be taking. Puff print back graphic, kangaroo pocket, no judgement.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.52 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Maroon",
+          "hex": "#5C2E2E"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p14_XS_Maroon",
+          "sku": "NLYK-BAD-DECI-MAR-XS",
+          "size": "XS",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_S_Maroon",
+          "sku": "NLYK-BAD-DECI-MAR-S",
+          "size": "S",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_M_Maroon",
+          "sku": "NLYK-BAD-DECI-MAR-M",
+          "size": "M",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_L_Maroon",
+          "sku": "NLYK-BAD-DECI-MAR-L",
+          "size": "L",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_XL_Maroon",
+          "sku": "NLYK-BAD-DECI-MAR-XL",
+          "size": "XL",
+          "color_name": "Maroon",
+          "color_hex": "#5C2E2E",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_XS_Jet",
+          "sku": "NLYK-BAD-DECI-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_S_Jet",
+          "sku": "NLYK-BAD-DECI-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_M_Jet",
+          "sku": "NLYK-BAD-DECI-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_L_Jet",
+          "sku": "NLYK-BAD-DECI-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p14_XL_Jet",
+          "sku": "NLYK-BAD-DECI-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.562633+00:00",
+      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+    },
+    "p15": {
+      "id": "p15",
+      "slug": "wrong-crowd-hoodie",
+      "name": "WRONG CROWD HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2399,
+      "compareAt": null,
+      "cost_price": 960,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Heavyweight fleece, embroidered logo, and a fit roomy enough for you and your reputation.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Olive",
+          "hex": "#4A5340"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p15_XS_Jet",
+          "sku": "NLYK-WRONG-CR-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_S_Jet",
+          "sku": "NLYK-WRONG-CR-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_M_Jet",
+          "sku": "NLYK-WRONG-CR-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_L_Jet",
+          "sku": "NLYK-WRONG-CR-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_XL_Jet",
+          "sku": "NLYK-WRONG-CR-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_XS_Olive",
+          "sku": "NLYK-WRONG-CR-OLI-XS",
+          "size": "XS",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_S_Olive",
+          "sku": "NLYK-WRONG-CR-OLI-S",
+          "size": "S",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_M_Olive",
+          "sku": "NLYK-WRONG-CR-OLI-M",
+          "size": "M",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_L_Olive",
+          "sku": "NLYK-WRONG-CR-OLI-L",
+          "size": "L",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p15_XL_Olive",
+          "sku": "NLYK-WRONG-CR-OLI-XL",
+          "size": "XL",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": true,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p16": {
+      "id": "p16",
+      "slug": "after-dark-hoodie",
+      "name": "AFTER DARK HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2699,
+      "compareAt": null,
+      "cost_price": 1080,
+      "category": "hoodies",
+      "gender": "women",
+      "badge": "LIMITED",
+      "desc": "Blackout fleece for blackout plans. Cropped-oversized hybrid fit. Limited run — when it’s gone, it’s a rumour.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.53 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p16_XS_Jet",
+          "sku": "NLYK-AFTER-DA-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p16_S_Jet",
+          "sku": "NLYK-AFTER-DA-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p16_M_Jet",
+          "sku": "NLYK-AFTER-DA-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p16_L_Jet",
+          "sku": "NLYK-AFTER-DA-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p16_XL_Jet",
+          "sku": "NLYK-AFTER-DA-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 5,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p17": {
+      "id": "p17",
+      "slug": "off-duty-cargo",
+      "name": "OFF DUTY CARGO",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2199,
+      "compareAt": null,
+      "cost_price": 880,
+      "category": "bottoms",
+      "gender": "men",
+      "badge": null,
+      "desc": "Six pockets, zero responsibilities. Ripstop cotton with an adjustable hem for dramatic exits.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Olive",
+          "hex": "#4A5340"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p17_XS_Olive",
+          "sku": "NLYK-OFF-DUTY-OLI-XS",
+          "size": "XS",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_S_Olive",
+          "sku": "NLYK-OFF-DUTY-OLI-S",
+          "size": "S",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_M_Olive",
+          "sku": "NLYK-OFF-DUTY-OLI-M",
+          "size": "M",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_L_Olive",
+          "sku": "NLYK-OFF-DUTY-OLI-L",
+          "size": "L",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_XL_Olive",
+          "sku": "NLYK-OFF-DUTY-OLI-XL",
+          "size": "XL",
+          "color_name": "Olive",
+          "color_hex": "#4A5340",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_XS_Jet",
+          "sku": "NLYK-OFF-DUTY-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_S_Jet",
+          "sku": "NLYK-OFF-DUTY-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_M_Jet",
+          "sku": "NLYK-OFF-DUTY-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_L_Jet",
+          "sku": "NLYK-OFF-DUTY-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p17_XL_Jet",
+          "sku": "NLYK-OFF-DUTY-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "bottoms",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p18": {
+      "id": "p18",
+      "slug": "wrong-place-trousers",
+      "name": "WRONG PLACE TROUSERS",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1999,
+      "compareAt": 2299,
+      "cost_price": 800,
+      "category": "bottoms",
+      "gender": "men",
+      "badge": null,
+      "desc": "Tailored enough for the wedding, loose enough to leave early. Pleated front, side adjusters, main-character drape.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM (2).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p18_XS_Jet",
+          "sku": "NLYK-WRONG-PL-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_S_Jet",
+          "sku": "NLYK-WRONG-PL-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_M_Jet",
+          "sku": "NLYK-WRONG-PL-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_L_Jet",
+          "sku": "NLYK-WRONG-PL-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_XL_Jet",
+          "sku": "NLYK-WRONG-PL-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_XS_Chalk",
+          "sku": "NLYK-WRONG-PL-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_S_Chalk",
+          "sku": "NLYK-WRONG-PL-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_M_Chalk",
+          "sku": "NLYK-WRONG-PL-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_L_Chalk",
+          "sku": "NLYK-WRONG-PL-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p18_XL_Chalk",
+          "sku": "NLYK-WRONG-PL-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "bottoms",
+        "men"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p19": {
+      "id": "p19",
+      "slug": "denim-but-nalayak",
+      "name": "DENIM, BUT MAKE IT NALAYAK",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2299,
+      "compareAt": null,
+      "cost_price": 920,
+      "category": "bottoms",
+      "gender": "women",
+      "badge": null,
+      "desc": "Rigid 13oz denim, straight leg, attitude included. Breaks in like a good grudge — slowly and permanently.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.54 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p19_XS_Ash",
+          "sku": "NLYK-DENIM-BU-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_S_Ash",
+          "sku": "NLYK-DENIM-BU-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_M_Ash",
+          "sku": "NLYK-DENIM-BU-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_L_Ash",
+          "sku": "NLYK-DENIM-BU-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_XL_Ash",
+          "sku": "NLYK-DENIM-BU-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_XS_Jet",
+          "sku": "NLYK-DENIM-BU-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_S_Jet",
+          "sku": "NLYK-DENIM-BU-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_M_Jet",
+          "sku": "NLYK-DENIM-BU-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_L_Jet",
+          "sku": "NLYK-DENIM-BU-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p19_XL_Jet",
+          "sku": "NLYK-DENIM-BU-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": true,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "bottoms",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p20": {
+      "id": "p20",
+      "slug": "daily-chaos-joggers",
+      "name": "DAILY CHAOS JOGGERS",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1799,
+      "compareAt": null,
+      "cost_price": 720,
+      "category": "bottoms",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "For errands, escapes and everything in between. Loopback cotton, tapered leg, drawstring waist for flexible morals.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p20_XS_Ash",
+          "sku": "NLYK-DAILY-CH-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_S_Ash",
+          "sku": "NLYK-DAILY-CH-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_M_Ash",
+          "sku": "NLYK-DAILY-CH-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_L_Ash",
+          "sku": "NLYK-DAILY-CH-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_XL_Ash",
+          "sku": "NLYK-DAILY-CH-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_XS_Jet",
+          "sku": "NLYK-DAILY-CH-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_S_Jet",
+          "sku": "NLYK-DAILY-CH-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_M_Jet",
+          "sku": "NLYK-DAILY-CH-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_L_Jet",
+          "sku": "NLYK-DAILY-CH-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p20_XL_Jet",
+          "sku": "NLYK-DAILY-CH-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "bottoms",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p21": {
+      "id": "p21",
+      "slug": "side-eye-cap",
+      "name": "SIDE EYE CAP",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 799,
+      "compareAt": null,
+      "cost_price": 320,
+      "category": "accessories",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Six panels of quiet judgement. Embroidered wordmark, adjustable strap, structured brim for maximum shade.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.55 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        }
+      ],
+      "sizes": [
+        "OS"
+      ],
+      "variants": [
+        {
+          "id": "var_p21_OS_Jet",
+          "sku": "NLYK-SIDE-EYE-JET-OS",
+          "size": "OS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 22,
+          "price_override": null
+        },
+        {
+          "id": "var_p21_OS_Chalk",
+          "sku": "NLYK-SIDE-EYE-CHA-OS",
+          "size": "OS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 22,
+          "price_override": null
+        }
+      ],
+      "stock": 44,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "accessories",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p22": {
+      "id": "p22",
+      "slug": "wrong-crowd-tote",
+      "name": "WRONG CROWD TOTE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 999,
+      "compareAt": null,
+      "cost_price": 400,
+      "category": "accessories",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Carries groceries, books, and your entire personality. 16oz canvas, reinforced handles, screen-printed both sides.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "OS"
+      ],
+      "variants": [
+        {
+          "id": "var_p22_OS_Chalk",
+          "sku": "NLYK-WRONG-CR-CHA-OS",
+          "size": "OS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 19,
+          "price_override": null
+        },
+        {
+          "id": "var_p22_OS_Jet",
+          "sku": "NLYK-WRONG-CR-JET-OS",
+          "size": "OS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 19,
+          "price_override": null
+        }
+      ],
+      "stock": 38,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": true,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "accessories",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p23": {
+      "id": "p23",
+      "slug": "low-profile-sunnies",
+      "name": "LOW PROFILE SUNNIES",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1499,
+      "compareAt": null,
+      "cost_price": 600,
+      "category": "accessories",
+      "gender": "unisex",
+      "badge": "SOLD OUT",
+      "desc": "UV400 protection and plausible deniability. Acetate frames for avoiding eye contact in style.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM (2).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "OS"
+      ],
+      "variants": [
+        {
+          "id": "var_p23_OS_Jet",
+          "sku": "NLYK-LOW-PROF-JET-OS",
+          "size": "OS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        }
+      ],
+      "stock": 15,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "accessories",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p24": {
+      "id": "p24",
+      "slug": "daily-chaos-sneakers",
+      "name": "DAILY CHAOS SNEAKERS",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 3499,
+      "compareAt": 3999,
+      "cost_price": 1400,
+      "category": "accessories",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "Cupsole sneakers built for 20,000 steps of questionable routing. Leather upper, gum sole, scuffs improve them.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.56 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Paper",
+          "hex": "#FFFFFF"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "UK 7",
+        "UK 8",
+        "UK 9",
+        "UK 10",
+        "UK 11"
+      ],
+      "variants": [
+        {
+          "id": "var_p24_UK 7_Paper",
+          "sku": "NLYK-DAILY-CH-PAP-UK7",
+          "size": "UK 7",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 8_Paper",
+          "sku": "NLYK-DAILY-CH-PAP-UK8",
+          "size": "UK 8",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 9_Paper",
+          "sku": "NLYK-DAILY-CH-PAP-UK9",
+          "size": "UK 9",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 10_Paper",
+          "sku": "NLYK-DAILY-CH-PAP-UK10",
+          "size": "UK 10",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 11_Paper",
+          "sku": "NLYK-DAILY-CH-PAP-UK11",
+          "size": "UK 11",
+          "color_name": "Paper",
+          "color_hex": "#FFFFFF",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 7_Jet",
+          "sku": "NLYK-DAILY-CH-JET-UK7",
+          "size": "UK 7",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 8_Jet",
+          "sku": "NLYK-DAILY-CH-JET-UK8",
+          "size": "UK 8",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 9_Jet",
+          "sku": "NLYK-DAILY-CH-JET-UK9",
+          "size": "UK 9",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 10_Jet",
+          "sku": "NLYK-DAILY-CH-JET-UK10",
+          "size": "UK 10",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p24_UK 11_Jet",
+          "sku": "NLYK-DAILY-CH-JET-UK11",
+          "size": "UK 11",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "accessories",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p29": {
+      "id": "p29",
+      "slug": "nalayak-chain",
+      "name": "NALAYAK CHAIN",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 899,
+      "compareAt": null,
+      "cost_price": 360,
+      "category": "accessories",
+      "gender": "women",
+      "badge": "NEW",
+      "desc": "Not jewelry. A problem attached to your jeans. Heavy-link metal chain made for wearing things slightly wrong.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/nalayak-chain-front.png"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "OS"
+      ],
+      "variants": [
+        {
+          "id": "var_p29_OS_Jet",
+          "sku": "NLYK-NALAYAK-JET-OS",
+          "size": "OS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 25,
+          "price_override": null
+        }
+      ],
+      "stock": 25,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "accessories",
+        "women"
+      ],
+      "created_at": "2026-10-25T14:08:07.563435+00:00",
+      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+    },
+    "p25": {
+      "id": "p25",
+      "slug": "midnight-cargo-tee",
+      "name": "MIDNIGHT CARGO TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1299,
+      "compareAt": null,
+      "cost_price": 520,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "CLUB",
+      "desc": "A club-first heavyweight tee with utility pocketing. Black on black, because subtlety is a choice we occasionally make.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM (2).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p25_XS_Jet",
+          "sku": "NLYK-MIDNIGHT-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p25_S_Jet",
+          "sku": "NLYK-MIDNIGHT-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p25_M_Jet",
+          "sku": "NLYK-MIDNIGHT-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p25_L_Jet",
+          "sku": "NLYK-MIDNIGHT-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p25_XL_Jet",
+          "sku": "NLYK-MIDNIGHT-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        }
+      ],
+      "stock": 15,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": true,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p26": {
+      "id": "p26",
+      "slug": "the-500-hoodie",
+      "name": "THE 500 HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2999,
+      "compareAt": null,
+      "cost_price": 1200,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": "CLUB ONLY",
+      "desc": "Made for the first 500 and nobody else. Numbered internal label, 450 GSM fleece, never restocked.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.57 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p26_XS_Jet",
+          "sku": "NLYK-THE-500-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_S_Jet",
+          "sku": "NLYK-THE-500-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_M_Jet",
+          "sku": "NLYK-THE-500-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_L_Jet",
+          "sku": "NLYK-THE-500-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_XL_Jet",
+          "sku": "NLYK-THE-500-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_XS_Chalk",
+          "sku": "NLYK-THE-500-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_S_Chalk",
+          "sku": "NLYK-THE-500-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_M_Chalk",
+          "sku": "NLYK-THE-500-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_L_Chalk",
+          "sku": "NLYK-THE-500-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        },
+        {
+          "id": "var_p26_XL_Chalk",
+          "sku": "NLYK-THE-500-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 15,
+          "price_override": null
+        }
+      ],
+      "stock": 150,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p27": {
+      "id": "p27",
+      "slug": "static-noise-overshirt",
+      "name": "STATIC NOISE OVERSHIRT",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2199,
+      "compareAt": null,
+      "cost_price": 880,
+      "category": "shirts",
+      "gender": "unisex",
+      "badge": "CLUB",
+      "desc": "Textured heavyweight overshirt. Club sees it Thursday. Everyone else squints until Friday.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM (1).jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p27_XS_Ash",
+          "sku": "NLYK-STATIC-N-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_S_Ash",
+          "sku": "NLYK-STATIC-N-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_M_Ash",
+          "sku": "NLYK-STATIC-N-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_L_Ash",
+          "sku": "NLYK-STATIC-N-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_XL_Ash",
+          "sku": "NLYK-STATIC-N-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_XS_Jet",
+          "sku": "NLYK-STATIC-N-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_S_Jet",
+          "sku": "NLYK-STATIC-N-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_M_Jet",
+          "sku": "NLYK-STATIC-N-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_L_Jet",
+          "sku": "NLYK-STATIC-N-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p27_XL_Jet",
+          "sku": "NLYK-STATIC-N-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": true,
+      "tags": [
+        "shirts",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p28": {
+      "id": "p28",
+      "slug": "off-script-denim",
+      "name": "OFF SCRIPT DENIM",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2499,
+      "compareAt": null,
+      "cost_price": 1000,
+      "category": "bottoms",
+      "gender": "unisex",
+      "badge": null,
+      "desc": "The early-access denim that already went public. Rigid, straight, slightly confrontational.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.58 PM.jpeg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p28_XS_Ash",
+          "sku": "NLYK-OFF-SCRI-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_S_Ash",
+          "sku": "NLYK-OFF-SCRI-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_M_Ash",
+          "sku": "NLYK-OFF-SCRI-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_L_Ash",
+          "sku": "NLYK-OFF-SCRI-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_XL_Ash",
+          "sku": "NLYK-OFF-SCRI-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_XS_Jet",
+          "sku": "NLYK-OFF-SCRI-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_S_Jet",
+          "sku": "NLYK-OFF-SCRI-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_M_Jet",
+          "sku": "NLYK-OFF-SCRI-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_L_Jet",
+          "sku": "NLYK-OFF-SCRI-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p28_XL_Jet",
+          "sku": "NLYK-OFF-SCRI-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": false,
+      "bestSeller": false,
+      "featured": false,
+      "clubEarlyAccess": true,
+      "tags": [
+        "bottoms",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p30": {
+      "id": "p30",
+      "slug": "devanagari-chaos-tee",
+      "name": "THE DEVANAGARI CHAOS TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1499,
+      "compareAt": null,
+      "cost_price": 600,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "Heavyweight 240 GSM drop-shoulder tee in jet black. Minimal gothic compass star on the chest, raw distressed Devanagari lettering across the back.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/devanagari-chaos-tee-front.jpg",
+        "/products/devanagari-chaos-tee-back.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p30_XS_Jet",
+          "sku": "NLYK-DEVANAGA-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_S_Jet",
+          "sku": "NLYK-DEVANAGA-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_M_Jet",
+          "sku": "NLYK-DEVANAGA-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_L_Jet",
+          "sku": "NLYK-DEVANAGA-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_XL_Jet",
+          "sku": "NLYK-DEVANAGA-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_XS_Ash",
+          "sku": "NLYK-DEVANAGA-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_S_Ash",
+          "sku": "NLYK-DEVANAGA-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_M_Ash",
+          "sku": "NLYK-DEVANAGA-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_L_Ash",
+          "sku": "NLYK-DEVANAGA-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p30_XL_Ash",
+          "sku": "NLYK-DEVANAGA-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p31": {
+      "id": "p31",
+      "slug": "after-hours-stealth-hoodie",
+      "name": "AFTER HOURS STEALTH HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 2899,
+      "compareAt": null,
+      "cost_price": 1160,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "Heavyweight 450 GSM stealth boxy hoodie in washed mineral black. Concealed kangaroo pocket, tonal high-density compass badge, and midnight architectural typography on back.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/after-hours-stealth-hoodie-front.jpg",
+        "/products/after-hours-stealth-hoodie-back.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        },
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p31_XS_Jet",
+          "sku": "NLYK-AFTER-HO-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_S_Jet",
+          "sku": "NLYK-AFTER-HO-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_M_Jet",
+          "sku": "NLYK-AFTER-HO-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_L_Jet",
+          "sku": "NLYK-AFTER-HO-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_XL_Jet",
+          "sku": "NLYK-AFTER-HO-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_XS_Ash",
+          "sku": "NLYK-AFTER-HO-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_S_Ash",
+          "sku": "NLYK-AFTER-HO-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_M_Ash",
+          "sku": "NLYK-AFTER-HO-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_L_Ash",
+          "sku": "NLYK-AFTER-HO-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        },
+        {
+          "id": "var_p31_XL_Ash",
+          "sku": "NLYK-AFTER-HO-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 2,
+          "price_override": null
+        }
+      ],
+      "stock": 20,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "hoodies",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p32": {
+      "id": "p32",
+      "slug": "everyday-nalayak-essential-tee",
+      "name": "EVERYDAY NALAYAK ESSENTIAL TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1199,
+      "compareAt": null,
+      "cost_price": 480,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "Chalk-white 220 GSM combed cotton boxy tee. Minimal black embroidered compass emblem on the chest with tonal back stitch detailing.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/everyday-nalayak-essential-tee-front.jpg",
+        "/products/everyday-nalayak-essential-tee-back.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Chalk",
+          "hex": "#F4F1EA"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p32_XS_Chalk",
+          "sku": "NLYK-EVERYDAY-CHA-XS",
+          "size": "XS",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_S_Chalk",
+          "sku": "NLYK-EVERYDAY-CHA-S",
+          "size": "S",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_M_Chalk",
+          "sku": "NLYK-EVERYDAY-CHA-M",
+          "size": "M",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_L_Chalk",
+          "sku": "NLYK-EVERYDAY-CHA-L",
+          "size": "L",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_XL_Chalk",
+          "sku": "NLYK-EVERYDAY-CHA-XL",
+          "size": "XL",
+          "color_name": "Chalk",
+          "color_hex": "#F4F1EA",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_XS_Jet",
+          "sku": "NLYK-EVERYDAY-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_S_Jet",
+          "sku": "NLYK-EVERYDAY-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_M_Jet",
+          "sku": "NLYK-EVERYDAY-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_L_Jet",
+          "sku": "NLYK-EVERYDAY-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        },
+        {
+          "id": "var_p32_XL_Jet",
+          "sku": "NLYK-EVERYDAY-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 3,
+          "price_override": null
+        }
+      ],
+      "stock": 30,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p33": {
+      "id": "p33",
+      "slug": "archive-specimen-series-001",
+      "name": "ARCHIVE SPECIMEN SERIES 001 TEE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1699,
+      "compareAt": null,
+      "cost_price": 680,
+      "category": "tees",
+      "gender": "unisex",
+      "badge": "LIMITED",
+      "desc": "Vintage acid-wash charcoal oversized tee. Hand-treated marble finish, discharge ink gothic typography, and SERIES 001 woven archive labeling.",
+      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
+      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
+      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
+      "story": "Engineered in India for the ones who were never interested in fitting in.",
+      "images": [
+        "/products/archive-specimen-series-001-front.jpg",
+        "/products/archive-specimen-series-001-back.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "Ash",
+          "hex": "#8C8C8C"
+        },
+        {
+          "name": "Jet",
+          "hex": "#111111"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p33_XS_Ash",
+          "sku": "NLYK-ARCHIVE-ASH-XS",
+          "size": "XS",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_S_Ash",
+          "sku": "NLYK-ARCHIVE-ASH-S",
+          "size": "S",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_M_Ash",
+          "sku": "NLYK-ARCHIVE-ASH-M",
+          "size": "M",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_L_Ash",
+          "sku": "NLYK-ARCHIVE-ASH-L",
+          "size": "L",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_XL_Ash",
+          "sku": "NLYK-ARCHIVE-ASH-XL",
+          "size": "XL",
+          "color_name": "Ash",
+          "color_hex": "#8C8C8C",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_XS_Jet",
+          "sku": "NLYK-ARCHIVE-JET-XS",
+          "size": "XS",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_S_Jet",
+          "sku": "NLYK-ARCHIVE-JET-S",
+          "size": "S",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_M_Jet",
+          "sku": "NLYK-ARCHIVE-JET-M",
+          "size": "M",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_L_Jet",
+          "sku": "NLYK-ARCHIVE-JET-L",
+          "size": "L",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        },
+        {
+          "id": "var_p33_XL_Jet",
+          "sku": "NLYK-ARCHIVE-JET-XL",
+          "size": "XL",
+          "color_name": "Jet",
+          "color_hex": "#111111",
+          "stock": 1,
+          "price_override": null
+        }
+      ],
+      "stock": 10,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": true,
+      "clubEarlyAccess": false,
+      "tags": [
+        "tees",
+        "unisex"
+      ],
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    }
+  },
+  "collections": {
+    "the-chaos-edit": {
+      "id": "col_the-chaos-edit",
+      "slug": "the-chaos-edit",
+      "title": "THE CHAOS EDIT",
+      "kicker": "COLLECTION",
+      "desc": "Prints, volume, and a complete disregard for subtlety.",
+      "image": "/collections/the-chaos-edit.jpg",
+      "products": [
+        "devanagari-chaos-tee",
+        "chaos-club-tee",
+        "bad-decisions-hoodie",
+        "anti-normal-hoodie",
+        "wrong-crowd-tee",
+        "basically-famous-tee",
+        "wrong-crowd-hoodie",
+        "nalayak-chain",
+        "daily-chaos-sneakers",
+        "off-duty-cargo"
+      ],
+      "isActive": true,
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "after-hours": {
+      "id": "col_after-hours",
+      "slug": "after-hours",
+      "title": "AFTER HOURS",
+      "kicker": "COLLECTION",
+      "desc": "For the plans that start after midnight.",
+      "image": "/collections/after-hours.jpg",
+      "products": [
+        "after-hours-stealth-hoodie",
+        "after-dark-hoodie",
+        "after-hours-tee",
+        "midnight-cargo-tee",
+        "static-noise-overshirt",
+        "night-shift-shirt",
+        "low-profile-sunnies"
+      ],
+      "isActive": true,
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "everyday-nalayak": {
+      "id": "col_everyday-nalayak",
+      "slug": "everyday-nalayak",
+      "title": "EVERYDAY NALAYAK",
+      "kicker": "COLLECTION",
+      "desc": "The daily uniform of the unapologetic.",
+      "image": "/collections/everyday-nalayak.jpg",
+      "products": [
+        "everyday-nalayak-essential-tee",
+        "nalayak-standard-tee",
+        "frequency-tee",
+        "off-record-overshirt",
+        "daily-chaos-joggers",
+        "side-eye-cap",
+        "wrong-crowd-tote",
+        "denim-but-nalayak",
+        "summer-of-chaos-shirt"
+      ],
+      "isActive": true,
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "limited-drops": {
+      "id": "col_limited-drops",
+      "slug": "limited-drops",
+      "title": "LIMITED DROPS",
+      "kicker": "COLLECTION",
+      "desc": "Small runs. Big regret if you miss them.",
+      "image": "/collections/limited-drops.jpg",
+      "products": [
+        "archive-specimen-series-001",
+        "no-approval-oversized-tee",
+        "the-500-hoodie",
+        "quiet-riot-shirt",
+        "off-script-denim",
+        "wrong-place-trousers",
+        "her-chaos-crop-tee"
+      ],
+      "isActive": true,
+      "created_at": "2026-10-25T14:08:07.564458+00:00",
+      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    }
+  },
+  "discounts": {
+    "WELCOME10": {
+      "id": "dsc_welcome10",
+      "code": "WELCOME10",
+      "discount_type": "percentage",
+      "value": 10,
+      "min_order_amount": 999,
+      "max_discount": 500,
+      "usage_limit": 1000,
+      "usage_count": 0,
+      "is_active": true,
+      "valid_from": "2026-10-25T14:08:07.564458+00:00",
+      "valid_to": null,
+      "description": "10% off for first-time orders over ₹999"
+    },
+    "CHAOS500": {
+      "id": "dsc_chaos500",
+      "code": "CHAOS500",
+      "discount_type": "fixed",
+      "value": 500,
+      "min_order_amount": 2499,
+      "max_discount": null,
+      "usage_limit": 500,
+      "usage_count": 0,
+      "is_active": true,
+      "valid_from": "2026-10-25T14:08:07.564458+00:00",
+      "valid_to": null,
+      "description": "Flat ₹500 off orders above ₹2,499"
+    },
+    "DROP26": {
+      "id": "dsc_drop26",
+      "code": "DROP26",
+      "discount_type": "percentage",
+      "value": 15,
+      "min_order_amount": 1999,
+      "max_discount": 1000,
+      "usage_limit": 500,
+      "usage_count": 0,
+      "is_active": true,
+      "valid_from": "2026-10-25T14:08:07.564458+00:00",
+      "valid_to": null,
+      "description": "15% off AW26 drops over ₹1,999"
+    }
+  },
+  "storefront": {
+    "announcement": {
+      "text": "FREE SHIPPING ON ORDERS ABOVE ₹999 — NO COUPON, NO BEGGING",
+      "enabled": true,
+      "link": "/new-arrivals"
+    },
+    "hero": {
+      "desktop": "/slide1.png",
+      "mobile": "/slide1-mobile.png",
+      "kicker": "AW26 — THE WRONG CROWD",
+      "lines": [
+        "NOT FOR",
+        "EVERYONE."
+      ],
+      "copy": "Clothes for people who were never interested in fitting in.",
+      "primary": {
+        "label": "SHOP NEW ARRIVALS",
+        "to": "/new-arrivals"
+      },
+      "secondary": {
+        "label": "EXPLORE COLLECTIONS",
+        "to": "/collections"
+      }
+    },
+    "campaign": {
+      "bg": "/hero/hero-chaos-edit.jpg",
+      "headline": "WELCOME TO THE WRONG CROWD.",
+      "copy": "For people who were never particularly interested in fitting in.",
+      "cta": {
+        "label": "EXPLORE THE COLLECTION",
+        "to": "/collections/the-chaos-edit"
+      }
+    },
+    "story": {
+      "image": "/editorial/about-atelier-craft.jpg",
+      "headline": "WE DON'T MAKE CLOTHES FOR EVERYONE.",
+      "paragraphs": [
+        "NALAYAK exists for the people who never quite fit the mould.",
+        "The ones who question the rules. The ones who make their own. The ones who would rather be remembered than approved.",
+        "We make clothes for them."
+      ],
+      "cta": {
+        "label": "OUR STORY",
+        "to": "/about"
+      }
+    },
+    "categoryTiles": [
+      {
+        "label": "TEES",
+        "spec": "240 GSM COMBED",
+        "to": "/tees",
+        "image": "/products/devanagari-chaos-tee-front.jpg"
+      },
+      {
+        "label": "SHIRTS",
+        "spec": "HEAVY TWILL",
+        "to": "/shirts",
+        "image": "photo-1596755094514-f87e34085b2c"
+      },
+      {
+        "label": "HOODIES",
+        "spec": "450 GSM FLEECE",
+        "to": "/hoodies",
+        "image": "/products/after-hours-stealth-hoodie-front.jpg"
+      },
+      {
+        "label": "BOTTOMS",
+        "spec": "TACTICAL UTILITY",
+        "to": "/bottoms",
+        "image": "/female-jeans-chain.png"
+      },
+      {
+        "label": "ACCESSORIES",
+        "spec": "HARDWARE & HEADWEAR",
+        "to": "/accessories",
+        "image": "/products/nalayak-chain-front.png"
+      }
+    ]
+  },
+  "admin_sessions": {},
+  "audit_logs": [
+    {
+      "id": "log_55c42111",
+      "admin_identity": "system",
+      "action": "seed_catalog",
+      "entity_type": "system",
+      "entity_id": "seed",
+      "details": {
+        "product_count": 33,
+        "collection_count": 4
+      },
+      "timestamp": "2026-10-25T14:08:07.564458+00:00"
+    }
+  ],
+  "orders": {
+    "NLO-8921": {
+      "order_id": "NLO-8921",
+      "name": "AARAV SEN",
+      "email": "aarav.sen@gmail.com",
+      "phone": "+91 98301 22891",
+      "address": {
+        "line1": "72 Park Street, Flat 4B",
+        "city": "Kolkata",
+        "state": "West Bengal",
+        "pincode": "700016"
+      },
+      "items": [
+        {
+          "id": "p_01",
+          "name": "THE DEVANAGARI CHAOS TEE",
+          "color": "BLACK",
+          "size": "L",
+          "qty": 1,
+          "price": 1499,
+          "image": "/products/devanagari-chaos-tee-front.jpg"
+        }
+      ],
+      "subtotal": 1499,
+      "discount": 0,
+      "coupon_code": null,
+      "shipping": 0,
+      "total": 1499,
+      "payment_method": "Razorpay UPI",
+      "payment_status": "PAID",
+      "razorpay_payment_id": "pay_NLYK89210aX",
+      "razorpay_order_id": "order_NLYK89210",
+      "status": "shipped",
+      "tracking_partner": "Delhivery Express",
+      "tracking_awb": "DEL9821447012",
+      "tracking_url": "https://www.delhivery.com/track/package/DEL9821447012",
+      "created_at": "2026-10-23T10:15:00Z",
+      "shipped_at": "2026-10-24T14:30:00Z",
+      "delivered_at": null
+    },
+    "NLO-7840": {
+      "order_id": "NLO-7840",
+      "name": "PRIYA CHATTERJEE",
+      "email": "priya.c@outlook.com",
+      "phone": "+91 98200 44512",
+      "address": {
+        "line1": "14 Bandra West, Perry Cross Rd",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "pincode": "400050"
+      },
+      "items": [
+        {
+          "id": "p_02",
+          "name": "AFTER HOURS STEALTH HOODIE",
+          "color": "BLACK",
+          "size": "M",
+          "qty": 1,
+          "price": 2899,
+          "image": "/products/after-hours-stealth-hoodie-front.jpg"
+        }
+      ],
+      "subtotal": 2899,
+      "discount": 500,
+      "coupon_code": "CHAOS500",
+      "shipping": 0,
+      "total": 2399,
+      "payment_method": "Razorpay Cards (Visa **** 4012)",
+      "payment_status": "PAID",
+      "razorpay_payment_id": "pay_NLYK78400bY",
+      "razorpay_order_id": "order_NLYK78400",
+      "status": "delivered",
+      "tracking_partner": "BlueDart Prime",
+      "tracking_awb": "BLU459102837",
+      "tracking_url": "https://www.bluedart.com/tracking?awb=BLU459102837",
+      "created_at": "2026-10-20T16:45:00Z",
+      "shipped_at": "2026-10-21T11:00:00Z",
+      "delivered_at": "2026-10-23T18:20:00Z"
+    },
+    "NLO-9104": {
+      "order_id": "NLO-9104",
+      "name": "ROHAN VERMA",
+      "email": "rohan.verma@gmail.com",
+      "phone": "+91 99112 55678",
+      "address": {
+        "line1": "204 Hauz Khas Village",
+        "city": "New Delhi",
+        "state": "Delhi",
+        "pincode": "110016"
+      },
+      "items": [
+        {
+          "id": "p_04",
+          "name": "TACTICAL UTILITY CARGO",
+          "color": "BLACK",
+          "size": "32",
+          "qty": 1,
+          "price": 2499,
+          "image": "/female-jeans-chain.png"
+        }
+      ],
+      "subtotal": 2499,
+      "discount": 0,
+      "coupon_code": null,
+      "shipping": 0,
+      "total": 2499,
+      "payment_method": "Cash on Delivery (COD)",
+      "payment_status": "PENDING",
+      "razorpay_payment_id": null,
+      "razorpay_order_id": null,
+      "status": "confirmed",
+      "tracking_partner": "Shiprocket Air",
+      "tracking_awb": "SR91040021",
+      "tracking_url": "https://shiprocket.co/tracking/SR91040021",
+      "created_at": "2026-10-25T08:20:00Z",
+      "shipped_at": null,
+      "delivered_at": null
+    },
+    "NLO-5494": {
+      "order_id": "NLO-5494",
+      "name": "KABIR MEHTA",
+      "email": "kabir.mehta@gmail.com",
+      "phone": "+91 98450 77123",
+      "address": {
+        "line1": "45 Indiranagar, 100ft Rd",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560038"
+      },
+      "items": [
+        {
+          "id": "p_05",
+          "name": "NALAYAK CHAIN NECKLACE",
+          "color": "SILVER",
+          "size": "OS",
+          "qty": 1,
+          "price": 999,
+          "image": "/products/nalayak-chain-front.png"
+        }
+      ],
+      "subtotal": 999,
+      "discount": 0,
+      "coupon_code": null,
+      "shipping": 0,
+      "total": 999,
+      "payment_method": "Razorpay NetBanking (HDFC)",
+      "payment_status": "PAID",
+      "razorpay_payment_id": "pay_NLYK54940cZ",
+      "razorpay_order_id": "order_NLYK54940",
+      "status": "placed",
+      "tracking_partner": "Delhivery Express",
+      "tracking_awb": "DEL54940081",
+      "tracking_url": "https://www.delhivery.com/track/package/DEL54940081",
+      "created_at": "2026-10-25T11:00:00Z",
+      "shipped_at": null,
+      "delivered_at": null
+    }
+  },
+  "customers": {},
+  "irl": {
+    "irl_01": {
+      "id": "irl_01",
+      "name": "Kabir M.",
+      "handle": "@kabir_nlyk",
+      "city": "Mumbai",
+      "image_url": "photo-1531891437562-4301cf35b7e4",
+      "caption": "After Hours stealth hoodie in Ballard Estate. Heavy drape hits different.",
+      "order_id": "NLO-7840",
+      "status": "approved",
+      "created_at": "2026-10-21T14:00:00Z"
+    },
+    "irl_02": {
+      "id": "irl_02",
+      "name": "Ananya D.",
+      "handle": "@ananya.fits",
+      "city": "Kolkata",
+      "image_url": "photo-1524504388940-b1c1722653e1",
+      "caption": "Devanagari Chaos tee styled with oversized utility pants.",
+      "order_id": "NLO-8921",
+      "status": "approved",
+      "created_at": "2026-10-22T17:30:00Z"
+    },
+    "irl_03": {
+      "id": "irl_03",
+      "name": "Devansh K.",
+      "handle": "@devansh_raw",
+      "city": "Bengaluru",
+      "image_url": "photo-1517841905240-472988babdf9",
+      "caption": "Street cut AW26. Boxy silhouette is exact.",
+      "order_id": null,
+      "status": "approved",
+      "created_at": "2026-10-23T11:15:00Z"
+    },
+    "irl_04": {
+      "id": "irl_04",
+      "name": "Tara Roy",
+      "handle": "@tara_nlyk",
+      "city": "Delhi",
+      "image_url": "photo-1492707892479-7bc8d5a4ee93",
+      "caption": "Tactical cargo chain detail in CP. Streetwear perfection.",
+      "order_id": "NLO-9104",
+      "status": "pending",
+      "created_at": "2026-10-25T12:00:00Z"
+    }
+  },
+  "sign_in_accounts": {
+    "aarav.sen@gmail.com": {
+      "email": "aarav.sen@gmail.com",
+      "name": "Aarav Sen",
+      "role": "VIP Club Member",
+      "auth_provider": "Email OTP",
+      "membership": "LIFETIME CLUB",
+      "phone": "+91 98301 22891",
+      "created_at": "2026-09-15T10:00:00Z",
+      "last_sign_in": "2026-10-25T14:12:00Z",
+      "email_verified": true
+    },
+    "priya.c@outlook.com": {
+      "email": "priya.c@outlook.com",
+      "name": "Priya Chatterjee",
+      "role": "Customer",
+      "auth_provider": "Google OAuth",
+      "membership": "MEMBER",
+      "phone": "+91 98200 44512",
+      "created_at": "2026-10-01T12:30:00Z",
+      "last_sign_in": "2026-10-24T18:40:00Z",
+      "email_verified": true
+    },
+    "rohan.verma@gmail.com": {
+      "email": "rohan.verma@gmail.com",
+      "name": "Rohan Verma",
+      "role": "Customer",
+      "auth_provider": "Email OTP",
+      "membership": "GUEST",
+      "phone": "+91 99112 55678",
+      "created_at": "2026-10-18T09:15:00Z",
+      "last_sign_in": "2026-10-25T08:19:00Z",
+      "email_verified": true
+    }
+  }
+}

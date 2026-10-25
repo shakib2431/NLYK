@@ -5,7 +5,7 @@ import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import { Reveal } from '@/components/Reveal';
 import AdvanceFilterDrawer from '@/components/AdvanceFilterDrawer';
-import { getListingProducts, sortProducts } from '@/services/catalog';
+import { getListingProducts, sortProducts, useLiveCatalog } from '@/services/catalog';
 import { listings, formatINR } from '@/data/storeData';
 import { useSeo } from '@/hooks/useSeo';
 
@@ -33,6 +33,11 @@ const ALL_COLORS = [
   { name: 'Jet', hex: '#111111', label: 'Jet Black' },
   { name: 'Chalk', hex: '#F4F1EA', label: 'Chalk White' },
   { name: 'Ash', hex: '#8C8C8C', label: 'Ash Grey' },
+  { name: 'Cobalt', hex: '#1035FF', label: 'Electric Cobalt' },
+  { name: 'Crimson', hex: '#B80C2A', label: 'Cherry Crimson' },
+  { name: 'Haldi', hex: '#E69500', label: 'Haldi Amber' },
+  { name: 'Forest', hex: '#143822', label: 'Tactical Forest' },
+  { name: 'Terracotta', hex: '#C85A32', label: 'Terracotta' },
   { name: 'Olive', hex: '#4A5340', label: 'Olive' },
   { name: 'Maroon', hex: '#5C2E2E', label: 'Maroon' },
 ];
@@ -72,7 +77,14 @@ export default function ListingPage({ listingKey }) {
     setActiveCategoryTab('ALL');
   }, [listingKey]);
 
-  const base = useMemo(() => getListingProducts(listingKey), [listingKey]);
+  const { products: liveProducts } = useLiveCatalog();
+
+  const base = useMemo(() => {
+    const cfg = listings[listingKey];
+    const source = liveProducts && liveProducts.length > 0 ? liveProducts : getListingProducts(listingKey);
+    if (!cfg) return source;
+    return source.filter(cfg.filter);
+  }, [listingKey, liveProducts]);
 
   const filtered = useMemo(() => {
     let list = base;
@@ -133,6 +145,13 @@ export default function ListingPage({ listingKey }) {
     setActiveCategoryTab('ALL');
   };
 
+  const scrollToCatalog = () => {
+    const el = document.getElementById('listing-catalog');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const activeFiltersCount =
     cats.length +
     sizes.length +
@@ -141,95 +160,208 @@ export default function ListingPage({ listingKey }) {
     (availability !== 'all' ? 1 : 0);
 
   return (
-    <main className="px-4 md:px-8 max-w-[1600px] mx-auto py-10 md:py-16" data-testid={`listing-${listingKey}`}>
-      {/* Breadcrumb */}
-      <nav className="text-[10px] tracking-[0.25em] text-smoke mb-6" aria-label="Breadcrumb">
-        <Link to="/" className="hover:text-ink transition-colors" data-testid="breadcrumb-home">
-          HOME
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink uppercase">{cfg?.title}</span>
-      </nav>
+    <main data-testid={`listing-${listingKey}`} className="min-h-screen bg-paper">
+      {/* Campaign Hero Banner (New In, Men, Women) */}
+      {cfg?.hero ? (
+        <section className="relative w-full h-[52vh] sm:h-[60vh] md:h-[68vh] min-h-[440px] max-h-[720px] bg-ink overflow-hidden select-none">
+          <SafeImg
+            id={cfg.hero.image}
+            w={2400}
+            alt={cfg.hero.headline || cfg.title}
+            className="absolute inset-0 h-full w-full object-cover object-[center_35%] md:object-center filter brightness-[0.92] transition-transform duration-700 hover:scale-[1.02]"
+          />
+          {/* Streetwear atmospheric vignette and contrast gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/30 to-transparent pointer-events-none" />
 
-      {/* Header Banner */}
-      <Reveal y={16}>
-        <p className="text-[11px] tracking-[0.3em] text-smoke mb-2 uppercase">{cfg?.kicker}</p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">
-            {cfg?.title}
-          </h1>
-          <p className="text-smoke text-sm max-w-sm">{cfg?.desc}</p>
+          {/* Hero Content Container */}
+          <div className="relative z-10 h-full max-w-[1600px] mx-auto px-4 md:px-8 flex flex-col justify-between pt-6 sm:pt-8 pb-10 sm:pb-12 text-paper">
+            {/* Top Bar inside Hero */}
+            <div className="flex items-center justify-between">
+              <nav className="text-[10px] tracking-[0.25em] text-paper/70" aria-label="Breadcrumb">
+                <Link to="/" className="hover:text-paper transition-colors" data-testid="breadcrumb-home">
+                  HOME
+                </Link>
+                <span className="mx-2 text-paper/40">/</span>
+                <span className="text-paper font-semibold uppercase">{cfg.title}</span>
+              </nav>
+
+              {cfg.hero.badge && (
+                <div className="inline-flex items-center gap-2 border border-paper/30 bg-black/40 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] font-mono tracking-widest text-paper/90 uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {cfg.hero.badge}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Hero Campaign Details */}
+            <div className="max-w-3xl">
+              <Reveal y={20}>
+                {cfg.hero.tagline && (
+                  <p className="text-[11px] sm:text-xs tracking-[0.35em] text-paper/75 font-mono mb-2.5 uppercase flex items-center gap-2">
+                    <span className="inline-block w-4 h-px bg-paper/60" />
+                    {cfg.hero.tagline}
+                  </p>
+                )}
+                <h1 className="font-display font-black uppercase tracking-tighter leading-[0.88] text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-paper drop-shadow-sm">
+                  {cfg.hero.headline || cfg.title}
+                </h1>
+                {cfg.hero.subhead && (
+                  <p className="mt-3.5 text-paper/85 text-xs sm:text-sm md:text-base max-w-xl font-sans leading-relaxed">
+                    {cfg.hero.subhead}
+                  </p>
+                )}
+
+                {/* Hero CTA button */}
+                <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={scrollToCatalog}
+                    className="group inline-flex items-center gap-3 bg-paper text-ink px-8 py-3.5 text-xs tracking-[0.25em] font-bold uppercase rounded-full hover:bg-neutral-200 transition-all cursor-pointer shadow-xl active:scale-95"
+                  >
+                    <span>{cfg.hero.cta || 'EXPLORE CATALOG'}</span>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      className="transition-transform group-hover:translate-y-0.5"
+                    >
+                      <path d="M7 13l5 5 5-5M12 6v12" />
+                    </svg>
+                  </button>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+      ) : (
+        /* Fallback text banner for non-hero routes like /tees, /shirts, /all */
+        <div className="px-4 md:px-8 max-w-[1600px] mx-auto pt-8 pb-2">
+          {/* Breadcrumb */}
+          <nav className="text-[10px] tracking-[0.25em] text-smoke mb-6" aria-label="Breadcrumb">
+            <Link to="/" className="hover:text-ink transition-colors" data-testid="breadcrumb-home">
+              HOME
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-ink uppercase">{cfg?.title}</span>
+          </nav>
+
+          {/* Header Banner */}
+          <Reveal y={16}>
+            <p className="text-[11px] tracking-[0.3em] text-smoke mb-2 uppercase">{cfg?.kicker}</p>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">
+                {cfg?.title}
+              </h1>
+              <p className="text-smoke text-sm max-w-sm">{cfg?.desc}</p>
+            </div>
+          </Reveal>
         </div>
-      </Reveal>
+      )}
 
-      {/* Control Bar */}
-      <div className="mt-10 flex items-center justify-between border-y border-line py-3.5">
-        <div className="flex items-center gap-3">
-          <span className="text-xs tracking-[0.2em] font-bold uppercase text-ink">
-            {cfg?.title}
-          </span>
-          <span className="text-[11px] tracking-[0.15em] font-mono text-smoke" data-testid="product-count">
-            ({filtered.length} {filtered.length === 1 ? 'PIECE' : 'PIECES'})
-          </span>
-        </div>
+      {/* Catalog & Filter Section */}
+      <section id="listing-catalog" className="px-4 md:px-8 max-w-[1600px] mx-auto py-8 md:py-12">
+        {/* Category Pills Navigation Strip */}
+        {cfg?.hero?.categoryPills && (
+          <div className="mb-6 sm:mb-8 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            {cfg.hero.categoryPills.map((pill) => {
+              const isAll = pill.category === 'ALL';
+              const isSelected = isAll ? cats.length === 0 : cats.length === 1 && cats[0] === pill.category;
+              return (
+                <button
+                  key={pill.label}
+                  type="button"
+                  onClick={() => {
+                    if (isAll || isSelected) {
+                      setCats([]);
+                    } else {
+                      setCats([pill.category]);
+                    }
+                  }}
+                  className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold tracking-wider whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? 'bg-ink text-paper shadow-sm ring-1 ring-ink'
+                      : 'bg-white border border-neutral-300 text-ink/80 hover:border-ink hover:text-ink hover:bg-neutral-50'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-        <div className="flex items-center gap-2.5">
-          {activeFiltersCount > 0 && (
-            <button
-              onClick={handleResetAll}
-              className="text-[10px] tracking-[0.15em] font-mono text-smoke hover:text-ink underline uppercase hidden sm:inline-block cursor-pointer mr-1"
-            >
-              CLEAR ALL ({activeFiltersCount})
-            </button>
-          )}
+        {/* Control Bar */}
+        <div className="flex items-center justify-between border-y border-line py-3.5">
+          <div className="flex items-center gap-3">
+            <span className="text-xs tracking-[0.2em] font-bold uppercase text-ink">
+              {cfg?.title}
+            </span>
+            <span className="text-[11px] tracking-[0.15em] font-mono text-smoke" data-testid="product-count">
+              ({filtered.length} {filtered.length === 1 ? 'PIECE' : 'PIECES'})
+            </span>
+          </div>
 
-          {/* Compass Star "Show Everything" Dense View Toggle */}
-          <button
-            type="button"
-            data-testid="toggle-dense-view-btn"
-            onClick={() => setDenseView(!denseView)}
-            title={denseView ? 'Switch to Editorial View' : 'Show Everything · Dense Atelier View'}
-            className={`relative flex items-center justify-center h-9 w-9 rounded-full border transition-all duration-300 cursor-pointer ${
-              denseView
-                ? 'bg-ink text-paper border-ink shadow-md scale-105'
-                : 'bg-white text-ink border-neutral-300 hover:border-ink hover:bg-neutral-50 shadow-sm'
-            }`}
-            aria-pressed={denseView}
-            aria-label="Toggle Show Everything Dense View"
-          >
-            {/* NALAYAK Compass Star Logo */}
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill={denseView ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className={denseView ? 'animate-pulse' : ''}
-            >
-              <path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" />
-            </svg>
-            {denseView && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
-            )}
-          </button>
-
-          {/* Advance Filters Button */}
-          <button
-            data-testid="filter-drawer-btn"
-            onClick={() => setDrawerOpen(true)}
-            className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase border border-neutral-300 bg-white hover:border-ink hover:bg-neutral-50 px-4 py-2 rounded-full shadow-sm transition-all cursor-pointer"
-          >
-            <SlidersHorizontal size={13} strokeWidth={2} />
-            <span>Advance Filters</span>
+          <div className="flex items-center gap-2.5">
             {activeFiltersCount > 0 && (
-              <span className="h-4 w-4 rounded-full bg-ink text-paper text-[9px] flex items-center justify-center font-bold">
-                {activeFiltersCount}
-              </span>
+              <button
+                onClick={handleResetAll}
+                className="text-[10px] tracking-[0.15em] font-mono text-smoke hover:text-ink underline uppercase hidden sm:inline-block cursor-pointer mr-1"
+              >
+                CLEAR ALL ({activeFiltersCount})
+              </button>
             )}
-          </button>
+
+            {/* Compass Star "Show Everything" Dense View Toggle */}
+            <button
+              type="button"
+              data-testid="toggle-dense-view-btn"
+              onClick={() => setDenseView(!denseView)}
+              title={denseView ? 'Switch to Editorial View' : 'Show Everything · Dense Atelier View'}
+              className={`relative flex items-center justify-center h-9 w-9 rounded-full border transition-all duration-300 cursor-pointer ${
+                denseView
+                  ? 'bg-ink text-paper border-ink shadow-md scale-105'
+                  : 'bg-white text-ink border-neutral-300 hover:border-ink hover:bg-neutral-50 shadow-sm'
+              }`}
+              aria-pressed={denseView}
+              aria-label="Toggle Show Everything Dense View"
+            >
+              {/* NALAYAK Compass Star Logo */}
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill={denseView ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth="1.8"
+                className={denseView ? 'animate-pulse' : ''}
+              >
+                <path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" />
+              </svg>
+              {denseView && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
+              )}
+            </button>
+
+            {/* Advance Filters Button */}
+            <button
+              data-testid="filter-drawer-btn"
+              onClick={() => setDrawerOpen(true)}
+              className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase border border-neutral-300 bg-white hover:border-ink hover:bg-neutral-50 px-4 py-2 rounded-full shadow-sm transition-all cursor-pointer"
+            >
+              <SlidersHorizontal size={13} strokeWidth={2} />
+              <span>Advance Filters</span>
+              {activeFiltersCount > 0 && (
+                <span className="h-4 w-4 rounded-full bg-ink text-paper text-[9px] flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Horizontal Category Quick Tabs (Revealed in Dense View or Quick Filter) */}
       {denseView && (
@@ -274,9 +406,9 @@ export default function ListingPage({ listingKey }) {
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-center p-2.5 aspect-[3/4] rounded-xl bg-neutral-100/70 border border-dashed border-neutral-300 select-none"
+                      className="flex items-center justify-center p-2.5 aspect-[3/4] bg-white border border-ink select-none"
                     >
-                      <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink/75 text-center leading-tight">
+                      <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink text-center leading-tight">
                         {item.title}
                       </span>
                     </div>
@@ -288,7 +420,7 @@ export default function ListingPage({ listingKey }) {
                   <Link
                     key={p.id}
                     to={`/product/${p.slug}`}
-                    className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-neutral-100 border border-line/60 shadow-sm hover:shadow-md transition-all duration-300 block"
+                    className="group relative aspect-[3/4] overflow-hidden bg-white border border-line hover:border-ink transition-colors duration-300 block"
                     title={`${p.name} — ${formatINR(p.price)}`}
                   >
                     <SafeImg
@@ -379,6 +511,7 @@ export default function ListingPage({ listingKey }) {
         sortOptions={SORTS}
         onResetAll={handleResetAll}
       />
+      </section>
     </main>
   );
 }

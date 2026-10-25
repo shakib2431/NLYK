@@ -5,7 +5,7 @@ import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import { Reveal } from '@/components/Reveal';
 import AdvanceFilterDrawer from '@/components/AdvanceFilterDrawer';
-import { getCollections, getProducts, sortProducts } from '@/services/catalog';
+import { getCollections, getProducts, sortProducts, useLiveCatalog } from '@/services/catalog';
 import { formatINR } from '@/data/storeData';
 import { useSeo } from '@/hooks/useSeo';
 
@@ -31,6 +31,11 @@ const ALL_COLORS = [
   { name: 'Jet', hex: '#111111', label: 'Jet Black' },
   { name: 'Chalk', hex: '#F4F1EA', label: 'Chalk White' },
   { name: 'Ash', hex: '#8C8C8C', label: 'Ash Grey' },
+  { name: 'Cobalt', hex: '#1035FF', label: 'Electric Cobalt' },
+  { name: 'Crimson', hex: '#B80C2A', label: 'Cherry Crimson' },
+  { name: 'Haldi', hex: '#E69500', label: 'Haldi Amber' },
+  { name: 'Forest', hex: '#143822', label: 'Tactical Forest' },
+  { name: 'Terracotta', hex: '#C85A32', label: 'Terracotta' },
   { name: 'Olive', hex: '#4A5340', label: 'Olive' },
   { name: 'Maroon', hex: '#5C2E2E', label: 'Maroon' },
 ];
@@ -46,8 +51,7 @@ const CATEGORY_TABS = [
 
 export default function Collections() {
   useSeo('Collections', 'The Nalayak Edit — curated drops, edits and moods.');
-  const cols = getCollections();
-  const allProducts = useMemo(() => getProducts(), []);
+  const { products: allProducts, collections: cols } = useLiveCatalog();
 
   const [sort, setSort] = useState('featured');
   const [cats, setCats] = useState([]);
@@ -281,9 +285,9 @@ export default function Collections() {
                     return (
                       <div
                         key={item.id}
-                        className="flex items-center justify-center p-2.5 aspect-[3/4] rounded-xl bg-neutral-100/70 border border-dashed border-neutral-300 select-none"
+                        className="flex items-center justify-center p-2.5 aspect-[3/4] bg-white border border-ink select-none"
                       >
-                        <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink/75 text-center leading-tight">
+                        <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink text-center leading-tight">
                           {item.title}
                         </span>
                       </div>
@@ -295,7 +299,7 @@ export default function Collections() {
                     <Link
                       key={p.id}
                       to={`/product/${p.slug}`}
-                      className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-neutral-100 border border-line/60 shadow-sm hover:shadow-md transition-all duration-300 block"
+                      className="group relative aspect-[3/4] overflow-hidden bg-white border border-line hover:border-ink transition-colors duration-300 block"
                       title={`${p.name} — ${formatINR(p.price)}`}
                     >
                       <SafeImg

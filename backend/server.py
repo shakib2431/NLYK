@@ -11,6 +11,7 @@ import secrets
 import re
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List, Dict, Any
 
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -32,18 +33,33 @@ load_dotenv(ROOT_DIR / ".env")
 mongo_url = os.environ.get("MONGO_URL", "").strip()
 db_name = os.environ.get("DB_NAME", "").strip()
 
-if not mongo_url:
-    raise RuntimeError("MONGO_URL is missing from backend/.env")
+class _LazyDatabase:
+    def __init__(self, url: str, name: str):
+        self._url = url
+        self._name = name
+        self._client = None
+        self._db = None
 
-if not db_name:
-    raise RuntimeError("DB_NAME is missing from backend/.env")
+    def _get_db(self):
+        if self._db is None:
+            if not self._url or not self._name:
+                raise RuntimeError("MONGO_URL or DB_NAME is missing from backend/.env")
+            try:
+                self._client = AsyncIOMotorClient(self._url, serverSelectionTimeoutMS=2000)
+                self._db = self._client[self._name]
+            except Exception as e:
+                logger.warning("MongoDB connection could not be established: %s", e)
+                raise
+        return self._db
 
-client = AsyncIOMotorClient(mongo_url)
-db = client[db_name]
+    def __getattr__(self, name):
+        return getattr(self._get_db(), name)
 
+    def __getitem__(self, name):
+        return self._get_db()[name]
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+db = _LazyDatabase(mongo_url, db_name)
+client = getattr(db, "_client", None)
 
 
 
@@ -52,6 +68,10 @@ app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+# NALAYAK Admin Studio & Storefront Catalog Router
+from admin_catalog_routes import router as catalog_router
+api_router.include_router(catalog_router)
 
 # =========================================================
 # SHIPROCKET CONFIG
@@ -1914,6 +1934,7 @@ class OrderInput(BaseModel):
     subtotal: int = 0
     shipping: int = 0
     total: int = 0
+    discount_code: Optional[str] = None
 
 @api_router.post("/orders")
 async def create_order(
@@ -2034,6 +2055,50 @@ async def create_order(
 
     now = datetime.now(timezone.utc).isoformat()
 
+    # ── Authoritative Server-Side Price & Inventory Recalculation ──
+    from catalog_db import catalog_store
+
+    auth_subtotal = 0
+    verified_items = []
+    for raw_item in input.items:
+        slug = raw_item.get("slug")
+        item_qty = max(1, int(raw_item.get("qty", 1)))
+        prod = catalog_store.get_product(slug) if slug else None
+
+        if prod:
+            unit_price = int(prod.get("price") or 0)
+            item_name = prod.get("name", raw_item.get("name", "Piece"))
+        else:
+            unit_price = max(0, int(raw_item.get("price") or 0))
+            item_name = raw_item.get("name", "Piece")
+
+        line_total = unit_price * item_qty
+        auth_subtotal += line_total
+
+        verified_item = dict(raw_item)
+        verified_item["price"] = unit_price
+        verified_item["name"] = item_name
+        verified_item["line_total"] = line_total
+        verified_items.append(verified_item)
+
+    auth_discount = 0
+    applied_coupon = None
+    if input.discount_code and input.discount_code.strip():
+        is_val, d_amt, _ = catalog_store.validate_discount(input.discount_code.strip(), auth_subtotal)
+        if is_val:
+            auth_discount = d_amt
+            applied_coupon = input.discount_code.strip().upper()
+
+    qualifying_subtotal = max(0, auth_subtotal - auth_discount)
+    auth_shipping = 0 if qualifying_subtotal >= 999 else 199
+    auth_total = qualifying_subtotal + auth_shipping
+
+    # Atomically decrement inventory stock
+    try:
+        catalog_store.decrement_inventory_for_order(verified_items)
+    except Exception as e:
+        logger.warning("Inventory decrement error: %s", e)
+
     tracking_token = secrets.token_urlsafe(32)
     tracking_token_hash = hashlib.sha256(
         tracking_token.encode("utf-8")
@@ -2048,10 +2113,12 @@ async def create_order(
         "name": input.name,
         "phone": input.phone,
         "shipping_address": input.shipping_address,
-        "items": input.items,
-        "subtotal": input.subtotal,
-        "shipping": input.shipping,
-        "total": input.total,
+        "items": verified_items,
+        "subtotal": auth_subtotal,
+        "discount_code": applied_coupon,
+        "discount_amount": auth_discount,
+        "shipping": auth_shipping,
+        "total": auth_total,
         "status": "placed",
         "created_at": now,
     }
@@ -2189,6 +2256,10 @@ async def create_order(
         "orderId": order_id,
         "trackingToken": tracking_token,
         "emailed": emailed,
+        "subtotal": auth_subtotal,
+        "discount": auth_discount,
+        "shipping": auth_shipping,
+        "total": auth_total,
     }
 
 
@@ -2296,6 +2367,27 @@ async def list_orders(
 # â”€â”€ Order tracking + shipping status â”€â”€
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str, token: str = None):
+    # First check catalog_store authoritative / local store
+    local_order = catalog_store.get_order(order_id)
+    if local_order:
+        return {
+            "order_id": local_order.get("order_id"),
+            "name": local_order.get("name"),
+            "status": local_order.get("status"),
+            "tracking_partner": local_order.get("tracking_partner") or "Delhivery Express",
+            "tracking_awb": local_order.get("tracking_awb"),
+            "tracking_url": local_order.get("tracking_url"),
+            "created_at": local_order.get("created_at"),
+            "shipped_at": local_order.get("shipped_at"),
+            "delivered_at": local_order.get("delivered_at"),
+            "items": local_order.get("items", []),
+            "shipping": local_order.get("shipping", 0),
+            "total": local_order.get("total", 0),
+            "payment_method": local_order.get("payment_method"),
+            "payment_status": local_order.get("payment_status"),
+            "address": local_order.get("address", {}),
+        }
+
     if not token or len(token) > 256:
         raise HTTPException(status_code=404, detail="not_found")
     token_hash = hashlib.sha256(
@@ -2495,28 +2587,28 @@ async def admin_orders(
             }
 
         if resp.status_code >= 400:
-            logger.error(
-                "Supabase admin orders lookup failed: "
-                f"{resp.status_code} {result}"
+            logger.warning(
+                "Supabase admin orders lookup returned status %s, using catalog_store",
+                resp.status_code,
             )
+            return {"orders": catalog_store.list_orders()}
 
-            raise HTTPException(
-                status_code=502,
-                detail="Failed to fetch orders",
-            )
-
+        orders_list = result if isinstance(result, list) else []
+        if not orders_list:
+            orders_list = catalog_store.list_orders()
         return {
-            "orders": result if isinstance(result, list) else [],
+            "orders": orders_list,
         }
 
     except HTTPException:
-        raise
+        return {"orders": catalog_store.list_orders()}
 
     except Exception as e:
         logger.exception(
-            "Supabase admin orders request failed: %s",
+            "Supabase admin orders request failed, falling back to catalog_store: %s",
             e,
         )
+        return {"orders": catalog_store.list_orders()}
 
         raise HTTPException(
             status_code=502,
@@ -2629,12 +2721,34 @@ def get_object(path: str):
     )
 
 
-def admin_guard(x_admin_key: str = Header(None)):
+def admin_guard(
+    x_admin_key: str = Header(None, alias="X-Admin-Key"),
+    x_admin_session: str = Header(None, alias="X-Admin-Session"),
+    authorization: str = Header(None, alias="Authorization"),
+):
+    from catalog_db import catalog_store
+
+    # 1. Validate session token if provided
+    token = None
+    if x_admin_session and x_admin_session.strip():
+        token = x_admin_session.strip()
+    elif authorization and authorization.lower().startswith("bearer "):
+        token = authorization[7:].strip()
+
+    if token:
+        sess = catalog_store.validate_admin_session(token)
+        if sess:
+            return {"admin_identity": sess["admin_identity"], "token": token}
+
+    # 2. Validate master admin key
     if not ADMIN_KEY or not ADMIN_KEY.strip():
         logger.error("ADMIN_KEY is not configured; admin access is disabled")
         raise HTTPException(status_code=503, detail="admin_not_configured")
-    if not x_admin_key or not hmac.compare_digest(x_admin_key, ADMIN_KEY):
+
+    if not x_admin_key or not hmac.compare_digest(x_admin_key.strip(), ADMIN_KEY.strip()):
         raise HTTPException(status_code=401, detail="unauthorized")
+
+    return {"admin_identity": "superadmin", "token": None}
 
 
 # â”€â”€ IRL / Real Life uploads â€” Supabase Storage + Supabase Postgres â”€â”€
@@ -3534,9 +3648,7 @@ async def retry_contact_notifications(admin_key: str = Header(None, alias="X-Adm
     Retry any pending or failed contact email notifications.
     Deduplicates automatically so sent notifications are never duplicated.
     """
-    expected_key = os.environ.get("ADMIN_KEY", "nalayak-admin-2026")
-    if not admin_key or admin_key != expected_key:
-        raise HTTPException(status_code=401, detail="unauthorized")
+    admin_guard(x_admin_key=admin_key)
 
     cursor = db.contact_messages.find({"notification_status": {"$in": ["pending", "failed"]}})
     retried = 0
@@ -3903,9 +4015,7 @@ async def purge_reviews_cache(admin_key: str = Header(None, alias="X-Admin-Key")
     Purge cached Google reviews for immediate refresh.
     Protected by ADMIN_KEY.
     """
-    expected_key = os.environ.get("ADMIN_KEY", "nalayak-admin-2026")
-    if not admin_key or admin_key != expected_key:
-        raise HTTPException(status_code=401, detail="unauthorized")
+    admin_guard(x_admin_key=admin_key)
     global _reviews_cache
     _reviews_cache["data"] = None
     _reviews_cache["timestamp"] = 0.0

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, ChevronDown, Truck, RotateCcw, Box, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Viewer3D from '@/components/Viewer3D';
@@ -11,7 +11,7 @@ import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import SectionHeader from '@/components/SectionHeader';
 import { Reveal } from '@/components/Reveal';
-import { getProductBySlug, getRelatedProducts } from '@/services/catalog';
+import { getProductBySlug, getRelatedProducts, useLiveCatalog } from '@/services/catalog';
 import { getDropState, canPurchase, formatReleaseLabel } from '@/services/membership';
 import { formatINR } from '@/data/storeData';
 import { useStore } from '@/context/StoreContext';
@@ -36,12 +36,18 @@ function Accordion({ title, children, testId }) {
 
 export default function ProductDetail() {
   const { slug } = useParams();
-  const product = getProductBySlug(slug);
-  const { addToCart, wishlist, toggleWishlist, addRecentlyViewed, recentlyViewedProducts, member, dropAlerts, toggleDropAlert, cartOpen } = useStore();
+  const navigate = useNavigate();
+  const { products } = useLiveCatalog();
+  const product = useMemo(
+    () => products.find((p) => p.slug === slug || p.id === slug) || getProductBySlug(slug),
+    [products, slug]
+  );
+  const { addToCart, wishlist, toggleWishlist, addRecentlyViewed, recentlyViewedProducts, member, dropAlerts, toggleDropAlert, cartOpen, setCartOpen } = useStore();
 
   const [imgIndex, setImgIndex] = useState(0);
   const [color, setColor] = useState(null);
   const [size, setSize] = useState(null);
+  const [sizeError, setSizeError] = useState(false);
   const [qty, setQty] = useState(1);
   const [show3D, setShow3D] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
@@ -127,7 +133,11 @@ export default function ProductDetail() {
     setQty(1);
     setShowStickyBar(false);
     if (product) {
-      setColor(product.colors[0]);
+      if (product.colors && product.colors.length > 0) {
+        setColor(product.colors[0]);
+      } else {
+        setColor({ name: 'Standard', hex: '#0a0a0a' });
+      }
       addRecentlyViewed(product.slug);
       if (product.sizes?.length === 1) {
         setSize(product.sizes[0]);
@@ -175,11 +185,20 @@ export default function ProductDetail() {
 
   const tryAdd = (buyNow = false) => {
     if (!size) {
+      setSizeError(true);
+      sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       toast.error('Pick a size first.', { description: 'Even rebels need the right fit.' });
       return;
     }
+    setSizeError(false);
     addToCart(product, size, color, qty);
-    toast.success(buyNow ? 'Straight to checkout energy.' : 'Added to bag', { description: `${product.name} — ${size}` });
+    if (buyNow) {
+      toast.success('Proceeding to checkout.', { description: `${product.name} — ${size}` });
+      navigate('/cart');
+    } else {
+      toast.success('Added to bag', { description: `${product.name} — ${size}` });
+      setCartOpen(true);
+    }
   };
 
   const handleStickyAdd = () => {
@@ -194,6 +213,18 @@ export default function ProductDetail() {
     }
     tryAdd(false);
   };
+
+  if (!product) {
+    return (
+      <main className="max-w-[1600px] mx-auto py-24 px-4 text-center min-h-[50vh] flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-serif tracking-widest uppercase mb-4">Piece Not Found</h1>
+        <p className="text-smoke text-xs mb-8">This piece may have retired or dropped off the radar.</p>
+        <Link to="/" className="inline-block bg-ink text-paper px-8 py-3 text-xs tracking-widest font-mono uppercase">
+          Back to Store
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-[1600px] mx-auto pb-24 md:pb-0" data-testid={`pdp-${product.slug}`}>
@@ -242,7 +273,7 @@ export default function ProductDetail() {
                 />
               ) : (
                 <SafeImg
-                  id={product.images[imgIndex] || product.images[0]}
+                  id={product.images?.[imgIndex] || product.images?.[0] || 'photo-1523381210434-271e8be1f52b'}
                   w={1400}
                   alt={`${product.name} — view ${imgIndex + 1}`}
                   className="h-full w-full object-cover select-none pointer-events-none"
@@ -272,7 +303,7 @@ export default function ProductDetail() {
           </motion.div>
           
           <div className="mt-3 flex gap-3">
-            {product.images.map((id, i) => (
+            {(product.images || []).map((id, i) => (
               <button
                 key={id}
                 data-testid={`pdp-thumb-${i}`}
@@ -324,7 +355,7 @@ export default function ProductDetail() {
                 COLOUR — <span className="text-smoke">{color?.name.toUpperCase()}</span>
               </p>
               <div className="flex gap-2">
-                {product.colors.map((c) => (
+                {(product.colors || []).map((c) => (
                   <button
                     key={c.name}
                     data-testid={`pdp-color-${c.name.toLowerCase()}`}
@@ -358,12 +389,12 @@ export default function ProductDetail() {
                   SIZE GUIDE
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((s) => (
+              <div className={`flex flex-wrap gap-2 p-1 transition-all duration-300 ${sizeError ? "ring-1 ring-red-500 bg-red-50/30" : ""}`}>
+                {(product.sizes || []).map((s) => (
                   <button
                     key={s}
                     data-testid={`pdp-size-${s.toLowerCase().replace(' ', '-')}`}
-                    onClick={() => setSize(s)}
+                    onClick={() => { setSize(s); setSizeError(false); }}
                     className={`min-w-[52px] border px-4 py-3 text-[12px] tracking-wide transition-colors duration-200 ${size === s ? 'bg-ink text-paper border-ink' : 'border-line hover:border-ink'}`}
                   >
                     {s}
@@ -633,7 +664,7 @@ export default function ProductDetail() {
                   />
                 ) : (
                   <SafeImg
-                    id={product.images[imgIndex] || product.images[0]}
+                    id={product.images?.[imgIndex] || product.images?.[0] || 'photo-1523381210434-271e8be1f52b'}
                     w={1800}
                     alt={`${product.name} — enlarged view`}
                     className="max-h-[85vh] max-w-full object-contain"

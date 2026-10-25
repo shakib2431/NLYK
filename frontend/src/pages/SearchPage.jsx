@@ -280,9 +280,9 @@ export default function SearchPage() {
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center justify-center p-2.5 aspect-[3/4] rounded-xl bg-neutral-100/70 border border-dashed border-neutral-300 select-none"
+                          className="flex items-center justify-center p-2.5 aspect-[3/4] bg-white border border-ink select-none"
                         >
-                          <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink/75 text-center leading-tight">
+                          <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink text-center leading-tight">
                             {item.title}
                           </span>
                         </div>
@@ -294,7 +294,7 @@ export default function SearchPage() {
                       <Link
                         key={p.id}
                         to={`/product/${p.slug}`}
-                        className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-neutral-100 border border-line/60 shadow-sm hover:shadow-md transition-all duration-300 block"
+                        className="group relative aspect-[3/4] overflow-hidden bg-white border border-line hover:border-ink transition-colors duration-300 block"
                         title={`${p.name} — ${formatINR(p.price)}`}
                       >
                         <SafeImg

@@ -186,29 +186,160 @@ export default function CustomDesign() {
   }
 
   return (
-    <main data-testid="custom-design-page">
-      <section className="grid md:grid-cols-2 border-b border-line">
-        <div className="flex flex-col justify-center px-6 md:px-16 py-16 md:py-28 order-2 md:order-1">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">CUSTOM DESIGN</p>
-            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-[13vw] md:text-[5.5vw]">
-              MAKE IT YOURS.
+    <main data-testid="custom-design-page" className="min-h-screen bg-paper text-ink">
+      {/* Hero Section — Editorial Split Layout */}
+      <section className="grid lg:grid-cols-12 border-b border-line overflow-hidden bg-paper">
+        {/* Left Column — Editorial Briefing */}
+        <div className="lg:col-span-7 flex flex-col justify-center px-6 sm:px-12 md:px-16 lg:px-20 py-16 md:py-24 order-2 lg:order-1">
+          <Reveal y={16}>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[11px] tracking-[0.3em] font-mono text-smoke uppercase">
+                {customDesign.eyebrow || 'CUSTOM DESIGN / NALAYAK ATELIER'}
+              </p>
+            </div>
+
+            <h1 className="font-display font-black uppercase tracking-tighter leading-[0.88] text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-ink">
+              {customDesign.title || 'MAKE IT YOURS.'}
             </h1>
-            <p className="mt-6 text-sm md:text-base text-ink/70 max-w-md leading-relaxed">
-              Have an idea that doesn't exist yet? Tell us what you're thinking. Our team will take it from there.
+
+            <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-lg leading-relaxed font-sans">
+              {customDesign.desc || "Have an idea that doesn't exist yet? Tell us what you're imagining. We'll explore the concept with you and assess the next steps."}
             </p>
-            <p className="mt-4 text-[11px] tracking-[0.25em] text-smoke">YOUR IDEA. OUR CRAFT. NOT OFF THE SHELF.</p>
-            <button
-              onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              data-testid="start-request-btn"
-              className="mt-8 bg-ink text-paper px-10 py-4 text-[11px] tracking-[0.3em] font-medium hover:bg-ink/85 transition-colors duration-300"
-            >
-              START A REQUEST
-            </button>
+
+            <div className="mt-6 inline-flex items-center gap-2 border border-line bg-neutral-100/60 px-3.5 py-1.5 rounded-full">
+              <span className="text-[10px] sm:text-[11px] tracking-[0.25em] font-mono text-smoke uppercase">
+                {customDesign.badge || 'YOUR IDEA. OUR CRAFT. BUILT TO BE DIFFERENT.'}
+              </span>
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                data-testid="start-request-btn"
+                className="group inline-flex items-center gap-3 bg-ink text-paper px-9 py-4 text-xs tracking-[0.25em] font-bold uppercase rounded-full hover:bg-neutral-800 transition-all cursor-pointer shadow-lg active:scale-95"
+              >
+                <span>{customDesign.cta || 'START A REQUEST'}</span>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  className="transition-transform group-hover:translate-y-0.5"
+                >
+                  <path d="M7 13l5 5 5-5M12 6v12" />
+                </svg>
+              </button>
+            </div>
           </Reveal>
         </div>
-        <div className="relative overflow-hidden min-h-[320px] md:min-h-[560px] order-1 md:order-2">
-          <SafeImg id={customDesign.heroImage} w={1400} alt="Nalayak custom studio" className="absolute inset-0 h-full w-full object-cover" />
+
+        {/* Right Column — Authentic Atelier Workbench Photography */}
+        <div className="lg:col-span-5 relative min-h-[360px] sm:min-h-[460px] lg:min-h-[620px] bg-neutral-900 border-b lg:border-b-0 lg:border-l border-line order-1 lg:order-2 overflow-hidden group">
+          <SafeImg
+            id={customDesign.heroImage}
+            w={1600}
+            alt="Nalayak custom design atelier workbench with drafting shears, pattern sketches, and heavyweight fabric swatches"
+            className="absolute inset-0 h-full w-full object-cover object-center filter brightness-[0.93] transition-transform duration-700 group-hover:scale-105"
+          />
+          {/* Streetwear studio atmospheric vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent pointer-events-none" />
+
+          {/* Studio Watermark & Status Pill */}
+          <div className="absolute bottom-6 left-6 z-10 flex items-center gap-2 border border-paper/30 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[10px] font-mono tracking-widest text-paper/90 uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>NALAYAK ATELIER · SAMPLE ROOM 01</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Three-Step Bespoke Workflow Process Section */}
+      <section className="border-b border-line bg-neutral-50/60 py-16 sm:py-20 md:py-24 px-4 md:px-8" data-testid="custom-process-section">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Section Header */}
+          <Reveal y={12}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12 sm:mb-16 border-b border-line pb-6">
+              <div>
+                <p className="text-[11px] tracking-[0.3em] font-mono text-smoke uppercase mb-2">ATELIER WORKFLOW</p>
+                <h2 className="font-display font-black uppercase tracking-tight text-3xl sm:text-4xl md:text-5xl text-ink">
+                  HOW BESPOKE COMMISSIONS WORK
+                </h2>
+              </div>
+              <p className="text-xs font-mono tracking-widest text-smoke uppercase">
+                DIRECT CONSULTATION · NO SHORTCUTS
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Three Restrained Editorial Steps */}
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+            {/* Step 01 */}
+            <Reveal delay={0.05}>
+              <div className="border-t-2 border-ink pt-6 flex flex-col justify-between h-full">
+                <div>
+                  <span className="font-mono text-xs tracking-[0.25em] text-smoke uppercase block mb-3">
+                    STAGE 01
+                  </span>
+                  <h3 className="font-display font-black uppercase text-xl md:text-2xl tracking-tight text-ink mb-3">
+                    01 — SHARE YOUR IDEA
+                  </h3>
+                  <p className="text-sm text-smoke/90 leading-relaxed font-sans">
+                    Tell us what garment, graphic or concept you have in mind. Upload any sketches, moodboards, or references.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Step 02 */}
+            <Reveal delay={0.1}>
+              <div className="border-t-2 border-ink pt-6 flex flex-col justify-between h-full">
+                <div>
+                  <span className="font-mono text-xs tracking-[0.25em] text-smoke uppercase block mb-3">
+                    STAGE 02
+                  </span>
+                  <h3 className="font-display font-black uppercase text-xl md:text-2xl tracking-tight text-ink mb-3">
+                    02 — DISCUSS THE DESIGN
+                  </h3>
+                  <p className="text-sm text-smoke/90 leading-relaxed font-sans">
+                    Our team reviews the brief and discusses feasibility, silhouette cuts, fabric weight, and next steps with you.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Step 03 */}
+            <Reveal delay={0.15}>
+              <div className="border-t-2 border-ink pt-6 flex flex-col justify-between h-full">
+                <div>
+                  <span className="font-mono text-xs tracking-[0.25em] text-smoke uppercase block mb-3">
+                    STAGE 03
+                  </span>
+                  <h3 className="font-display font-black uppercase text-xl md:text-2xl tracking-tight text-ink mb-3">
+                    03 — EXPLORE PRODUCTION
+                  </h3>
+                  <p className="text-sm text-smoke/90 leading-relaxed font-sans">
+                    Confirm available options, sample iterations, quantities and costs once feasibility is agreed upon.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Workflow Footnote Disclaimer */}
+          <div className="mt-12 pt-6 border-t border-line/60 flex flex-wrap items-center justify-between gap-4 text-[11px] text-smoke font-mono tracking-wider">
+            <span>* FEASIBILITY AND ESTIMATES CONFIRMED ONLY AFTER DIRECT CONSULTATION.</span>
+            <button
+              type="button"
+              onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              className="underline hover:text-ink cursor-pointer font-medium uppercase transition-colors"
+            >
+              SUBMIT YOUR BRIEF BELOW ↓
+            </button>
+          </div>
         </div>
       </section>
 

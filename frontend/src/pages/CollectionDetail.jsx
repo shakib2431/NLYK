@@ -5,7 +5,7 @@ import SafeImg from '@/components/SafeImg';
 import ProductCard from '@/components/ProductCard';
 import { Reveal } from '@/components/Reveal';
 import AdvanceFilterDrawer from '@/components/AdvanceFilterDrawer';
-import { getCollectionBySlug, getCollectionProducts, sortProducts } from '@/services/catalog';
+import { getCollectionBySlug, getCollectionProducts, sortProducts, useLiveCatalog, getProductBySlug } from '@/services/catalog';
 import { formatINR } from '@/data/storeData';
 import { useSeo } from '@/hooks/useSeo';
 
@@ -31,6 +31,11 @@ const ALL_COLORS = [
   { name: 'Jet', hex: '#111111', label: 'Jet Black' },
   { name: 'Chalk', hex: '#F4F1EA', label: 'Chalk White' },
   { name: 'Ash', hex: '#8C8C8C', label: 'Ash Grey' },
+  { name: 'Cobalt', hex: '#1035FF', label: 'Electric Cobalt' },
+  { name: 'Crimson', hex: '#B80C2A', label: 'Cherry Crimson' },
+  { name: 'Haldi', hex: '#E69500', label: 'Haldi Amber' },
+  { name: 'Forest', hex: '#143822', label: 'Tactical Forest' },
+  { name: 'Terracotta', hex: '#C85A32', label: 'Terracotta' },
   { name: 'Olive', hex: '#4A5340', label: 'Olive' },
   { name: 'Maroon', hex: '#5C2E2E', label: 'Maroon' },
 ];
@@ -46,7 +51,11 @@ const CATEGORY_TABS = [
 
 export default function CollectionDetail() {
   const { slug } = useParams();
-  const col = getCollectionBySlug(slug);
+  const { products, collections } = useLiveCatalog();
+  const col = useMemo(
+    () => collections.find((c) => c.slug === slug) || getCollectionBySlug(slug),
+    [collections, slug]
+  );
   useSeo(col?.title || 'Collection', col?.desc);
 
   const [sort, setSort] = useState('featured');
@@ -59,7 +68,13 @@ export default function CollectionDetail() {
   const [denseView, setDenseView] = useState(false);
   const [activeCategoryTab, setActiveCategoryTab] = useState('ALL');
 
-  const rawItems = useMemo(() => (slug ? getCollectionProducts(slug) : []), [slug]);
+  const rawItems = useMemo(() => {
+    if (!col) return [];
+    const productSlugs = col.products || [];
+    return productSlugs
+      .map((s) => products.find((p) => p.slug === s || p.id === s) || getProductBySlug(s))
+      .filter(Boolean);
+  }, [col, products]);
 
   const filtered = useMemo(() => {
     let list = rawItems;
@@ -269,9 +284,9 @@ export default function CollectionDetail() {
                     return (
                       <div
                         key={item.id}
-                        className="flex items-center justify-center p-2.5 aspect-[3/4] rounded-xl bg-neutral-100/70 border border-dashed border-neutral-300 select-none"
+                        className="flex items-center justify-center p-2.5 aspect-[3/4] bg-white border border-ink select-none"
                       >
-                        <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink/75 text-center leading-tight">
+                        <span className="font-display font-extrabold uppercase text-[11px] sm:text-xs tracking-widest text-ink text-center leading-tight">
                           {item.title}
                         </span>
                       </div>
@@ -283,7 +298,7 @@ export default function CollectionDetail() {
                     <Link
                       key={p.id}
                       to={`/product/${p.slug}`}
-                      className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-neutral-100 border border-line/60 shadow-sm hover:shadow-md transition-all duration-300 block"
+                      className="group relative aspect-[3/4] overflow-hidden bg-white border border-line hover:border-ink transition-colors duration-300 block"
                       title={`${p.name} — ${formatINR(p.price)}`}
                     >
                       <SafeImg

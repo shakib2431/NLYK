@@ -6,6 +6,7 @@ import SafeImg from '@/components/SafeImg';
 import { Reveal } from '@/components/Reveal';
 import { useStore } from '@/context/StoreContext';
 import { formatINR, FREE_SHIPPING_THRESHOLD } from '@/data/storeData';
+import { validateCouponApi } from '@/services/catalog';
 import { useSeo } from '@/hooks/useSeo';
 
 export default function CartPage() {
@@ -18,7 +19,12 @@ const [checkoutName, setCheckoutName] = useState('');
 const [checkoutEmail, setCheckoutEmail] = useState('');
 const [checkoutPhone, setCheckoutPhone] = useState('');
 const [checkoutAddress, setCheckoutAddress] = useState('');
-  const shipping = cartSubtotal >= FREE_SHIPPING_THRESHOLD || cartSubtotal === 0 ? 0 : 99;
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const discountAmount = appliedCoupon ? appliedCoupon.discount : 0;
+  const discountedSubtotal = Math.max(0, cartSubtotal - discountAmount);
+  const shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD || discountedSubtotal === 0 ? 0 : 99;
+  const finalTotal = discountedSubtotal + shipping;
 
   const checkout = async () => {
   if (!checkoutOpen) {
@@ -85,7 +91,8 @@ if (!checkoutAddress.trim()) {
           })),
           subtotal: cartSubtotal,
           shipping,
-          total: cartSubtotal + shipping,
+          total: finalTotal,
+          discount_code: appliedCoupon ? appliedCoupon.code : null,
         }),
       }
     );
@@ -100,7 +107,7 @@ if (!checkoutAddress.trim()) {
       id: data.orderId,
       trackingToken: data.trackingToken,
       emailed: data.emailed,
-      total: cartSubtotal + shipping,
+      total: data.total || finalTotal,
     });
 
     setCheckoutOpen(false);
@@ -198,13 +205,48 @@ if (!checkoutAddress.trim()) {
                 <span className="text-smoke">Subtotal</span>
                 <span className="font-medium" data-testid="summary-subtotal">{formatINR(cartSubtotal)}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-emerald-700 font-medium">
+                  <span>Promo ({appliedCoupon.code})</span>
+                  <span>-{formatINR(appliedCoupon.discount)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-smoke">Shipping</span>
                 <span className="font-medium">{shipping === 0 ? 'FREE' : formatINR(shipping)}</span>
               </div>
               <div className="flex justify-between pt-3 border-t border-line text-base font-semibold">
                 <span>Total</span>
-                <span data-testid="summary-total">{formatINR(cartSubtotal + shipping)}</span>
+                <span data-testid="summary-total">{formatINR(finalTotal)}</span>
+              </div>
+            </div>
+
+            {/* Promo Code Input */}
+            <div className="mt-4 pt-3 border-t border-line">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="PROMO CODE"
+                  className="w-full border border-line px-3 py-2 text-xs font-mono tracking-widest outline-none uppercase"
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!couponInput.trim()) return;
+                    const res = await validateCouponApi(couponInput, cartSubtotal);
+                    if (res.valid) {
+                      setAppliedCoupon({ code: res.code, discount: res.discount });
+                      toast.success(res.message);
+                    } else {
+                      toast.error(res.message || 'Invalid coupon code');
+                    }
+                  }}
+                  className="px-3 py-2 bg-ink text-paper text-xs font-mono font-medium hover:bg-ink/85 transition-colors"
+                >
+                  APPLY
+                </button>
               </div>
             </div>
              {checkoutOpen && (

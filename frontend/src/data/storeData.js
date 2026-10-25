@@ -77,7 +77,7 @@ export const manifesto = [
 ];
 
 export const campaign = {
-  bg: '/slide1.png',
+  bg: '/hero/hero-chaos-edit.jpg',
   headline: 'WELCOME TO THE WRONG CROWD.',
   copy: 'For people who were never particularly interested in fitting in.',
   cta: { label: 'EXPLORE THE COLLECTION', to: '/collections/the-chaos-edit' },
@@ -126,6 +126,11 @@ const ASH = { name: 'Ash', hex: '#8C8C8C' };
 const OLIVE = { name: 'Olive', hex: '#4A5340' };
 const MAROON = { name: 'Maroon', hex: '#5C2E2E' };
 const PAPER = { name: 'Paper', hex: '#FFFFFF' };
+const COBALT = { name: 'Cobalt', hex: '#1035FF' };
+const CRIMSON = { name: 'Crimson', hex: '#B80C2A' };
+const HALDI = { name: 'Haldi', hex: '#E69500' };
+const FOREST = { name: 'Forest', hex: '#143822' };
+const TERRACOTTA = { name: 'Terracotta', hex: '#C85A32' };
 
 const daysFromNow = (d) => new Date(Date.now() + d * 864e5).toISOString();
 const daysAgo = (d) => daysFromNow(-d);
@@ -499,9 +504,72 @@ export const footerLinks = {
 };
 
 export const listings = {
-  'new-arrivals': { title: 'NEW ARRIVALS', kicker: 'JUST LANDED', desc: 'Fresh pieces. Questionable decisions.', filter: (p) => p.newArrival },
-  men: { title: 'MEN', kicker: 'SHOP MEN', desc: 'Everything, engineered for trouble.', filter: (p) => p.gender === 'men' || p.gender === 'unisex' },
-  women: { title: 'WOMEN', kicker: 'SHOP WOMEN', desc: 'Cut sharper. Worn louder.', filter: (p) => p.gender === 'women' || p.gender === 'unisex' },
+  'new-arrivals': {
+    title: 'NEW ARRIVALS',
+    kicker: 'JUST LANDED',
+    desc: 'Fresh pieces. Questionable decisions.',
+    filter: (p) => p.newArrival,
+    hero: {
+      image: '/hero/landing-new-arrivals.jpg',
+      badge: 'AW26 EDITORIAL',
+      tagline: 'AUTUMN / WINTER 2026 // THE WRONG CROWD',
+      headline: 'NEW ARRIVALS',
+      subhead: 'Engineered in Mumbai. Heavyweight 300+ GSM cotton, architectural cuts, and unapologetic Indian attitude.',
+      cta: 'SHOP NEW ARRIVALS',
+      categoryPills: [
+        { label: 'ALL NEW', category: 'ALL' },
+        { label: 'BOXY TEES', category: 'tees' },
+        { label: 'OVERSIZED HOODIES', category: 'hoodies' },
+        { label: 'CAMP SHIRTS', category: 'shirts' },
+        { label: 'TACTICAL CARGOS', category: 'bottoms' },
+        { label: 'HARDWARE & ACCESSORIES', category: 'accessories' },
+      ],
+    },
+  },
+  men: {
+    title: 'MEN',
+    kicker: 'SHOP MEN',
+    desc: 'Everything, engineered for trouble.',
+    filter: (p) => p.gender === 'men' || p.gender === 'unisex',
+    hero: {
+      image: '/hero/landing-men.jpg',
+      badge: 'MEN’S UNIFORM',
+      tagline: 'TACTICAL SILHOUETTES // HEAVYWEIGHT DRAPE',
+      headline: 'MEN’S COLLECTION',
+      subhead: '450 GSM fleece, dropped shoulder boxy cuts, and industrial cargo hardware built for the street.',
+      cta: 'SHOP MEN',
+      categoryPills: [
+        { label: 'ALL MEN', category: 'ALL' },
+        { label: 'BOXY TEES', category: 'tees' },
+        { label: 'OVERSIZED HOODIES', category: 'hoodies' },
+        { label: 'CAMP SHIRTS', category: 'shirts' },
+        { label: 'TACTICAL CARGOS', category: 'bottoms' },
+        { label: 'HARDWARE & HEADWEAR', category: 'accessories' },
+      ],
+    },
+  },
+  women: {
+    title: 'WOMEN',
+    kicker: 'SHOP WOMEN',
+    desc: 'Cut sharper. Worn louder.',
+    filter: (p) => p.gender === 'women' || p.gender === 'unisex',
+    hero: {
+      image: '/hero/landing-women.jpg',
+      badge: 'WOMEN’S ATELIER',
+      tagline: 'SHARP SILHOUETTES // MIDNIGHT DRAPE',
+      headline: 'WOMEN’S COLLECTION',
+      subhead: 'Cropped baby tees, relaxed heavyweight fleece, and unapologetic cuts made to own any room.',
+      cta: 'SHOP WOMEN',
+      categoryPills: [
+        { label: 'ALL WOMEN', category: 'ALL' },
+        { label: 'CROP & BABY TEES', category: 'tees' },
+        { label: 'RELAXED HOODIES', category: 'hoodies' },
+        { label: 'FLUID SHIRTS', category: 'shirts' },
+        { label: 'WIDE-LEG BOTTOMS', category: 'bottoms' },
+        { label: 'HARDWARE & JEWELRY', category: 'accessories' },
+      ],
+    },
+  },
   tees: { title: 'TEES', kicker: 'SHOP TEES', desc: 'Heavyweight cotton. Heavyweight opinions.', filter: (p) => p.category === 'tees' },
   shirts: { title: 'SHIRTS', kicker: 'SHOP SHIRTS', desc: 'Buttoned up. Never behaved.', filter: (p) => p.category === 'shirts' },
   hoodies: { title: 'HOODIES', kicker: 'SHOP HOODIES', desc: 'Fleece thick enough to hide in.', filter: (p) => p.category === 'hoodies' },
@@ -595,7 +663,29 @@ export const statusLevels = [
 ];
 
 export const customDesign = {
-  heroImage: 'photo-1556905055-8f358a7a47b2',
+  heroImage: '/editorial/custom-atelier-studio.jpg',
+  eyebrow: 'CUSTOM DESIGN / NALAYAK ATELIER',
+  title: 'MAKE IT YOURS.',
+  desc: "Have an idea that doesn't exist yet? Tell us what you're imagining. We'll explore the concept with you and assess the next steps.",
+  badge: 'YOUR IDEA. OUR CRAFT. BUILT TO BE DIFFERENT.',
+  cta: 'START A REQUEST',
+  steps: [
+    {
+      num: '01',
+      title: 'SHARE YOUR IDEA',
+      desc: 'Tell us what garment, graphic or concept you have in mind.',
+    },
+    {
+      num: '02',
+      title: 'DISCUSS THE DESIGN',
+      desc: 'Our team reviews the brief and discusses feasibility and next steps.',
+    },
+    {
+      num: '03',
+      title: 'EXPLORE PRODUCTION',
+      desc: 'Confirm available options, quantities and costs after the discussion.',
+    },
+  ],
   garments: ['T-SHIRT', 'HOODIE', 'SHIRT', 'BOTTOMS', 'OTHER'],
   vibes: ['MINIMAL', 'GRAPHIC', 'OVERSIZED', 'STREET', 'EXPERIMENTAL', 'OTHER'],
   colours: [

@@ -22,6 +22,10 @@ export default function SearchOverlay() {
   const results = useMemo(() => searchProducts(q).slice(0, 6), [q]);
 
   const go = () => q.trim() && addRecentSearch(q.trim());
+  const handleSelectProduct = () => {
+    go();
+    setSearchOpen(false);
+  };
 
   return (
     <motion.div
@@ -89,7 +93,7 @@ export default function SearchOverlay() {
                   <Link
                     key={p.slug}
                     to={`/product/${p.slug}`}
-                    onClick={go}
+                    onClick={handleSelectProduct}
                     data-testid={`search-result-${p.slug}`}
                     className="flex items-center gap-4 py-3 group"
                   >

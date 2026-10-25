@@ -133,11 +133,9 @@ export default function TrackOrder() {
   useEffect(() => {
     if (!orderId) return;
     setOrder(undefined);
-    if (!trackingToken) {
-      setOrder(null);
-      return;
-    }
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/orders/${encodeURIComponent(orderId.trim().toUpperCase())}?token=${encodeURIComponent(trackingToken)}`)
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+    const query = trackingToken ? `?token=${encodeURIComponent(trackingToken)}` : '';
+    fetch(`${backendUrl}/api/orders/${encodeURIComponent(orderId.trim().toUpperCase())}${query}`)
       .then((r) => (r.ok ? r.json() : null))
       .then(setOrder)
       .catch(() => setOrder(null));
@@ -208,6 +206,30 @@ export default function TrackOrder() {
       </Reveal>
 
       <Timeline order={order} />
+
+      {order.tracking_awb && (
+        <div className="mt-8 p-4 bg-white border border-line flex flex-wrap items-center justify-between gap-4" data-testid="tracking-awb-card">
+          <div>
+            <p className="text-[10px] font-mono tracking-widest text-smoke uppercase">COURIER PARTNER & WAYBILL</p>
+            <p className="font-semibold text-sm mt-0.5">{order.tracking_partner || 'Delhivery Express'} · AWB: {order.tracking_awb}</p>
+          </div>
+          {order.tracking_url && (
+            <a
+              href={order.tracking_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2 text-[10px] tracking-widest font-mono uppercase hover:bg-ink/80 transition-colors"
+            >
+              TRACK ON CARRIER PORTAL ↗
+            </a>
+          )}
+        </div>
+      )}
+
+      <div className="mt-4 flex items-center justify-between text-xs font-mono text-smoke">
+        <span>PAYMENT: {order.payment_method || 'Razorpay UPI'}</span>
+        <span className="px-2 py-0.5 border border-line text-ink font-bold">{(order.payment_status || 'PAID').toUpperCase()}</span>
+      </div>
 
       {(order.status || '').toLowerCase() === 'delivered' && <FitUpload order={order} />}
 
