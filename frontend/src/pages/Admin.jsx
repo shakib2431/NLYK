@@ -6,10 +6,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Reveal } from '@/components/Reveal';
-import { refreshCatalog } from '@/services/catalog';
+import { refreshCatalog, markProductArchivedLocally, markCategoryDeletedLocally, unmarkCategoryDeletedLocally } from '@/services/catalog';
 import { useSeo } from '@/hooks/useSeo';
 import {
   LayoutDashboard,
+  LayoutGrid,
   ShoppingBag,
   Boxes,
   Layers,
@@ -22,6 +23,8 @@ import {
   Search,
   Copy,
   Trash2,
+  Archive,
+  RotateCcw,
   Edit3,
   ExternalLink,
   RefreshCw,
@@ -38,6 +41,7 @@ import {
   ShieldCheck,
   ArrowUpRight,
   Lock,
+  MessageSquareQuote,
 } from 'lucide-react';
 
 const API = () => process.env.REACT_APP_BACKEND_URL || '';
@@ -100,12 +104,18 @@ export default function Admin() {
   const [customerSubView, setCustomerSubView] = useState('customers'); // 'customers' | 'accounts'
   const [viewingCustomer, setViewingCustomer] = useState(null);
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('ALL');
+  const [adminReviews, setAdminReviews] = useState([]);
+  const [reviewsStatusFilter, setReviewsStatusFilter] = useState('ALL');
+  const [reviewsSearch, setReviewsSearch] = useState('');
+  const [syncingGoogle, setSyncingGoogle] = useState(false);
   const [irlFilter, setIrlFilter] = useState('ALL');
   const [addingIrl, setAddingIrl] = useState(false);
   const [newIrlData, setNewIrlData] = useState({ name: '', handle: '', city: 'Kolkata', image_url: '', caption: '' });
 
   // Modals & Drawers State
   const [editingProduct, setEditingProduct] = useState(null); // null or product object
+  const [categories, setCategories] = useState([]);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [editingCollection, setEditingCollection] = useState(null);
   const [editingDiscount, setEditingDiscount] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -153,6 +163,14 @@ export default function Admin() {
         setCollections(c.collections || []);
       } catch {
         setCollections([]);
+      }
+
+      // 4b. Categories
+      try {
+        const catRes = await adminFetch('/api/admin/catalog/categories', activeKey);
+        setCategories(catRes.categories || []);
+      } catch {
+        setCategories([]);
       }
 
       // 5. Discounts
@@ -205,12 +223,89 @@ export default function Admin() {
         setTickets(t.tickets || []);
       } catch { setTickets([]); }
 
+      try {
+        const revData = await adminFetch('/api/admin/reviews', activeKey);
+        setAdminReviews(revData.reviews || []);
+      } catch { setAdminReviews([]); }
+
       setError(false);
     } catch (err) {
       console.error('Admin load failed:', err);
       setError(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveReview = async (reviewId, verified) => {
+    try {
+      const url = `/api/admin/reviews/${reviewId}/approve${verified !== undefined ? `?verified=${verified}` : ''}`;
+      const res = await adminFetch(url, key, { method: 'POST' });
+      if (res && res.success) {
+        toast.success('Review approved and live on storefront.');
+        setAdminReviews((prev) => prev.map((r) => (r.id === reviewId ? res.review : r)));
+      }
+    } catch (err) {
+      toast.error(`Approve failed: ${err.message}`);
+    }
+  };
+
+  const handleRejectReview = async (reviewId) => {
+    try {
+      const res = await adminFetch(`/api/admin/reviews/${reviewId}/reject`, key, { method: 'POST' });
+      if (res && res.success) {
+        toast.success('Review marked as rejected.');
+        setAdminReviews((prev) => prev.map((r) => (r.id === reviewId ? res.review : r)));
+      }
+    } catch (err) {
+      toast.error(`Reject failed: ${err.message}`);
+    }
+  };
+
+  const handleToggleVerifiedBuyer = async (review) => {
+    try {
+      const newStatus = !review.is_verified_buyer;
+      const res = await adminFetch(`/api/admin/reviews/${review.id}`, key, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_verified_buyer: newStatus }),
+      });
+      if (res && res.success) {
+        toast.success(newStatus ? 'Marked as ✦ Verified Buyer' : 'Unmarked Verified Buyer');
+        setAdminReviews((prev) => prev.map((r) => (r.id === review.id ? res.review : r)));
+      }
+    } catch (err) {
+      toast.error(`Toggle failed: ${err.message}`);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm(`Permanently delete review ${reviewId}? This cannot be undone.`)) return;
+    try {
+      const res = await adminFetch(`/api/admin/reviews/${reviewId}`, key, { method: 'DELETE' });
+      if (res && res.deleted) {
+        toast.success(`Review ${reviewId} deleted.`);
+        setAdminReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      }
+    } catch (err) {
+      toast.error(`Delete failed: ${err.message}`);
+    }
+  };
+
+  const handleSyncGoogle = async () => {
+    setSyncingGoogle(true);
+    try {
+      const res = await adminFetch('/api/admin/reviews/google-sync', key, { method: 'POST' });
+      if (res && res.configured) {
+        toast.success(`Google sync complete! Synced ${res.imported_count} reviews.`);
+        const revData = await adminFetch('/api/admin/reviews', key);
+        setAdminReviews(revData.reviews || []);
+      } else {
+        toast.info(res.message || 'Google Places API credentials not configured in backend/.env.');
+      }
+    } catch (err) {
+      toast.error(`Google sync error: ${err.message}`);
+    } finally {
+      setSyncingGoogle(false);
     }
   };
 
@@ -299,6 +394,16 @@ export default function Admin() {
     if (orderStatusFilter !== 'ALL') {
       list = list.filter((o) => (o.status || 'placed').toLowerCase() === orderStatusFilter.toLowerCase());
     }
+    if (orderPaymentFilter !== 'ALL') {
+      list = list.filter((o) => {
+        const pStatus = (o.payment_status || '').toUpperCase();
+        const pMethod = (o.payment_method || '').toUpperCase();
+        if (orderPaymentFilter === 'PAID') return pStatus === 'PAID';
+        if (orderPaymentFilter === 'PENDING') return pStatus === 'PENDING';
+        if (orderPaymentFilter === 'COD') return pMethod.includes('COD') || pMethod.includes('CASH');
+        return true;
+      });
+    }
     if (orderSearch.trim()) {
       const q = orderSearch.toLowerCase();
       list = list.filter(
@@ -310,7 +415,26 @@ export default function Admin() {
       );
     }
     return list;
-  }, [orders, orderStatusFilter, orderSearch]);
+  }, [orders, orderStatusFilter, orderPaymentFilter, orderSearch]);
+
+  const orderFinancials = useMemo(() => {
+    return (orders || []).reduce(
+      (acc, o) => {
+        const total = Number(o.total || 0);
+        acc.gross += total;
+        const pStatus = (o.payment_status || '').toUpperCase();
+        const pMethod = (o.payment_method || '').toUpperCase();
+        if (pStatus === 'PAID' || pMethod.includes('RAZORPAY') || pMethod.includes('PREPAID') || pMethod.includes('CARD') || pMethod.includes('UPI')) {
+          acc.razorpayPaid += total;
+        } else if (pMethod.includes('COD') || pMethod.includes('CASH') || pStatus === 'PENDING') {
+          acc.codPending += total;
+        }
+        acc.discountsTotal += Number(o.discount || 0);
+        return acc;
+      },
+      { gross: 0, razorpayPaid: 0, codPending: 0, discountsTotal: 0 }
+    );
+  }, [orders]);
 
   // ── GATE / LOGIN SCREEN ─────────────────────────────────────────
   if (!key) {
@@ -414,6 +538,7 @@ export default function Admin() {
             { id: 'products', label: 'PRODUCTS', icon: ShoppingBag, count: products.length },
             { id: 'inventory', label: 'INVENTORY', icon: Boxes, count: products.reduce((acc, p) => acc + (p.stock || 0), 0) },
             { id: 'collections', label: 'COLLECTIONS', icon: Layers, count: collections.length },
+            { id: 'categories', label: 'CATEGORIES', icon: LayoutGrid, count: categories.length },
             { id: 'discounts', label: 'DISCOUNTS', icon: Tag, count: discounts.length },
             { id: 'orders', label: 'ORDERS', icon: PackageCheck, count: orders.length },
             { id: 'customers', label: 'CUSTOMERS', icon: Users, count: customers.length },
@@ -422,6 +547,7 @@ export default function Admin() {
             { id: 'custom', label: 'CUSTOM', icon: null, count: requests.length },
             { id: 'support', label: 'SUPPORT', icon: null, count: tickets.length },
             { id: 'irl', label: 'IRL', icon: null, count: irl.length },
+            { id: 'reviews', label: 'REVIEWS', icon: MessageSquareQuote, count: adminReviews.filter((r) => r.status === 'pending').length },
             { id: 'drops', label: 'DROPS', icon: null, count: null },
           ].map((t) => {
             const Icon = t.icon;
@@ -636,11 +762,11 @@ export default function Admin() {
                   className="bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs font-mono text-white outline-none"
                 >
                   <option value="ALL">ALL CATEGORIES</option>
-                  <option value="tees">TEES</option>
-                  <option value="hoodies">HOODIES</option>
-                  <option value="shirts">SHIRTS</option>
-                  <option value="bottoms">BOTTOMS</option>
-                  <option value="accessories">ACCESSORIES</option>
+                  {categories.map((c) => (
+                    <option key={c.slug || c.id} value={c.slug || c.id}>
+                      {(c.title || c.name || c.slug).toUpperCase()}
+                    </option>
+                  ))}
                 </select>
 
                 <select
@@ -744,14 +870,16 @@ export default function Admin() {
                           </span>
                         </td>
                         <td className="p-3">
-                          <span className={`px-2 py-0.5 text-[9px] uppercase border ${
+                          <span className={`px-2 py-0.5 text-[9px] uppercase border font-bold ${
                             p.status === 'active'
                               ? 'border-emerald-800 text-emerald-400 bg-emerald-950/40'
+                              : p.status === 'archived'
+                              ? 'border-amber-800/80 text-amber-400 bg-amber-950/40'
                               : p.status === 'draft'
-                              ? 'border-amber-800 text-amber-400 bg-amber-950/40'
+                              ? 'border-zinc-700 text-zinc-400 bg-zinc-900'
                               : 'border-zinc-700 text-zinc-500'
                           }`}>
-                            {p.status || 'active'}
+                            {p.status === 'archived' ? 'ARCHIVED' : (p.status || 'active')}
                           </span>
                         </td>
                         <td className="p-3 text-right">
@@ -775,20 +903,59 @@ export default function Admin() {
                             >
                               <Copy size={13} />
                             </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm(`Archive ${p.name}?`)) {
-                                  act(
-                                    () => adminFetch(`/api/admin/catalog/products/${p.id}`, key, { method: 'DELETE' }),
-                                    `Archived ${p.name}`
-                                  );
-                                }
-                              }}
-                              title="Archive"
-                              className="p-1.5 border border-zinc-800 hover:border-red-800 text-zinc-400 hover:text-red-400 transition-colors"
-                            >
-                              <Trash2 size={13} />
-                            </button>
+                            {p.status === 'archived' ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (window.confirm(`Restore ${p.name} to live website?`)) {
+                                      await act(
+                                        () => adminFetch(`/api/admin/catalog/products/${p.id}/unarchive`, key, { method: 'POST' }),
+                                        `Restored ${p.name} to live website`
+                                      );
+                                      markProductArchivedLocally(p.slug || p.id, false);
+                                    }
+                                  }}
+                                  title="Restore to Live Website"
+                                  className="p-1.5 border border-zinc-800 hover:border-emerald-700 text-emerald-400 hover:bg-emerald-950/40 transition-colors"
+                                >
+                                  <RotateCcw size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (window.confirm(`Permanently DELETE ${p.name}? This action cannot be reversed.`)) {
+                                      await act(
+                                        () => adminFetch(`/api/admin/catalog/products/${p.id}?permanent=true`, key, { method: 'DELETE' }),
+                                        `Permanently deleted ${p.name}`
+                                      );
+                                      markProductArchivedLocally(p.slug || p.id, true);
+                                    }
+                                  }}
+                                  title="Permanently Delete"
+                                  className="p-1.5 border border-zinc-800 hover:border-red-700 text-red-400 hover:bg-red-950/40 transition-colors"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (window.confirm(`Archive ${p.name}? This will immediately hide it from the live website.`)) {
+                                    await act(
+                                      () => adminFetch(`/api/admin/catalog/products/${p.id}`, key, { method: 'DELETE' }),
+                                      `Archived ${p.name} (hidden from live site)`
+                                    );
+                                    markProductArchivedLocally(p.slug || p.id, true);
+                                  }
+                                }}
+                                title="Archive & Hide from Website"
+                                className="p-1.5 border border-zinc-800 hover:border-amber-700 text-zinc-400 hover:text-amber-400 hover:bg-amber-950/40 transition-colors"
+                              >
+                                <Archive size={13} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -971,6 +1138,143 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════
+            TAB: CATEGORIES (ATELIER SILHOUETTES & PIECES)
+        ══════════════════════════════════════════════════════ */}
+        {tab === 'categories' && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div>
+                <p className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">CATALOGUE TAXONOMY</p>
+                <h2 className="text-sm font-mono tracking-widest text-white uppercase font-bold">
+                  ACTIVE ATELIER CATEGORIES ({categories.length})
+                </h2>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingCategory({
+                    slug: '',
+                    name: '',
+                    title: '',
+                    subtitle: '',
+                    desc: '',
+                    image: '',
+                    display_order: (categories.length + 1) * 10,
+                    is_active: true,
+                  });
+                }}
+                className="flex items-center gap-2 bg-white text-black px-4 py-2 text-xs font-mono font-bold hover:bg-zinc-200 transition-colors uppercase"
+              >
+                <Plus size={14} />
+                <span>NEW CATEGORY</span>
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((cat) => {
+                const count = cat.product_count !== undefined
+                  ? cat.product_count
+                  : products.filter((p) => (p.category || '').toLowerCase() === (cat.slug || '').toLowerCase() && p.status !== 'archived').length;
+                return (
+                  <div key={cat.slug || cat.id} className="border border-zinc-800 bg-zinc-900/40 flex flex-col justify-between overflow-hidden group hover:border-zinc-700 transition-colors">
+                    <div>
+                      {/* Category Cover Preview */}
+                      <div className="relative h-44 overflow-hidden border-b border-zinc-800 bg-zinc-950">
+                        {cat.image ? (
+                          <img
+                            src={cat.image}
+                            alt={cat.title || cat.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-zinc-600 font-mono text-xs gap-2">
+                            <LayoutGrid size={28} className="opacity-40" />
+                            <span>NO COVER IMAGE</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-4 flex flex-col justify-end">
+                          <span className={`text-[9px] font-mono px-2 py-0.5 border self-start mb-1 font-bold ${
+                            cat.is_active !== false ? 'border-emerald-800 bg-emerald-950/80 text-emerald-400' : 'border-zinc-700 bg-zinc-900 text-zinc-400'
+                          }`}>
+                            {cat.is_active !== false ? 'ACTIVE' : 'HIDDEN'}
+                          </span>
+                          <h3 className="font-display font-black text-xl text-white tracking-tight">
+                            {(cat.title || cat.name || cat.slug).toUpperCase()}
+                          </h3>
+                          <p className="text-[10px] font-mono tracking-wider text-zinc-400 truncate">
+                            {cat.subtitle || 'ATELIER ESSENTIAL'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Details & Specs */}
+                      <div className="p-4 space-y-3 font-mono text-xs">
+                        <div className="flex items-center justify-between text-zinc-400">
+                          <span className="text-zinc-500">SLUG:</span>
+                          <span className="text-zinc-300">/{cat.slug}</span>
+                        </div>
+                        {cat.desc && (
+                          <p className="text-zinc-400 line-clamp-2 text-[11px] leading-relaxed">
+                            {cat.desc}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between pt-1 text-[11px]">
+                          <span className="text-zinc-500">LIVE PIECES:</span>
+                          <span className="px-2 py-0.5 bg-zinc-800 text-white font-bold rounded">
+                            {count} {count === 1 ? 'PIECE' : 'PIECES'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="p-4 border-t border-zinc-800/80 bg-zinc-950/60 flex items-center justify-between font-mono text-xs">
+                      <a
+                        href={`/${cat.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-zinc-500 hover:text-white flex items-center gap-1 text-[10px]"
+                        title="View on storefront"
+                      >
+                        <ExternalLink size={11} />
+                        <span>VIEW</span>
+                      </a>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setEditingCategory({ ...cat })}
+                          className="border border-zinc-800 hover:border-zinc-500 px-3 py-1 text-zinc-300 hover:text-white transition-colors"
+                        >
+                          EDIT
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Delete category "${cat.title || cat.name || cat.slug}"? Existing products will not be deleted.`)) {
+                              act(
+                                async () => {
+                                  await adminFetch(`/api/admin/catalog/categories/${cat.slug || cat.id}`, key, { method: 'DELETE' });
+                                  markCategoryDeletedLocally(cat.slug || cat.id);
+                                  const refreshed = await adminFetch('/api/admin/catalog/categories', key);
+                                  setCategories(refreshed.categories || []);
+                                  await refreshCatalog();
+                                },
+                                `Deleted category "${cat.title || cat.name || cat.slug}".`
+                              );
+                            }
+                          }}
+                          className="border border-zinc-800 hover:border-red-800 px-3 py-1 text-red-400 hover:bg-red-950/30 transition-colors"
+                        >
+                          DELETE
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1789,6 +2093,224 @@ export default function Admin() {
           </div>
         )}
 
+        {tab === 'reviews' && (
+          <div className="space-y-6" data-testid="admin-reviews-panel">
+            {/* Header with Google Sync and Purge Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div>
+                <h2 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
+                  CUSTOMER REVIEWS & ATELIER MODERATION
+                </h2>
+                <p className="text-xs font-mono text-zinc-400 mt-1">
+                  Inspect customer fit submissions, verify buyers, approve dispatches to storefront, and manage Google Reviews sync.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSyncGoogle}
+                  disabled={syncingGoogle}
+                  className="flex items-center gap-2 bg-zinc-800 text-white border border-zinc-700 px-4 py-2 text-xs font-mono font-bold hover:bg-zinc-700 transition-colors uppercase disabled:opacity-50"
+                  title="Check or sync Google Business Profile reviews"
+                >
+                  <RefreshCw size={13} className={syncingGoogle ? 'animate-spin' : ''} />
+                  <span>{syncingGoogle ? 'SYNCING GOOGLE...' : 'SYNC GOOGLE REVIEWS'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="p-3 border border-zinc-800 bg-zinc-900/60">
+                <span className="text-[10px] text-zinc-500 uppercase block tracking-wider">TOTAL SUBMISSIONS</span>
+                <span className="text-lg font-bold text-white block mt-1">{adminReviews.length}</span>
+                <span className="text-[9px] text-zinc-400 block mt-0.5">All customer & Google entries</span>
+              </div>
+              <div className="p-3 border border-zinc-800 bg-zinc-900/60">
+                <span className="text-[10px] text-amber-400 uppercase block tracking-wider">PENDING APPROVAL</span>
+                <span className="text-lg font-bold text-amber-400 block mt-1">
+                  {adminReviews.filter((r) => r.status === 'pending').length}
+                </span>
+                <span className="text-[9px] text-zinc-400 block mt-0.5">Requires atelier review</span>
+              </div>
+              <div className="p-3 border border-zinc-800 bg-zinc-900/60">
+                <span className="text-[10px] text-emerald-400 uppercase block tracking-wider">LIVE ON STOREFRONT</span>
+                <span className="text-lg font-bold text-emerald-400 block mt-1">
+                  {adminReviews.filter((r) => r.status === 'approved').length}
+                </span>
+                <span className="text-[9px] text-zinc-400 block mt-0.5">Visible to all visitors</span>
+              </div>
+              <div className="p-3 border border-zinc-800 bg-zinc-900/60">
+                <span className="text-[10px] text-rose-400 uppercase block tracking-wider">REJECTED / SPAM</span>
+                <span className="text-lg font-bold text-rose-400 block mt-1">
+                  {adminReviews.filter((r) => r.status === 'rejected').length}
+                </span>
+                <span className="text-[9px] text-zinc-400 block mt-0.5">Hidden from public</span>
+              </div>
+            </div>
+
+            {/* Filter Pills & Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-3">
+              <div className="flex flex-wrap gap-2 text-xs font-mono">
+                {[
+                  { id: 'ALL', label: `ALL (${adminReviews.length})` },
+                  { id: 'pending', label: `PENDING (${adminReviews.filter((r) => r.status === 'pending').length})` },
+                  { id: 'approved', label: `LIVE ON SITE (${adminReviews.filter((r) => r.status === 'approved').length})` },
+                  { id: 'rejected', label: `REJECTED (${adminReviews.filter((r) => r.status === 'rejected').length})` },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setReviewsStatusFilter(f.id)}
+                    className={`px-3 py-1.5 border transition-colors uppercase ${
+                      reviewsStatusFilter === f.id
+                        ? 'border-white bg-white text-black font-bold'
+                        : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search size={14} className="absolute left-3 top-2.5 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="SEARCH REVIEWS, PIECES..."
+                  value={reviewsSearch}
+                  onChange={(e) => setReviewsSearch(e.target.value)}
+                  className="w-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-white pl-9 pr-3 py-2 focus:outline-none focus:border-zinc-500"
+                />
+              </div>
+            </div>
+
+            {/* Review Cards Grid */}
+            <div className="space-y-4">
+              {adminReviews
+                .filter((r) => {
+                  if (reviewsStatusFilter !== 'ALL' && r.status !== reviewsStatusFilter) return false;
+                  if (reviewsSearch) {
+                    const q = reviewsSearch.toLowerCase();
+                    const text = `${r.author || ''} ${r.piece || ''} ${r.quote || ''} ${r.highlight || ''} ${r.email || ''}`.toLowerCase();
+                    if (!text.includes(q)) return false;
+                  }
+                  return true;
+                })
+                .map((rev) => (
+                  <div
+                    key={rev.id}
+                    className="p-5 border border-zinc-800 bg-zinc-900/60 rounded flex flex-col md:flex-row md:items-start justify-between gap-5 font-mono text-xs"
+                    data-testid={`admin-review-card-${rev.id}`}
+                  >
+                    {/* Left: Review Details */}
+                    <div className="space-y-2 flex-grow max-w-3xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-white uppercase text-sm">{rev.author}</span>
+                        {rev.email && <span className="text-zinc-500 text-[11px]">&lt;{rev.email}&gt;</span>}
+                        <span className="text-zinc-600">·</span>
+                        <span className="text-zinc-400 text-[11px]">{rev.date || rev.created_at?.slice(0, 10)}</span>
+
+                        {/* Status Badge */}
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            rev.status === 'approved'
+                              ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60'
+                              : rev.status === 'pending'
+                              ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+                              : 'bg-rose-950/80 text-rose-400 border border-rose-800/60'
+                          }`}
+                        >
+                          {rev.status === 'approved' ? '● LIVE' : rev.status === 'pending' ? '⏳ PENDING' : '✕ REJECTED'}
+                        </span>
+
+                        {/* Source Badge */}
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 uppercase">
+                          {rev.source === 'customer' ? 'CUSTOMER SUBMISSION' : rev.source === 'google' ? 'GOOGLE MAPS' : 'COMMUNITY ARCHIVE'}
+                        </span>
+
+                        {/* Verified Buyer Badge */}
+                        {rev.is_verified_buyer && (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-900/40 text-emerald-300 border border-emerald-700/40 font-bold uppercase">
+                            ✦ VERIFIED BUYER
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Piece & Rating */}
+                      <div className="flex items-center gap-3 pt-1">
+                        <span className="text-zinc-300 font-bold uppercase">{rev.piece || 'ATELIER PIECE'}</span>
+                        {rev.variant && <span className="text-zinc-500 text-[11px]">({rev.variant})</span>}
+                        <span className="text-zinc-600">·</span>
+                        <span className="text-amber-400 font-bold">★ {rev.rating || 5}.0</span>
+                      </div>
+
+                      {/* Highlight */}
+                      <p className="font-bold text-white uppercase text-sm pt-1">
+                        “{rev.highlight}”
+                      </p>
+
+                      {/* Quote */}
+                      <blockquote className="text-zinc-300 font-sans text-xs leading-relaxed bg-black/40 p-3 rounded border border-zinc-800/60">
+                        “{rev.quote}”
+                      </blockquote>
+                    </div>
+
+                    {/* Right: Actions Toolbar */}
+                    <div className="flex md:flex-col items-center md:items-end gap-2 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-800">
+                      {rev.status !== 'approved' && (
+                        <button
+                          onClick={() => handleApproveReview(rev.id)}
+                          className="w-full sm:w-auto px-3 py-1.5 bg-emerald-600 text-white text-[11px] font-bold uppercase hover:bg-emerald-500 transition-colors"
+                        >
+                          APPROVE & PUBLISH
+                        </button>
+                      )}
+
+                      {rev.status !== 'rejected' && (
+                        <button
+                          onClick={() => handleRejectReview(rev.id)}
+                          className="w-full sm:w-auto px-3 py-1.5 bg-zinc-800 text-zinc-300 text-[11px] font-bold uppercase hover:bg-zinc-700 hover:text-white transition-colors"
+                        >
+                          REJECT
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleToggleVerifiedBuyer(rev)}
+                        className="w-full sm:w-auto px-3 py-1.5 border border-zinc-700 text-zinc-300 text-[11px] uppercase hover:border-zinc-500 transition-colors"
+                        title="Toggle Verified Buyer status"
+                      >
+                        {rev.is_verified_buyer ? 'UNVERIFY BUYER' : '✦ VERIFY BUYER'}
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteReview(rev.id)}
+                        className="w-full sm:w-auto px-3 py-1.5 text-rose-400 hover:text-rose-300 text-[11px] uppercase transition-colors"
+                        title="Permanently delete review"
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+              {adminReviews.filter((r) => {
+                if (reviewsStatusFilter !== 'ALL' && r.status !== reviewsStatusFilter) return false;
+                if (reviewsSearch) {
+                  const q = reviewsSearch.toLowerCase();
+                  const text = `${r.author || ''} ${r.piece || ''} ${r.quote || ''} ${r.highlight || ''} ${r.email || ''}`.toLowerCase();
+                  if (!text.includes(q)) return false;
+                }
+                return true;
+              }).length === 0 && (
+                <div className="py-12 text-center text-zinc-500 font-mono text-xs border border-dashed border-zinc-800 rounded">
+                  NO REVIEWS MATCHING THIS FILTER
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {tab === 'drops' && (
           <div className="p-6 border border-zinc-800 text-center font-mono text-xs text-zinc-400 space-y-4">
             <p>BROADCAST DROP ALERTS TO REGISTERED VIP MEMBERS</p>
@@ -1813,16 +2335,33 @@ export default function Admin() {
           MODAL: PRODUCT EDITOR & VARIANT BUILDER
       ══════════════════════════════════════════════════════ */}
       {editingProduct && (
-        <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h2 className="text-sm font-mono tracking-widest font-bold uppercase">
-                {editingProduct.id ? `EDIT PIECE: ${editingProduct.name}` : 'CREATE NEW PIECE'}
-              </h2>
-              <button onClick={() => setEditingProduct(null)} className="text-zinc-500 hover:text-white">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 bg-zinc-900/95 backdrop-blur z-20 shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <div>
+                  <h2 className="text-sm font-mono tracking-widest font-bold uppercase text-white">
+                    {editingProduct.id ? `EDIT PIECE: ${editingProduct.name || 'UNTITLED'}` : 'CREATE NEW PIECE'}
+                  </h2>
+                  <p className="text-[10px] text-zinc-500 font-mono">
+                    {(editingProduct.category || 'TEES').toUpperCase()} · {(editingProduct.gender || 'UNISEX').toUpperCase()} · {(editingProduct.status || 'ACTIVE').toUpperCase()}
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setEditingProduct(null)} 
+                className="text-zinc-400 hover:text-white p-1.5 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-colors"
+                title="Close modal"
+              >
                 <X size={18} />
               </button>
             </div>
+
+            {/* Scrollable Body with High-Contrast Accessible Scrollbar */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 admin-scroll overscroll-contain">
 
             <div className="grid sm:grid-cols-2 gap-4 text-xs font-mono">
               <div>
@@ -1871,13 +2410,23 @@ export default function Admin() {
                 <select
                   value={editingProduct.category || 'tees'}
                   onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                  className="w-full bg-zinc-950 border border-zinc-800 p-2 text-white"
+                  className="w-full bg-zinc-950 border border-zinc-800 p-2 text-white uppercase font-mono"
                 >
-                  <option value="tees">TEES</option>
-                  <option value="hoodies">HOODIES</option>
-                  <option value="shirts">SHIRTS</option>
-                  <option value="bottoms">BOTTOMS</option>
-                  <option value="accessories">ACCESSORIES</option>
+                  {categories.length > 0 ? (
+                    categories.map((c) => (
+                      <option key={c.slug || c.id} value={c.slug || c.id}>
+                        {(c.title || c.name || c.slug).toUpperCase()}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="tees">TEES</option>
+                      <option value="hoodies">HOODIES</option>
+                      <option value="shirts">SHIRTS</option>
+                      <option value="bottoms">BOTTOMS</option>
+                      <option value="accessories">ACCESSORIES</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -2105,42 +2654,98 @@ export default function Admin() {
 
               {/* Media Uploader */}
               <div className="sm:col-span-2 border border-zinc-800 p-3 bg-zinc-950 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-zinc-400">PRODUCT MEDIA ASSETS</label>
-                  <label className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 px-3 py-1 text-white flex items-center gap-1.5">
-                    <Upload size={12} />
-                    <span>UPLOAD IMAGE FILE</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="text-zinc-300 font-bold block text-xs">PRODUCT MEDIA ASSETS</label>
+                    <span className="text-[10px] text-zinc-500">First image is the primary cover. Upload photo files or paste URLs below.</span>
+                  </div>
+                  <label className="cursor-pointer bg-white hover:bg-zinc-200 text-black px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto transition-colors">
+                    <Upload size={13} />
+                    <span>UPLOAD PHOTOS</span>
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
                       onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        try {
-                          const res = await fetch(`${API()}/api/admin/catalog/media/upload`, {
-                            method: 'POST',
-                            headers: {
-                              'X-Admin-Key': key || '',
-                              'X-Admin-Session': sessionToken || '',
-                            },
-                            body: formData,
-                          });
-                          if (!res.ok) throw new Error('Upload failed');
-                          const data = await res.json();
-                          setEditingProduct({
-                            ...editingProduct,
-                            images: [...(editingProduct.images || []), data.url],
-                          });
-                          toast.success('Image uploaded.');
-                        } catch {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length === 0) return;
+                        toast.info(`Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`);
+                        const uploadedUrls = [];
+                        for (const file of files) {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          try {
+                            const res = await fetch(`${API()}/api/admin/catalog/media/upload`, {
+                              method: 'POST',
+                              headers: {
+                                'X-Admin-Key': key || '',
+                                'X-Admin-Session': sessionToken || '',
+                              },
+                              body: formData,
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              if (data.url) uploadedUrls.push(data.url);
+                            }
+                          } catch (err) {
+                            console.error('File upload error:', err);
+                          }
+                        }
+                        if (uploadedUrls.length > 0) {
+                          setEditingProduct((prev) => ({
+                            ...prev,
+                            images: [...(prev.images || []), ...uploadedUrls],
+                          }));
+                          toast.success(`Added ${uploadedUrls.length} photo${uploadedUrls.length > 1 ? 's' : ''}`);
+                        } else {
                           toast.error('Image upload failed.');
                         }
+                        e.target.value = '';
                       }}
                     />
                   </label>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="admin_img_url_input"
+                    placeholder="Or paste image URL / public path (e.g. /editorial/... or https://...)"
+                    className="flex-1 bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs text-white placeholder-zinc-500 font-mono"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = e.target.value.trim();
+                        if (val) {
+                          setEditingProduct((prev) => ({
+                            ...prev,
+                            images: [...(prev.images || []), val],
+                          }));
+                          e.target.value = '';
+                          toast.success('Image added');
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById('admin_img_url_input');
+                      const val = input?.value?.trim();
+                      if (val) {
+                        setEditingProduct((prev) => ({
+                          ...prev,
+                          images: [...(prev.images || []), val],
+                        }));
+                        input.value = '';
+                        toast.success('Image added');
+                      }
+                    }}
+                    className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 text-xs font-mono font-bold"
+                  >
+                    + ADD URL
+                  </button>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {(editingProduct.images || []).map((imgUrl, idx) => {
@@ -2199,34 +2804,50 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="border-t border-zinc-800 pt-4 flex justify-end gap-3">
-              <button
-                onClick={() => setEditingProduct(null)}
-                className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white font-mono text-xs"
-              >
-                CANCEL
-              </button>
-              <button
-                onClick={async () => {
-                  if (!editingProduct.name.trim()) {
-                    toast.error('Product title is required.');
-                    return;
-                  }
-                  const method = editingProduct.id ? 'PUT' : 'POST';
-                  const endpoint = editingProduct.id
-                    ? `/api/admin/catalog/products/${editingProduct.id}`
-                    : '/api/admin/catalog/products';
+            </div>
 
-                  await act(
-                    () => adminFetch(endpoint, key, { method, body: JSON.stringify(editingProduct) }),
-                    `Saved product ${editingProduct.name}`
-                  );
-                  setEditingProduct(null);
-                }}
-                className="bg-white text-black px-6 py-2 text-xs font-mono font-bold hover:bg-zinc-200 transition-colors uppercase"
-              >
-                SAVE PIECE
-              </button>
+            {/* Sticky Footer */}
+            <div className="border-t border-zinc-800 px-6 py-4 bg-zinc-950/95 backdrop-blur flex items-center justify-between gap-3 shrink-0 z-20">
+              <div className="flex items-center gap-4 text-[11px] font-mono text-zinc-400">
+                <span><strong className="text-white">{(editingProduct.images || []).length}</strong> photos</span>
+                <span>·</span>
+                <span><strong className="text-white">{(editingProduct.sizes || []).length}</strong> sizes</span>
+                <span>·</span>
+                <span><strong className="text-white">₹{editingProduct.price || 0}</strong></span>
+              </div>
+
+              <div className="flex items-center gap-3 ml-auto">
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white font-mono text-xs hover:bg-zinc-900 transition-colors"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!editingProduct.name.trim()) {
+                      toast.error('Product title is required.');
+                      return;
+                    }
+                    const method = editingProduct.id ? 'PUT' : 'POST';
+                    const endpoint = editingProduct.id
+                      ? `/api/admin/catalog/products/${editingProduct.id}`
+                      : '/api/admin/catalog/products';
+
+                    await act(
+                      () => adminFetch(endpoint, key, { method, body: JSON.stringify(editingProduct) }),
+                      `Saved product ${editingProduct.name}`
+                    );
+                    setEditingProduct(null);
+                  }}
+                  className="bg-white text-black px-6 py-2 text-xs font-mono font-bold hover:bg-zinc-200 transition-colors uppercase shadow-md flex items-center gap-1.5"
+                >
+                  <Check size={14} />
+                  <span>SAVE PIECE</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2236,17 +2857,20 @@ export default function Admin() {
           MODAL: ORDER FULFILLMENT & TRACKING
       ══════════════════════════════════════════════════════ */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 bg-zinc-900/95 backdrop-blur shrink-0 z-20">
               <div>
                 <p className="text-xs font-mono text-zinc-400">ORDER FULFILLMENT</p>
                 <h2 className="text-base font-mono font-bold text-white">{selectedOrder.order_id}</h2>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className="text-zinc-500 hover:text-white">
+              <button onClick={() => setSelectedOrder(null)} className="text-zinc-500 hover:text-white p-1">
                 <X size={18} />
               </button>
             </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 admin-scroll overscroll-contain">
+
 
             <div className="space-y-4 text-xs font-mono">
               <div className="p-3 bg-zinc-950 border border-zinc-800">
@@ -2348,14 +2972,19 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="border-t border-zinc-800 pt-4 flex justify-end gap-3">
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="border-t border-zinc-800 px-6 py-4 bg-zinc-950/95 backdrop-blur flex justify-end gap-3 shrink-0 z-20">
               <button
+                type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white font-mono text-xs"
+                className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white font-mono text-xs hover:bg-zinc-900 transition-colors"
               >
                 CLOSE
               </button>
               <button
+                type="button"
                 onClick={async () => {
                   const status = document.getElementById('fulfillment-status-select')?.value || 'shipped';
                   const courier = document.getElementById('fulfillment-courier-input')?.value;
@@ -2493,6 +3122,210 @@ export default function Admin() {
       {/* ══════════════════════════════════════════════════════
           MODAL: COLLECTION EDITOR
       ══════════════════════════════════════════════════════ */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-xs font-mono">
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 bg-zinc-900/95 backdrop-blur shrink-0 z-20">
+              <div>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">CATEGORY STUDIO</p>
+                <h2 className="text-base font-bold text-white uppercase font-mono">
+                  {editingCategory.slug ? `EDIT CATEGORY: ${editingCategory.title || editingCategory.name || editingCategory.slug}` : 'NEW CATEGORY'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingCategory(null)}
+                className="text-zinc-500 hover:text-white p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 admin-scroll overscroll-contain">
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">CATEGORY TITLE *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. TEES, HOODIES, SHIRTS, BOMBERS"
+                  value={editingCategory.title || editingCategory.name || ''}
+                  onChange={(e) => {
+                    const title = e.target.value.toUpperCase();
+                    const updates = { ...editingCategory, title, name: title };
+                    if (!editingCategory.id && (!editingCategory.slug || editingCategory.slug === (editingCategory.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))) {
+                      updates.slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                    }
+                    setEditingCategory(updates);
+                  }}
+                  className="w-full bg-zinc-950 border border-zinc-800 p-2.5 text-white font-bold focus:border-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">SLUG (URL PATH) *</label>
+                <div className="flex items-center bg-zinc-950 border border-zinc-800 px-2.5 focus-within:border-white">
+                  <span className="text-zinc-500">/</span>
+                  <input
+                    type="text"
+                    placeholder="tees"
+                    value={editingCategory.slug || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                    className="w-full bg-transparent p-2 text-white outline-none"
+                  />
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-1">Used in storefront URL: e.g. /{editingCategory.slug || 'category-name'}</p>
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1">SPECIFICATION / SUBTITLE</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 240 GSM COMBED COTTON, HEAVYWEIGHT TWILL & RELAXED"
+                  value={editingCategory.subtitle || ''}
+                  onChange={(e) => setEditingCategory({ ...editingCategory, subtitle: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-800 p-2.5 text-white focus:border-white outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1">EDITORIAL DESCRIPTION</label>
+                <textarea
+                  rows={2}
+                  placeholder="Category editorial philosophy or cut description..."
+                  value={editingCategory.desc || ''}
+                  onChange={(e) => setEditingCategory({ ...editingCategory, desc: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-800 p-2.5 text-white focus:border-white outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">COVER IMAGE</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    placeholder="/editorial/sample.jpg or https://..."
+                    value={editingCategory.image || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, image: e.target.value })}
+                    className="flex-1 bg-zinc-950 border border-zinc-800 p-2 text-white focus:border-white outline-none"
+                  />
+                  <label className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white cursor-pointer transition-colors shrink-0">
+                    <Upload size={13} />
+                    <span className="text-[11px]">UPLOAD</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        try {
+                          const res = await fetch('/api/admin/catalog/upload-image', {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${key}` },
+                            body: fd,
+                          });
+                          const json = await res.json();
+                          if (json.url) {
+                            setEditingCategory((prev) => ({ ...prev, image: json.url }));
+                            toast.success('Category cover uploaded.');
+                          } else {
+                            toast.error('Upload failed: ' + (json.detail || 'Unknown error'));
+                          }
+                        } catch {
+                          toast.error('Network error uploading image.');
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {editingCategory.image && (
+                  <div className="relative h-32 border border-zinc-800 bg-zinc-950 overflow-hidden">
+                    <img
+                      src={editingCategory.image}
+                      alt="Category preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="block text-zinc-400 mb-1">DISPLAY ORDER</label>
+                  <input
+                    type="number"
+                    value={editingCategory.display_order ?? 10}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, display_order: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-950 border border-zinc-800 p-2 text-white focus:border-white outline-none"
+                  />
+                </div>
+                <div className="flex items-center pt-5">
+                  <label className="flex items-center gap-2 cursor-pointer text-white">
+                    <input
+                      type="checkbox"
+                      checked={editingCategory.is_active !== false}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, is_active: e.target.checked })}
+                      className="accent-white h-4 w-4 cursor-pointer"
+                    />
+                    <span>VISIBLE ON STORE</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="border-t border-zinc-800 px-6 py-4 bg-zinc-950/95 backdrop-blur flex justify-end gap-3 shrink-0 z-20">
+              <button
+                type="button"
+                onClick={() => setEditingCategory(null)}
+                className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                CANCEL
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!editingCategory.title?.trim() && !editingCategory.name?.trim()) {
+                    toast.error('Category title is required.');
+                    return;
+                  }
+                  if (!editingCategory.slug?.trim()) {
+                    toast.error('Category slug is required.');
+                    return;
+                  }
+                  await act(
+                    async () => {
+                      const payload = {
+                        ...editingCategory,
+                        title: (editingCategory.title || editingCategory.name).trim().toUpperCase(),
+                        name: (editingCategory.name || editingCategory.title).trim().toUpperCase(),
+                        slug: editingCategory.slug.trim().toLowerCase(),
+                      };
+                      unmarkCategoryDeletedLocally(payload.slug);
+                      await adminFetch('/api/admin/catalog/categories', key, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                      });
+                      const refreshed = await adminFetch('/api/admin/catalog/categories', key);
+                      setCategories(refreshed.categories || []);
+                      await refreshCatalog();
+                    },
+                    `Category "${editingCategory.title || editingCategory.slug}" saved.`
+                  );
+                  setEditingCategory(null);
+                }}
+                className="bg-white text-black px-6 py-2 font-bold uppercase hover:bg-zinc-200 transition-colors"
+              >
+                SAVE CATEGORY
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editingCollection && (
         <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 w-full max-w-xl p-6 space-y-5 text-xs font-mono">
@@ -2571,15 +3404,17 @@ export default function Admin() {
           MODAL: CUSTOMER PROFILE & ORDER HISTORY
       ══════════════════════════════════════════════════════ */}
       {viewingCustomer && (
-        <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl p-6 space-y-6 text-xs font-mono">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-xs font-mono">
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 bg-zinc-900/95 backdrop-blur shrink-0 z-20">
               <div>
                 <p className="text-zinc-500 uppercase tracking-widest text-[10px]">CLIENT PROFILE</p>
                 <h2 className="text-base font-bold text-white uppercase">{viewingCustomer.name}</h2>
               </div>
-              <button onClick={() => setViewingCustomer(null)} className="text-zinc-500 hover:text-white"><X size={18} /></button>
+              <button onClick={() => setViewingCustomer(null)} className="text-zinc-500 hover:text-white p-1"><X size={18} /></button>
             </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 admin-scroll overscroll-contain">
 
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="p-3 bg-zinc-950 border border-zinc-800 space-y-1">
@@ -2629,10 +3464,13 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="border-t border-zinc-800 pt-3 flex justify-end">
+            </div>
+            {/* Sticky Footer */}
+            <div className="border-t border-zinc-800 px-6 py-4 bg-zinc-950/95 backdrop-blur flex justify-end shrink-0 z-20">
               <button
+                type="button"
                 onClick={() => setViewingCustomer(null)}
-                className="bg-white text-black px-5 py-2 font-bold uppercase hover:bg-zinc-200"
+                className="bg-white text-black px-5 py-2 font-bold uppercase hover:bg-zinc-200 transition-colors"
               >
                 CLOSE PROFILE
               </button>

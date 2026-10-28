@@ -503,17 +503,39 @@ class CatalogStore:
             if pid not in self._store["products"]:
                 return False
 
+            prod = self._store["products"][pid]
+            slug = prod.get("slug")
+
+            # Remove from all collections immediately
+            for col in self._store.get("collections", {}).values():
+                if slug and slug in col.get("products", []):
+                    col["products"] = [s for s in col["products"] if s != slug]
+
             if permanent:
-                name = self._store["products"][pid].get("name")
+                name = prod.get("name")
                 del self._store["products"][pid]
                 self._log_audit(admin_identity, "delete_product", "product", pid, {"name": name, "permanent": True})
             else:
-                self._store["products"][pid]["status"] = "archived"
-                self._store["products"][pid]["updated_at"] = _now_iso()
+                prod["status"] = "archived"
+                prod["newArrival"] = False
+                prod["bestSeller"] = False
+                prod["featured"] = False
+                prod["updated_at"] = _now_iso()
                 self._log_audit(admin_identity, "archive_product", "product", pid, {"status": "archived"})
 
             self.save()
             return True
+
+    def unarchive_product(self, pid: str, admin_identity: str = "admin") -> Optional[Dict[str, Any]]:
+        with _lock:
+            if pid not in self._store["products"]:
+                return None
+            prod = self._store["products"][pid]
+            prod["status"] = "active"
+            prod["updated_at"] = _now_iso()
+            self._log_audit(admin_identity, "unarchive_product", "product", pid, {"status": "active"})
+            self.save()
+            return self._enrich_product(prod)
 
     def duplicate_product(self, pid: str, admin_identity: str = "admin") -> Optional[Dict[str, Any]]:
         with _lock:
@@ -636,13 +658,27 @@ class CatalogStore:
 
     # ── COLLECTIONS CRUD ───────────────────────────────────────────
 
-    def list_collections(self) -> List[Dict[str, Any]]:
+    def list_collections(self, include_archived: bool = False) -> List[Dict[str, Any]]:
         with _lock:
-            return list(self._store.get("collections", {}).values())
+            cols = []
+            archived_slugs = {p.get("slug") for p in self._store.get("products", {}).values() if p.get("status") == "archived"}
+            for c in self._store.get("collections", {}).values():
+                col_copy = dict(c)
+                if not include_archived:
+                    col_copy["products"] = [s for s in col_copy.get("products", []) if s not in archived_slugs]
+                cols.append(col_copy)
+            return cols
 
-    def get_collection(self, slug: str) -> Optional[Dict[str, Any]]:
+    def get_collection(self, slug: str, include_archived: bool = False) -> Optional[Dict[str, Any]]:
         with _lock:
-            return self._store.get("collections", {}).get(slug)
+            col = self._store.get("collections", {}).get(slug)
+            if not col:
+                return None
+            col_copy = dict(col)
+            if not include_archived:
+                archived_slugs = {p.get("slug") for p in self._store.get("products", {}).values() if p.get("status") == "archived"}
+                col_copy["products"] = [s for s in col_copy.get("products", []) if s not in archived_slugs]
+            return col_copy
 
     def save_collection(self, data: Dict[str, Any], admin_identity: str = "admin") -> Dict[str, Any]:
         with _lock:
@@ -1362,7 +1398,7 @@ class CatalogStore:
                 "image_url": "photo-1492707892479-7bc8d5a4ee93",
                 "caption": "Tactical cargo chain detail in CP. Streetwear perfection.",
                 "order_id": "NLO-9104",
-                "status": "pending",
+                "status": "approved",
                 "created_at": "2026-10-25T12:00:00Z"
             }
         }
@@ -1407,14 +1443,578 @@ class CatalogStore:
         self._store["irl"] = irl
         self._store["sign_in_accounts"] = sign_in_accounts
 
+    def _seed_categories(self):
+        default_categories = {
+            "tees": {
+                "id": "cat_tees",
+                "slug": "tees",
+                "name": "TEES",
+                "subtitle": "240 GSM COMBED COTTON",
+                "desc": "Heavyweight combed cotton oversized tees with drop-shoulder silhouettes.",
+                "image": "/products/devanagari-chaos-tee-front.jpg",
+                "display_order": 1,
+                "is_active": True,
+            },
+            "shirts": {
+                "id": "cat_shirts",
+                "slug": "shirts",
+                "name": "SHIRTS",
+                "subtitle": "HEAVYWEIGHT TWILL & RELAXED",
+                "desc": "Relaxed-fit heavyweight twill and utility button-downs.",
+                "image": "photo-1596755094514-f87e34085b2c",
+                "display_order": 2,
+                "is_active": True,
+            },
+            "hoodies": {
+                "id": "cat_hoodies",
+                "slug": "hoodies",
+                "name": "HOODIES",
+                "subtitle": "450 GSM BRUSHED FLEECE",
+                "desc": "Ultra-dense 450 GSM box-cut fleece hoodies and crewnecks.",
+                "image": "/products/after-hours-stealth-hoodie-front.jpg",
+                "display_order": 3,
+                "is_active": True,
+            },
+            "bottoms": {
+                "id": "cat_bottoms",
+                "slug": "bottoms",
+                "name": "BOTTOMS",
+                "subtitle": "WIDE-LEG CARGOS & DENIM",
+                "desc": "Tactical wide-leg cargo pants, heavy wash denim and hardware tracks.",
+                "image": "/female-jeans-chain.png",
+                "display_order": 4,
+                "is_active": True,
+            },
+            "accessories": {
+                "id": "cat_accessories",
+                "slug": "accessories",
+                "name": "ACCESSORIES",
+                "subtitle": "HARDWARE, CAPS & BAGS",
+                "desc": "Signature sterling-finish chains, distress-embroidered caps and heavy canvas totes.",
+                "image": "/products/nalayak-chain-front.png",
+                "display_order": 5,
+                "is_active": True,
+            },
+            "custom-design": {
+                "id": "cat_custom_design",
+                "slug": "custom-design",
+                "name": "CUSTOM DESIGN",
+                "subtitle": "BESPOKE 1-OF-1 ATELIER",
+                "desc": "Bespoke 1-of-1 editorial atelier pieces handcrafted on demand.",
+                "image": "/editorial/about-hero-streetwear.jpg",
+                "display_order": 6,
+                "is_active": True,
+            },
+        }
+        self._store["categories"] = default_categories
+
+    def list_categories(self, include_inactive: bool = False) -> List[Dict[str, Any]]:
+        with _lock:
+            cats = []
+            prod_counts = {}
+            for p in self._store.get("products", {}).values():
+                if p.get("status") == "active":
+                    cat_slug = (p.get("category") or "").lower()
+                    prod_counts[cat_slug] = prod_counts.get(cat_slug, 0) + 1
+
+            for c in self._store.get("categories", {}).values():
+                if not include_inactive and not c.get("is_active", True):
+                    continue
+                copy_c = dict(c)
+                copy_c["product_count"] = prod_counts.get(copy_c.get("slug", "").lower(), 0)
+                cats.append(copy_c)
+
+            cats.sort(key=lambda x: (int(x.get("display_order") or 99), x.get("name", "")))
+            return cats
+
+    def get_category(self, slug_or_id: str) -> Optional[Dict[str, Any]]:
+        with _lock:
+            if slug_or_id in self._store.get("categories", {}):
+                return dict(self._store["categories"][slug_or_id])
+            for c in self._store.get("categories", {}).values():
+                if c.get("id") == slug_or_id or c.get("slug") == slug_or_id:
+                    return dict(c)
+            return None
+
+    def save_category(self, data: Dict[str, Any], admin_identity: str = "admin") -> Dict[str, Any]:
+        with _lock:
+            slug = (data.get("slug") or "").strip().lower()
+            name = (data.get("name") or data.get("title") or slug.upper()).strip()
+            if not slug:
+                slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-') or f"cat-{uuid.uuid4().hex[:6]}"
+
+            existing = self._store.get("categories", {}).get(slug)
+            old_slug = data.get("old_slug")
+
+            # Update products if slug renamed
+            if old_slug and old_slug != slug and old_slug in self._store.get("categories", {}):
+                del self._store["categories"][old_slug]
+                for p in self._store.get("products", {}).values():
+                    if (p.get("category") or "").lower() == old_slug.lower():
+                        p["category"] = slug
+
+            cat_id = data.get("id") or (existing.get("id") if existing else f"cat_{slug}")
+            doc = {
+                "id": cat_id,
+                "slug": slug,
+                "name": name,
+                "subtitle": (data.get("subtitle") or data.get("kicker") or "").strip(),
+                "desc": (data.get("desc") or data.get("description") or "").strip(),
+                "image": data.get("image") or "/products/devanagari-chaos-tee-front.jpg",
+                "display_order": int(data.get("display_order") or 99),
+                "is_active": bool(data.get("is_active", True)),
+                "updated_at": _now_iso(),
+            }
+            if not existing:
+                doc["created_at"] = _now_iso()
+
+            self._store.setdefault("categories", {})[slug] = doc
+            action = "update_category" if existing else "create_category"
+            self._log_audit(admin_identity, action, "category", cat_id, {"slug": slug, "name": name})
+            self.save()
+            return doc
+
+    def delete_category(self, slug_or_id: str, admin_identity: str = "admin") -> bool:
+        with _lock:
+            target_slug = None
+            if slug_or_id in self._store.get("categories", {}):
+                target_slug = slug_or_id
+            else:
+                for s, c in self._store.get("categories", {}).items():
+                    if c.get("id") == slug_or_id or c.get("slug") == slug_or_id:
+                        target_slug = s
+                        break
+
+            if not target_slug:
+                return False
+
+            cat = self._store["categories"][target_slug]
+            name = cat.get("name")
+            del self._store["categories"][target_slug]
+            self._log_audit(admin_identity, "delete_category", "category", slug_or_id, {"name": name, "slug": target_slug})
+            self.save()
+            return True
+
+
+    def _seed_reviews(self):
+        initial_reviews = [
+            {
+                "id": "rev-01",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Rohan D.",
+                "initials": "RD",
+                "avatar_url": "photo-1507003211169-0a1dd7228f2d",
+                "image": "/products/devanagari-chaos-tee-front.jpg",
+                "product_slug": "nalayak-standard-tee",
+                "productSlug": "nalayak-standard-tee",
+                "location": "Kolkata, WB",
+                "piece": "NALAYAK Standard Tee",
+                "variant": "Jet Black / Size L",
+                "rating": 5,
+                "category": "fabric",
+                "category_label": "FABRIC & WEIGHT",
+                "categoryLabel": "FABRIC & WEIGHT",
+                "highlight": "240 GSM THAT HOLDS ITS SHAPE",
+                "quote": "The 240 GSM weight is no joke. Most Indian streetwear brands claim boxy and send you a limp regular tee. This holds its silhouette even after three hard washes in Kolkata humidity.",
+                "specs": [
+                    {"label": "WEIGHT", "value": "240 GSM"},
+                    {"label": "CUT", "value": "Drop Shoulder"},
+                    {"label": "DURABILITY", "value": "Zero Shrinkage"},
+                ],
+                "date": "OCT 2026",
+                "batch": "BATCH 001 · ARCHIVE",
+                "tag": "240 GSM HEAVYWEIGHT",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ VERIFIED BUYER",
+                "created_at": "2026-10-01T10:00:00Z",
+            },
+            {
+                "id": "rev-02",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Ananya M.",
+                "initials": "AM",
+                "avatar_url": "photo-1494790108377-be9c29b29330",
+                "image": "/products/everyday-nalayak-essential-tee-front.jpg",
+                "product_slug": "no-approval-oversized-tee",
+                "productSlug": "no-approval-oversized-tee",
+                "location": "Mumbai, MH",
+                "piece": "No Approval Oversized Tee",
+                "variant": "Chalk White / Size M",
+                "rating": 5,
+                "category": "identity",
+                "category_label": "BRAND IDENTITY",
+                "categoryLabel": "BRAND IDENTITY",
+                "highlight": "FAMILY UNCLE APPROVED? DEFINITELY NOT",
+                "quote": "Wore the No Approval tee to a family Diwali function. My uncle stared at the back graphic for two straight minutes without speaking. 10/10, brand promise fulfilled.",
+                "specs": [
+                    {"label": "GRAPHIC", "value": "High-Density Screen"},
+                    {"label": "REACTION", "value": "Pure Disapproval"},
+                    {"label": "SILHOUETTE", "value": "True Oversized"},
+                ],
+                "date": "SEP 2026",
+                "batch": "DROP 02 · VERBATIM",
+                "tag": "NO APPROVAL · DROP 02",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ FOUNDING MEMBER",
+                "created_at": "2026-09-15T12:00:00Z",
+            },
+            {
+                "id": "rev-03",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Kabir S.",
+                "initials": "KS",
+                "avatar_url": "photo-1500648767791-00dcc994a43e",
+                "image": "/products/archive-specimen-series-001-front.jpg",
+                "product_slug": "chaos-club-tee",
+                "productSlug": "chaos-club-tee",
+                "location": "Delhi NCR",
+                "piece": "Chaos Club Tee",
+                "variant": "Ash Grey / Size XL",
+                "rating": 5,
+                "category": "fit",
+                "category_label": "FIT & SILHOUETTE",
+                "categoryLabel": "FIT & SILHOUETTE",
+                "highlight": "TRUE DROP SHOULDER WITHOUT EXCESS BAGGAGE",
+                "quote": "True drop shoulder that actually drapes down the tricep rather than just looking two sizes too big. Collar ribbing is tight 1.25\" and doesn’t bacon after line drying.",
+                "specs": [
+                    {"label": "COLLAR", "value": "1.25\" Heavy Rib"},
+                    {"label": "DRAPE", "value": "Structured Boxy"},
+                    {"label": "ROTATION", "value": "Daily Essential"},
+                ],
+                "date": "AUG 2026",
+                "batch": "DROP 01 · CORE",
+                "tag": "1.25\" HEAVY RIB",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ VERIFIED BUYER",
+                "created_at": "2026-08-20T14:30:00Z",
+            },
+            {
+                "id": "rev-04",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Tanya K.",
+                "initials": "TK",
+                "avatar_url": "photo-1524504388940-b1c1722653e1",
+                "image": "/products/wrong-crowd-tee-front.jpg",
+                "product_slug": "basically-famous-tee",
+                "productSlug": "basically-famous-tee",
+                "location": "Bengaluru, KA",
+                "piece": "Basically Famous Tee",
+                "variant": "Jet Black / Size S",
+                "rating": 5,
+                "category": "print",
+                "category_label": "PRINT QUALITY",
+                "categoryLabel": "PRINT QUALITY",
+                "highlight": "SCREENPRINT IN THE FIBERS, NOT PLASTIC",
+                "quote": "The screenprint feels embedded into the cotton fibers instead of a thick rubbery sticker slapped on top. Breathable even when riding in 32° heat.",
+                "specs": [
+                    {"label": "PRINT TYPE", "value": "Discharge Inks"},
+                    {"label": "FEEL", "value": "Soft Breathable"},
+                    {"label": "FABRIC", "value": "100% Combed"},
+                ],
+                "date": "OCT 2026",
+                "batch": "BATCH 003 · EDITORIAL",
+                "tag": "DISCHARGE INK",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ ATELIER TESTED",
+                "created_at": "2026-10-10T16:00:00Z",
+            },
+            {
+                "id": "rev-05",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Varun P.",
+                "initials": "VP",
+                "avatar_url": "photo-1506794778202-cad84cf45f1d",
+                "image": "/products/after-hours-stealth-hoodie-front.jpg",
+                "product_slug": "after-hours-stealth-hoodie",
+                "productSlug": "after-hours-stealth-hoodie",
+                "location": "Pune, MH",
+                "piece": "Acid Wash Oversized Hoodie",
+                "variant": "Vintage Charcoal / Size L",
+                "rating": 5,
+                "category": "fabric",
+                "category_label": "WINTER WEIGHT",
+                "categoryLabel": "WINTER WEIGHT",
+                "highlight": "DOUBLE-LAYER HOOD THAT ACTUALLY STANDS UP",
+                "quote": "Heaviest hoodie in my rotation. The double-layered hood actually stays upright and doesn’t collapse flat against your collarbones. Ribbed cuffs don’t stretch out.",
+                "specs": [
+                    {"label": "WEIGHT", "value": "420 GSM Fleece"},
+                    {"label": "HOOD", "value": "Double-Layered"},
+                    {"label": "CUFFS", "value": "Form-Retaining"},
+                ],
+                "date": "SEP 2026",
+                "batch": "WINTER 26 · HEAVY",
+                "tag": "420 GSM FLEECE",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ VERIFIED BUYER",
+                "created_at": "2026-09-28T09:00:00Z",
+            },
+            {
+                "id": "rev-06",
+                "source": "community",
+                "status": "approved",
+                "is_demo": True,
+                "author": "Meera V.",
+                "initials": "MV",
+                "avatar_url": "photo-1531746020798-e6953c6e8e04",
+                "image": "/products/her-chaos-crop-tee-front.jpg",
+                "product_slug": "her-chaos-crop-tee",
+                "productSlug": "her-chaos-crop-tee",
+                "location": "Hyderabad, TS",
+                "piece": "Her Chaos Crop Tee",
+                "variant": "Paper White / Size M",
+                "rating": 5,
+                "category": "fit",
+                "category_label": "PROPORTIONS & CUT",
+                "categoryLabel": "PROPORTIONS & CUT",
+                "highlight": "SHARP BOXY CROP WITHOUT BEING FLIMSY",
+                "quote": "Most women’s streetwear crops are either paper-thin or cut like an awkward square box. This has proper structured shoulders and sits right at the high waistband.",
+                "specs": [
+                    {"label": "WEIGHT", "value": "220 GSM"},
+                    {"label": "CROP", "value": "High Waist Cut"},
+                    {"label": "HEM", "value": "Reinforced Twin"},
+                ],
+                "date": "AUG 2026",
+                "batch": "DROP 02 · WOMENS",
+                "tag": "STRUCTURED CROP",
+                "is_verified_buyer": True,
+                "verified_badge": "✦ VERIFIED BUYER",
+                "created_at": "2026-08-14T11:00:00Z",
+            },
+        ]
+        self._store.setdefault("reviews", {})
+        for rev in initial_reviews:
+            self._store["reviews"][rev["id"]] = rev
+
+    def list_reviews(self, status: Optional[str] = None, source: Optional[str] = None, include_demo: bool = False) -> List[Dict[str, Any]]:
+        with _lock:
+            reviews_dict = self._store.get("reviews", {})
+            results = list(reviews_dict.values())
+            
+            # Filter out demo/design fixtures from live production feed unless specifically requested
+            if not include_demo:
+                results = [r for r in results if not r.get("is_demo")]
+            
+            if status and status.lower() != "all":
+                target_status = status.lower()
+                results = [r for r in results if str(r.get("status", "")).lower() == target_status]
+                
+            if source and source.lower() != "all":
+                target_source = source.lower()
+                results = [r for r in results if str(r.get("source", "")).lower() == target_source]
+                
+            # Sort by created_at descending (newest first)
+            results.sort(key=lambda r: str(r.get("created_at") or r.get("publish_time") or ""), reverse=True)
+            return results
+
+    def get_review(self, review_id: str) -> Optional[Dict[str, Any]]:
+        with _lock:
+            return self._store.get("reviews", {}).get(review_id)
+
+    def create_customer_review(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        with _lock:
+            self._store.setdefault("reviews", {})
+            review_id = f"rev-cust-{uuid.uuid4().hex[:10]}"
+            
+            # Verify buyer status using completed order lookup
+            email = str(data.get("email") or "").strip().lower()
+            order_ref = str(data.get("order_ref") or "").strip()
+            is_verified, matched_order = self.verify_customer_purchase(email, order_ref)
+            
+            author = str(data.get("name") or "Community Member").strip()
+            name_parts = author.split()
+            initials = f"{name_parts[0][0]}{name_parts[-1][0]}".upper() if len(name_parts) >= 2 else (author[:2].upper() if author else "NV")
+            
+            now_iso = datetime.now(timezone.utc).isoformat()
+            now_label = datetime.now(timezone.utc).strftime("%b %Y").upper()
+            
+            piece_name = str(data.get("piece") or "").strip()
+            # Match piece name to catalog product slug if possible
+            product_slug = None
+            for p in self._store.get("products", {}).values():
+                if p.get("name", "").lower() == piece_name.lower():
+                    product_slug = p.get("slug")
+                    break
+
+            review_doc = {
+                "id": review_id,
+                "source": "customer",
+                "status": "approved",  # directly published
+                "author": author,
+                "initials": initials,
+                "email": email or None,
+                "piece": piece_name,
+                "product_slug": product_slug,
+                "productSlug": product_slug,
+                "variant": str(data.get("variant") or "").strip() or None,
+                "rating": int(data.get("rating", 5)),
+                "highlight": str(data.get("highlight") or "").strip().upper(),
+                "quote": str(data.get("quote") or "").strip(),
+                "created_at": now_iso,
+                "date": now_label,
+                "category": str(data.get("category") or "fabric").lower(),
+                "category_label": "CUSTOMER VERBATIM",
+                "categoryLabel": "CUSTOMER VERBATIM",
+                "is_verified_buyer": is_verified,
+                "verified_badge": "✦ VERIFIED BUYER" if is_verified else None,
+                "verifiedBadge": "✦ VERIFIED BUYER" if is_verified else None,
+                "verified_order_id": matched_order,
+                "moderated_by": None,
+                "moderated_at": None,
+                "specs": [
+                    {"label": "PIECE", "value": piece_name},
+                    {"label": "RATING", "value": f"{int(data.get('rating', 5))}.0 / 5.0"},
+                    {"label": "VERIFICATION", "value": "Verified Order" if is_verified else "Community Submission"},
+                ],
+            }
+            
+            self._store["reviews"][review_id] = review_doc
+            self.save()
+            return review_doc
+
+    def moderate_review(
+        self,
+        review_id: str,
+        status: str,
+        admin_identity: str = "admin",
+        verified: Optional[bool] = None,
+        notes: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        with _lock:
+            review = self._store.get("reviews", {}).get(review_id)
+            if not review:
+                return None
+                
+            status_clean = status.strip().lower()
+            if status_clean not in ("pending", "approved", "rejected"):
+                raise ValueError(f"Invalid review status: {status_clean}")
+                
+            review["status"] = status_clean
+            review["moderated_by"] = admin_identity
+            review["moderated_at"] = datetime.now(timezone.utc).isoformat()
+            if notes is not None:
+                review["moderation_notes"] = notes
+                
+            if verified is not None:
+                review["is_verified_buyer"] = bool(verified)
+                review["verified_badge"] = "✦ VERIFIED BUYER" if verified else None
+                review["verifiedBadge"] = "✦ VERIFIED BUYER" if verified else None
+                
+            self._log_audit(admin_identity, f"review_{status_clean}", "review", review_id, {
+                "status": status_clean,
+                "author": review.get("author"),
+                "is_verified": review.get("is_verified_buyer"),
+            })
+            self.save()
+            return review
+
+    def delete_review(self, review_id: str, admin_identity: str = "admin") -> bool:
+        with _lock:
+            if review_id in self._store.get("reviews", {}):
+                rev = self._store["reviews"].pop(review_id)
+                self._log_audit(admin_identity, "delete_review", "review", review_id, {"author": rev.get("author")})
+                self.save()
+                return True
+            return False
+
+    def upsert_google_reviews(self, reviews_list: List[Dict[str, Any]]) -> int:
+        with _lock:
+            self._store.setdefault("reviews", {})
+            upserted_count = 0
+            for r in reviews_list:
+                google_id = r.get("id") or r.get("google_review_id")
+                if not google_id:
+                    continue
+                    
+                # Find if already exists by google_review_id or id
+                existing_key = None
+                for k, existing in self._store["reviews"].items():
+                    if existing.get("google_review_id") == google_id or k == google_id:
+                        existing_key = k
+                        break
+                        
+                key = existing_key or f"google-{google_id.replace('/', '_')}"
+                doc = {
+                    "id": key,
+                    "google_review_id": google_id,
+                    "source": "google",
+                    "status": "approved",
+                    "author": r.get("author") or "Google Verified Reviewer",
+                    "initials": r.get("initials") or "GV",
+                    "avatar_url": r.get("avatar_url"),
+                    "rating": r.get("rating") or 5,
+                    "highlight": r.get("highlight") or "GOOGLE MAPS VERIFIED",
+                    "quote": r.get("quote") or "",
+                    "date": r.get("date") or "RECENT",
+                    "publish_time": r.get("publish_time"),
+                    "attribution_url": r.get("attribution_url"),
+                    "category": "google",
+                    "category_label": "GOOGLE REVIEWS",
+                    "categoryLabel": "GOOGLE REVIEWS",
+                    "is_verified_buyer": False,
+                    "verified_badge": None,
+                    "verifiedBadge": None,
+                    "piece": None,
+                    "product_slug": None,
+                    "productSlug": None,
+                    "specs": [],
+                    "image": None,
+                    "created_at": r.get("publish_time") or datetime.now(timezone.utc).isoformat(),
+                }
+                self._store["reviews"][key] = doc
+                upserted_count += 1
+                
+            self.save()
+            return upserted_count
+
+    def verify_customer_purchase(self, email: str, order_ref: Optional[str] = None) -> Tuple[bool, Optional[str]]:
+        if not email and not order_ref:
+            return (False, None)
+            
+        clean_email = email.strip().lower() if email else None
+        clean_ref = order_ref.strip().upper() if order_ref else None
+        
+        valid_statuses = ("delivered", "shipped", "paid", "completed", "processing", "confirmed")
+        
+        # Check in orders
+        for order_id, o in self._store.get("orders", {}).items():
+            o_email = str(o.get("email") or "").strip().lower()
+            o_status = str(o.get("status") or "").lower()
+            o_payment = str(o.get("payment_status") or "").lower()
+            is_valid_order = o_status in valid_statuses or o_payment in ("paid", "completed")
+            
+            if clean_ref and (order_id.upper() == clean_ref or str(o.get("order_id", "")).upper() == clean_ref):
+                if is_valid_order:
+                    return (True, order_id)
+            if clean_email and o_email == clean_email and is_valid_order:
+                return (True, order_id)
+                
+        return (False, None)
+
     def _ensure_store_keys(self):
         self._store.setdefault("orders", {})
         self._store.setdefault("customers", {})
         self._store.setdefault("irl", {})
         self._store.setdefault("sign_in_accounts", {})
+        self._store.setdefault("categories", {})
+        self._store.setdefault("reviews", {})
+        self._store.setdefault("google_reviews_cache", {"data": None, "timestamp": 0.0})
         if not self._store.get("orders") or len(self._store["orders"]) == 0:
             self._seed_orders_customers_and_irl()
-            self.save()
+        if not self._store.get("categories") or len(self._store["categories"]) == 0:
+            self._seed_categories()
+        if not self._store.get("reviews") or len(self._store["reviews"]) == 0:
+            self._seed_reviews()
+        self.save()
 
 
 # Singleton instance

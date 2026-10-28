@@ -179,151 +179,9 @@
         }
       ],
       "stock": 30,
-      "status": "active",
-      "newArrival": true,
-      "bestSeller": true,
-      "featured": true,
-      "clubEarlyAccess": false,
-      "tags": [
-        "tees",
-        "unisex"
-      ],
-      "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
-    },
-    "p02": {
-      "id": "p02",
-      "slug": "wrong-crowd-tee",
-      "name": "WRONG CROWD TEE",
-      "kicker": "NALAYAK HEAVYWEIGHT",
-      "price": 1199,
-      "compareAt": null,
-      "cost_price": 480,
-      "category": "tees",
-      "gender": "unisex",
-      "badge": "NEW",
-      "desc": "Membership has its privileges. Chest print, relaxed fit, and a back graphic your mother will ask about.",
-      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
-      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
-      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
-      "story": "Engineered in India for the ones who were never interested in fitting in.",
-      "images": [
-        "/products/wrong-crowd-tee-front.jpg"
-      ],
-      "colorImages": {},
-      "colors": [
-        {
-          "name": "Chalk",
-          "hex": "#F4F1EA"
-        },
-        {
-          "name": "Jet",
-          "hex": "#111111"
-        }
-      ],
-      "sizes": [
-        "XS",
-        "S",
-        "M",
-        "L",
-        "XL"
-      ],
-      "variants": [
-        {
-          "id": "var_p02_XS_Chalk",
-          "sku": "NLYK-WRONG-CR-CHA-XS",
-          "size": "XS",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_S_Chalk",
-          "sku": "NLYK-WRONG-CR-CHA-S",
-          "size": "S",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_M_Chalk",
-          "sku": "NLYK-WRONG-CR-CHA-M",
-          "size": "M",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_L_Chalk",
-          "sku": "NLYK-WRONG-CR-CHA-L",
-          "size": "L",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_XL_Chalk",
-          "sku": "NLYK-WRONG-CR-CHA-XL",
-          "size": "XL",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_XS_Jet",
-          "sku": "NLYK-WRONG-CR-JET-XS",
-          "size": "XS",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_S_Jet",
-          "sku": "NLYK-WRONG-CR-JET-S",
-          "size": "S",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_M_Jet",
-          "sku": "NLYK-WRONG-CR-JET-M",
-          "size": "M",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_L_Jet",
-          "sku": "NLYK-WRONG-CR-JET-L",
-          "size": "L",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 2,
-          "price_override": null
-        },
-        {
-          "id": "var_p02_XL_Jet",
-          "sku": "NLYK-WRONG-CR-JET-XL",
-          "size": "XL",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 2,
-          "price_override": null
-        }
-      ],
-      "stock": 20,
-      "status": "active",
-      "newArrival": true,
-      "bestSeller": true,
+      "status": "archived",
+      "newArrival": false,
+      "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
       "tags": [
@@ -331,7 +189,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+      "updated_at": "2026-10-26T11:59:32.606521+00:00"
     },
     "p03": {
       "id": "p03",
@@ -512,8 +370,8 @@
         }
       ],
       "stock": 15,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
@@ -522,7 +380,7 @@
         "men"
       ],
       "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+      "updated_at": "2026-10-26T11:59:42.712593+00:00"
     },
     "p04": {
       "id": "p04",
@@ -654,17 +512,17 @@
         }
       ],
       "stock": 20,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
-      "bestSeller": true,
-      "featured": true,
+      "bestSeller": false,
+      "featured": false,
       "clubEarlyAccess": false,
       "tags": [
         "tees",
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+      "updated_at": "2026-10-26T11:59:45.949055+00:00"
     },
     "p05": {
       "id": "p05",
@@ -938,7 +796,7 @@
         }
       ],
       "stock": 40,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
       "featured": false,
@@ -948,7 +806,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+      "updated_at": "2026-10-26T11:59:49.970745+00:00"
     },
     "p07": {
       "id": "p07",
@@ -1080,8 +938,8 @@
         }
       ],
       "stock": 20,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
@@ -1090,7 +948,7 @@
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.557914+00:00",
-      "updated_at": "2026-10-25T14:08:07.557914+00:00"
+      "updated_at": "2026-10-26T11:59:54.872162+00:00"
     },
     "p08": {
       "id": "p08",
@@ -1274,9 +1132,9 @@
         }
       ],
       "stock": 15,
-      "status": "active",
-      "newArrival": true,
-      "bestSeller": true,
+      "status": "archived",
+      "newArrival": false,
+      "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
       "tags": [
@@ -1284,291 +1142,7 @@
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.562218+00:00",
-      "updated_at": "2026-10-25T14:08:07.562218+00:00"
-    },
-    "p09": {
-      "id": "p09",
-      "slug": "off-record-overshirt",
-      "name": "OFF RECORD OVERSHIRT",
-      "kicker": "NALAYAK HEAVYWEIGHT",
-      "price": 1899,
-      "compareAt": null,
-      "cost_price": 760,
-      "category": "shirts",
-      "gender": "men",
-      "badge": null,
-      "desc": "Nothing you said while wearing this can be used against you. Brushed twill, boxy cut, two chest pockets for secrets.",
-      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
-      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
-      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
-      "story": "Engineered in India for the ones who were never interested in fitting in.",
-      "images": [
-        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.27 PM.jpeg"
-      ],
-      "colorImages": {},
-      "colors": [
-        {
-          "name": "Olive",
-          "hex": "#4A5340"
-        },
-        {
-          "name": "Jet",
-          "hex": "#111111"
-        }
-      ],
-      "sizes": [
-        "XS",
-        "S",
-        "M",
-        "L",
-        "XL"
-      ],
-      "variants": [
-        {
-          "id": "var_p09_XS_Olive",
-          "sku": "NLYK-OFF-RECO-OLI-XS",
-          "size": "XS",
-          "color_name": "Olive",
-          "color_hex": "#4A5340",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_S_Olive",
-          "sku": "NLYK-OFF-RECO-OLI-S",
-          "size": "S",
-          "color_name": "Olive",
-          "color_hex": "#4A5340",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_M_Olive",
-          "sku": "NLYK-OFF-RECO-OLI-M",
-          "size": "M",
-          "color_name": "Olive",
-          "color_hex": "#4A5340",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_L_Olive",
-          "sku": "NLYK-OFF-RECO-OLI-L",
-          "size": "L",
-          "color_name": "Olive",
-          "color_hex": "#4A5340",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_XL_Olive",
-          "sku": "NLYK-OFF-RECO-OLI-XL",
-          "size": "XL",
-          "color_name": "Olive",
-          "color_hex": "#4A5340",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_XS_Jet",
-          "sku": "NLYK-OFF-RECO-JET-XS",
-          "size": "XS",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_S_Jet",
-          "sku": "NLYK-OFF-RECO-JET-S",
-          "size": "S",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_M_Jet",
-          "sku": "NLYK-OFF-RECO-JET-M",
-          "size": "M",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_L_Jet",
-          "sku": "NLYK-OFF-RECO-JET-L",
-          "size": "L",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 1,
-          "price_override": null
-        },
-        {
-          "id": "var_p09_XL_Jet",
-          "sku": "NLYK-OFF-RECO-JET-XL",
-          "size": "XL",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 1,
-          "price_override": null
-        }
-      ],
-      "stock": 10,
-      "status": "active",
-      "newArrival": false,
-      "bestSeller": false,
-      "featured": true,
-      "clubEarlyAccess": false,
-      "tags": [
-        "shirts",
-        "men"
-      ],
-      "created_at": "2026-10-25T14:08:07.562218+00:00",
-      "updated_at": "2026-10-25T14:08:07.562218+00:00"
-    },
-    "p10": {
-      "id": "p10",
-      "slug": "quiet-riot-shirt",
-      "name": "QUIET RIOT SHIRT",
-      "kicker": "NALAYAK HEAVYWEIGHT",
-      "price": 1699,
-      "compareAt": 1999,
-      "cost_price": 680,
-      "category": "shirts",
-      "gender": "men",
-      "badge": null,
-      "desc": "Rebellion, but make it business casual. A camp-collar shirt that behaves in meetings and nowhere else.",
-      "fit": "Oversized boxy drop-shoulder streetwear cut. Pre-shrunk.",
-      "composition": "100% Combed Heavyweight Cotton. 240+ GSM.",
-      "care": "Cold machine wash inside out. Line dry in shade. Do not iron directly on print.",
-      "story": "Engineered in India for the ones who were never interested in fitting in.",
-      "images": [
-        "/product-pack/WhatsApp Image 2026-10-08 at 2.25.28 PM (1).jpeg"
-      ],
-      "colorImages": {},
-      "colors": [
-        {
-          "name": "Jet",
-          "hex": "#111111"
-        },
-        {
-          "name": "Chalk",
-          "hex": "#F4F1EA"
-        }
-      ],
-      "sizes": [
-        "XS",
-        "S",
-        "M",
-        "L",
-        "XL"
-      ],
-      "variants": [
-        {
-          "id": "var_p10_XS_Jet",
-          "sku": "NLYK-QUIET-RI-JET-XS",
-          "size": "XS",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_S_Jet",
-          "sku": "NLYK-QUIET-RI-JET-S",
-          "size": "S",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_M_Jet",
-          "sku": "NLYK-QUIET-RI-JET-M",
-          "size": "M",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_L_Jet",
-          "sku": "NLYK-QUIET-RI-JET-L",
-          "size": "L",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_XL_Jet",
-          "sku": "NLYK-QUIET-RI-JET-XL",
-          "size": "XL",
-          "color_name": "Jet",
-          "color_hex": "#111111",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_XS_Chalk",
-          "sku": "NLYK-QUIET-RI-CHA-XS",
-          "size": "XS",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_S_Chalk",
-          "sku": "NLYK-QUIET-RI-CHA-S",
-          "size": "S",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_M_Chalk",
-          "sku": "NLYK-QUIET-RI-CHA-M",
-          "size": "M",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_L_Chalk",
-          "sku": "NLYK-QUIET-RI-CHA-L",
-          "size": "L",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 15,
-          "price_override": null
-        },
-        {
-          "id": "var_p10_XL_Chalk",
-          "sku": "NLYK-QUIET-RI-CHA-XL",
-          "size": "XL",
-          "color_name": "Chalk",
-          "color_hex": "#F4F1EA",
-          "stock": 15,
-          "price_override": null
-        }
-      ],
-      "stock": 150,
-      "status": "active",
-      "newArrival": false,
-      "bestSeller": false,
-      "featured": false,
-      "clubEarlyAccess": false,
-      "tags": [
-        "shirts",
-        "men"
-      ],
-      "created_at": "2026-10-25T14:08:07.562633+00:00",
-      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+      "updated_at": "2026-10-26T11:59:07.407637+00:00"
     },
     "p11": {
       "id": "p11",
@@ -1651,8 +1225,8 @@
         }
       ],
       "stock": 10,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
@@ -1661,7 +1235,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.562633+00:00",
-      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+      "updated_at": "2026-10-26T12:02:40.944656+00:00"
     },
     "p12": {
       "id": "p12",
@@ -1793,7 +1367,7 @@
         }
       ],
       "stock": 10,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
       "featured": false,
@@ -1803,7 +1377,7 @@
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.562633+00:00",
-      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+      "updated_at": "2026-10-26T12:02:26.405768+00:00"
     },
     "p13": {
       "id": "p13",
@@ -1935,17 +1509,17 @@
         }
       ],
       "stock": 30,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
-      "bestSeller": true,
-      "featured": true,
+      "bestSeller": false,
+      "featured": false,
       "clubEarlyAccess": false,
       "tags": [
         "hoodies",
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.562633+00:00",
-      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+      "updated_at": "2026-10-26T12:02:23.820827+00:00"
     },
     "p14": {
       "id": "p14",
@@ -2077,8 +1651,8 @@
         }
       ],
       "stock": 10,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
@@ -2087,7 +1661,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.562633+00:00",
-      "updated_at": "2026-10-25T14:08:07.562633+00:00"
+      "updated_at": "2026-10-26T12:02:20.857006+00:00"
     },
     "p15": {
       "id": "p15",
@@ -2219,9 +1793,9 @@
         }
       ],
       "stock": 10,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
-      "bestSeller": true,
+      "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
       "tags": [
@@ -2229,7 +1803,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:00:19.651943+00:00"
     },
     "p16": {
       "id": "p16",
@@ -2312,8 +1886,8 @@
         }
       ],
       "stock": 5,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
@@ -2322,7 +1896,7 @@
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:00:24.542111+00:00"
     },
     "p17": {
       "id": "p17",
@@ -2738,9 +2312,9 @@
         }
       ],
       "stock": 10,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
-      "bestSeller": true,
+      "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
       "tags": [
@@ -2748,7 +2322,7 @@
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:00:31.453910+00:00"
     },
     "p20": {
       "id": "p20",
@@ -3012,9 +2586,9 @@
         }
       ],
       "stock": 38,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
-      "bestSeller": true,
+      "bestSeller": false,
       "featured": false,
       "clubEarlyAccess": false,
       "tags": [
@@ -3022,7 +2596,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:07:46.021314+00:00"
     },
     "p23": {
       "id": "p23",
@@ -3065,7 +2639,7 @@
         }
       ],
       "stock": 15,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
       "featured": false,
@@ -3075,7 +2649,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:07:41.890081+00:00"
     },
     "p24": {
       "id": "p24",
@@ -3207,17 +2781,17 @@
         }
       ],
       "stock": 10,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
-      "featured": true,
+      "featured": false,
       "clubEarlyAccess": false,
       "tags": [
         "accessories",
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:00:42.031055+00:00"
     },
     "p29": {
       "id": "p29",
@@ -3260,17 +2834,17 @@
         }
       ],
       "stock": 25,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
-      "featured": true,
+      "featured": false,
       "clubEarlyAccess": false,
       "tags": [
         "accessories",
         "women"
       ],
       "created_at": "2026-10-25T14:08:07.563435+00:00",
-      "updated_at": "2026-10-25T14:08:07.563435+00:00"
+      "updated_at": "2026-10-26T12:07:35.884903+00:00"
     },
     "p25": {
       "id": "p25",
@@ -3353,7 +2927,7 @@
         }
       ],
       "stock": 15,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
       "featured": false,
@@ -3363,7 +2937,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.564458+00:00",
-      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+      "updated_at": "2026-10-26T12:00:44.963728+00:00"
     },
     "p26": {
       "id": "p26",
@@ -3495,7 +3069,7 @@
         }
       ],
       "stock": 150,
-      "status": "active",
+      "status": "archived",
       "newArrival": false,
       "bestSeller": false,
       "featured": false,
@@ -3505,7 +3079,7 @@
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.564458+00:00",
-      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+      "updated_at": "2026-10-26T12:07:27.793382+00:00"
     },
     "p27": {
       "id": "p27",
@@ -4208,17 +3782,17 @@
         }
       ],
       "stock": 30,
-      "status": "active",
-      "newArrival": true,
+      "status": "archived",
+      "newArrival": false,
       "bestSeller": false,
-      "featured": true,
+      "featured": false,
       "clubEarlyAccess": false,
       "tags": [
         "tees",
         "unisex"
       ],
       "created_at": "2026-10-25T14:08:07.564458+00:00",
-      "updated_at": "2026-10-25T14:08:07.564458+00:00"
+      "updated_at": "2026-10-26T12:00:56.545734+00:00"
     },
     "p33": {
       "id": "p33",
@@ -4362,6 +3936,199 @@
       ],
       "created_at": "2026-10-25T14:08:07.564458+00:00",
       "updated_at": "2026-10-25T14:08:07.564458+00:00"
+    },
+    "p_fb5714": {
+      "id": "p_fb5714",
+      "slug": "red-flag-scarlet-rebellion-hoodie",
+      "name": "RED FLAG — SCARLET REBELLION HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1999,
+      "compareAt": null,
+      "cost_price": null,
+      "category": "hoodies",
+      "gender": "unisex",
+      "badge": "NEW",
+      "desc": "Make them stare. Let the red flag speak. 🚩\n\nIntroducing the **Red Flag — Scarlet Rebellion Hoodie** by NALAYAK. A bold, oversized streetwear essential in deep crimson, featuring the unapologetic statement “I am a red flag but the material is quality” on the front and striking Indian-inspired artwork on the back.\n\nDesigned for those who refuse to blend in, this piece combines desi attitude with rebellious street culture. The rich red colour, statement graphics, and premium-inspired details make it a standout addition to your rotation.\n\n**Details**\n- Bold crimson-red colourway\n- Oversized streetwear aesthetic\n- Statement typography on the front\n- Eye-catching illustrated back graphic\n- Ribbed cuffs and hem with a relaxed silhouette\n\n**Wear your chaos. Own your red flag. Stay NALAYAK.**\n\n*Fabric composition, GSM, and fit specifications should be confirmed before publishing as product facts.*",
+      "fit": "Oversized boxy drop-shoulder cut.",
+      "composition": "100% Combed Heavyweight Cotton.",
+      "care": "Cold machine wash inside out. Dry in shade.",
+      "story": "",
+      "images": [
+        "/uploads/media_20261026_084120_c67ebb.jpg",
+        "/uploads/media_20261026_084120_281d59.jpg",
+        "/uploads/media_20261026_084120_137a7e.jpg",
+        "/uploads/media_20261026_084120_d8acda.jpg",
+        "/uploads/media_20261026_084120_f787ef.jpg",
+        "/uploads/media_20261026_084120_c766f9.jpg",
+        "/uploads/media_20261026_084120_05a84d.jpg",
+        "/uploads/media_20261026_084120_360080.jpg",
+        "/uploads/media_20261026_084120_c9bb18.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "#A10F20",
+          "hex": "#A10F20"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p_fb5714_XS_BLACK",
+          "sku": "NLYK-RED-FLAG-BLA-XS",
+          "size": "XS",
+          "color_name": "BLACK",
+          "color_hex": "#0a0a0a",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_fb5714_S_BLACK",
+          "sku": "NLYK-RED-FLAG-BLA-S",
+          "size": "S",
+          "color_name": "BLACK",
+          "color_hex": "#0a0a0a",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_fb5714_M_BLACK",
+          "sku": "NLYK-RED-FLAG-BLA-M",
+          "size": "M",
+          "color_name": "BLACK",
+          "color_hex": "#0a0a0a",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_fb5714_L_BLACK",
+          "sku": "NLYK-RED-FLAG-BLA-L",
+          "size": "L",
+          "color_name": "BLACK",
+          "color_hex": "#0a0a0a",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_fb5714_XL_BLACK",
+          "sku": "NLYK-RED-FLAG-BLA-XL",
+          "size": "XL",
+          "color_name": "BLACK",
+          "color_hex": "#0a0a0a",
+          "stock": 5,
+          "price_override": null
+        }
+      ],
+      "stock": 25,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "tags": [
+        "tees",
+        "streetwear"
+      ],
+      "created_at": "2026-10-26T08:41:58.194689+00:00",
+      "updated_at": "2026-10-26T08:44:43.969216+00:00"
+    },
+    "p_92dc77": {
+      "id": "p_92dc77",
+      "slug": "RED-FLAG-DESI-REBELLION-HOODIE",
+      "name": "RED FLAG — DESI REBELLION HOODIE",
+      "kicker": "NALAYAK HEAVYWEIGHT",
+      "price": 1999,
+      "compareAt": null,
+      "cost_price": null,
+      "category": "hoodies",
+      "gender": "women",
+      "badge": "NEW",
+      "desc": "Not every red flag is a warning. Some are a whole statement. 🚩\n\nMeet the Red Flag — Desi Rebellion Hoodie by NALAYAK, where unapologetic attitude meets Indian street culture. Drenched in deep crimson red, this statement piece features the iconic words “I am a red flag but the material is quality” across the front, paired with bold vintage-inspired Indian artwork on the back.\n\nMade for the ones who break rules, challenge expectations, and wear their personality without an apology. The relaxed streetwear silhouette, striking graphic placement, and rich red colour make this hoodie impossible to ignore.\n\nTHE DETAILS\n\nDeep crimson red colourway\n\nBold statement typography on the front\n\nVintage-inspired desi artwork on the back\n\nHooded design with adjustable drawstrings\n\nFront kangaroo pocket\n\nRibbed cuffs and hem\n\nStatement streetwear aesthetic\n\nYour vibe. Your rules. Your red flag.\n\nNALAYAK — Not made for everyone.",
+      "fit": "Oversized boxy drop-shoulder cut.",
+      "composition": "100% Combed Heavyweight Cotton.",
+      "care": "Cold machine wash inside out. Dry in shade.",
+      "story": "",
+      "images": [
+        "/uploads/media_20261026_084851_482e64.jpg",
+        "/uploads/media_20261026_084851_2c1348.jpg"
+      ],
+      "colorImages": {},
+      "colors": [
+        {
+          "name": "#A10F20",
+          "hex": "#A10F20"
+        }
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "variants": [
+        {
+          "id": "var_p_92dc77_XS_#A10F20",
+          "sku": "NLYK-RED-FLAG-A10-XS",
+          "size": "XS",
+          "color_name": "#A10F20",
+          "color_hex": "#A10F20",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_92dc77_S_#A10F20",
+          "sku": "NLYK-RED-FLAG-A10-S",
+          "size": "S",
+          "color_name": "#A10F20",
+          "color_hex": "#A10F20",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_92dc77_M_#A10F20",
+          "sku": "NLYK-RED-FLAG-A10-M",
+          "size": "M",
+          "color_name": "#A10F20",
+          "color_hex": "#A10F20",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_92dc77_L_#A10F20",
+          "sku": "NLYK-RED-FLAG-A10-L",
+          "size": "L",
+          "color_name": "#A10F20",
+          "color_hex": "#A10F20",
+          "stock": 5,
+          "price_override": null
+        },
+        {
+          "id": "var_p_92dc77_XL_#A10F20",
+          "sku": "NLYK-RED-FLAG-A10-XL",
+          "size": "XL",
+          "color_name": "#A10F20",
+          "color_hex": "#A10F20",
+          "stock": 5,
+          "price_override": null
+        }
+      ],
+      "stock": 25,
+      "status": "active",
+      "newArrival": true,
+      "bestSeller": false,
+      "featured": false,
+      "tags": [
+        "tees",
+        "streetwear"
+      ],
+      "created_at": "2026-10-26T08:49:00.574751+00:00",
+      "updated_at": "2026-10-26T08:50:50.662797+00:00"
     }
   },
   "collections": {
@@ -4374,14 +4141,7 @@
       "image": "/collections/the-chaos-edit.jpg",
       "products": [
         "devanagari-chaos-tee",
-        "chaos-club-tee",
-        "bad-decisions-hoodie",
-        "anti-normal-hoodie",
-        "wrong-crowd-tee",
         "basically-famous-tee",
-        "wrong-crowd-hoodie",
-        "nalayak-chain",
-        "daily-chaos-sneakers",
         "off-duty-cargo"
       ],
       "isActive": true,
@@ -4397,12 +4157,7 @@
       "image": "/collections/after-hours.jpg",
       "products": [
         "after-hours-stealth-hoodie",
-        "after-dark-hoodie",
-        "after-hours-tee",
-        "midnight-cargo-tee",
-        "static-noise-overshirt",
-        "night-shift-shirt",
-        "low-profile-sunnies"
+        "static-noise-overshirt"
       ],
       "isActive": true,
       "created_at": "2026-10-25T14:08:07.564458+00:00",
@@ -4416,15 +4171,8 @@
       "desc": "The daily uniform of the unapologetic.",
       "image": "/collections/everyday-nalayak.jpg",
       "products": [
-        "everyday-nalayak-essential-tee",
-        "nalayak-standard-tee",
-        "frequency-tee",
-        "off-record-overshirt",
         "daily-chaos-joggers",
-        "side-eye-cap",
-        "wrong-crowd-tote",
-        "denim-but-nalayak",
-        "summer-of-chaos-shirt"
+        "side-eye-cap"
       ],
       "isActive": true,
       "created_at": "2026-10-25T14:08:07.564458+00:00",
@@ -4439,12 +4187,8 @@
       "image": "/collections/limited-drops.jpg",
       "products": [
         "archive-specimen-series-001",
-        "no-approval-oversized-tee",
-        "the-500-hoodie",
-        "quiet-riot-shirt",
         "off-script-denim",
-        "wrong-place-trousers",
-        "her-chaos-crop-tee"
+        "wrong-place-trousers"
       ],
       "isActive": true,
       "created_at": "2026-10-25T14:08:07.564458+00:00",
@@ -4576,6 +4320,637 @@
   },
   "admin_sessions": {},
   "audit_logs": [
+    {
+      "id": "log_6febf7bb",
+      "admin_identity": "cleanup",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-74fa9112ec",
+      "details": {
+        "author": "Arjun Singhania"
+      },
+      "timestamp": "2026-10-28T09:25:41.548578+00:00"
+    },
+    {
+      "id": "log_d685379d",
+      "admin_identity": "admin_paap",
+      "action": "review_rejected",
+      "entity_type": "review",
+      "entity_id": "rev-cust-74fa9112ec",
+      "details": {
+        "status": "rejected",
+        "author": "Arjun Singhania",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T09:25:41.540989+00:00"
+    },
+    {
+      "id": "log_95cc379d",
+      "admin_identity": "admin_paap",
+      "action": "review_approved",
+      "entity_type": "review",
+      "entity_id": "rev-cust-74fa9112ec",
+      "details": {
+        "status": "approved",
+        "author": "Arjun Singhania",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T09:25:41.514737+00:00"
+    },
+    {
+      "id": "log_306edb35",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-612ffe4934",
+      "details": {
+        "author": "Aarav Sen"
+      },
+      "timestamp": "2026-10-28T07:37:25.448077+00:00"
+    },
+    {
+      "id": "log_6b465b31",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-65a1e3af03",
+      "details": {
+        "author": "Simran K."
+      },
+      "timestamp": "2026-10-28T07:37:25.426847+00:00"
+    },
+    {
+      "id": "log_9634a9ec",
+      "admin_identity": "superadmin",
+      "action": "review_rejected",
+      "entity_type": "review",
+      "entity_id": "rev-cust-65a1e3af03",
+      "details": {
+        "status": "rejected",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T07:37:25.389711+00:00"
+    },
+    {
+      "id": "log_f0026a76",
+      "admin_identity": "superadmin",
+      "action": "review_approved",
+      "entity_type": "review",
+      "entity_id": "rev-cust-65a1e3af03",
+      "details": {
+        "status": "approved",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T07:37:25.360880+00:00"
+    },
+    {
+      "id": "log_6a959bf3",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-71d10b43fa",
+      "details": {
+        "author": "Aarav Sen"
+      },
+      "timestamp": "2026-10-28T06:31:52.666872+00:00"
+    },
+    {
+      "id": "log_b65a83d4",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-cb7ac3e1d9",
+      "details": {
+        "author": "Simran K."
+      },
+      "timestamp": "2026-10-28T06:31:52.622583+00:00"
+    },
+    {
+      "id": "log_30081116",
+      "admin_identity": "superadmin",
+      "action": "review_rejected",
+      "entity_type": "review",
+      "entity_id": "rev-cust-cb7ac3e1d9",
+      "details": {
+        "status": "rejected",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T06:31:52.561521+00:00"
+    },
+    {
+      "id": "log_fbbe449b",
+      "admin_identity": "superadmin",
+      "action": "review_approved",
+      "entity_type": "review",
+      "entity_id": "rev-cust-cb7ac3e1d9",
+      "details": {
+        "status": "approved",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-28T06:31:52.503471+00:00"
+    },
+    {
+      "id": "log_d6d182b6",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-0f1286dd71",
+      "details": {
+        "author": "Aarav Sen"
+      },
+      "timestamp": "2026-10-27T16:55:11.403168+00:00"
+    },
+    {
+      "id": "log_7a2f6112",
+      "admin_identity": "superadmin",
+      "action": "delete_review",
+      "entity_type": "review",
+      "entity_id": "rev-cust-15e0d81bcc",
+      "details": {
+        "author": "Simran K."
+      },
+      "timestamp": "2026-10-27T16:55:11.377614+00:00"
+    },
+    {
+      "id": "log_42c220a8",
+      "admin_identity": "superadmin",
+      "action": "review_rejected",
+      "entity_type": "review",
+      "entity_id": "rev-cust-15e0d81bcc",
+      "details": {
+        "status": "rejected",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-27T16:55:11.342728+00:00"
+    },
+    {
+      "id": "log_b6c0a423",
+      "admin_identity": "superadmin",
+      "action": "review_approved",
+      "entity_type": "review",
+      "entity_id": "rev-cust-15e0d81bcc",
+      "details": {
+        "status": "approved",
+        "author": "Simran K.",
+        "is_verified": false
+      },
+      "timestamp": "2026-10-27T16:55:11.319550+00:00"
+    },
+    {
+      "id": "log_ba5a5e32",
+      "admin_identity": "superadmin",
+      "action": "delete_category",
+      "entity_type": "category",
+      "entity_id": "accessories",
+      "details": {
+        "name": "ACCESSORIES",
+        "slug": "accessories"
+      },
+      "timestamp": "2026-10-26T16:14:38.170897+00:00"
+    },
+    {
+      "id": "log_d2b86223",
+      "admin_identity": "superadmin",
+      "action": "create_category",
+      "entity_type": "category",
+      "entity_id": "cat_accessories",
+      "details": {
+        "slug": "accessories",
+        "name": "ACCESSORIES"
+      },
+      "timestamp": "2026-10-26T16:10:02.952909+00:00"
+    },
+    {
+      "id": "log_133173c9",
+      "admin_identity": "superadmin",
+      "action": "delete_category",
+      "entity_type": "category",
+      "entity_id": "accessories",
+      "details": {
+        "name": "ACCESSORIES",
+        "slug": "accessories"
+      },
+      "timestamp": "2026-10-26T16:02:53.383393+00:00"
+    },
+    {
+      "id": "log_2b1182aa",
+      "admin_identity": "test_admin",
+      "action": "delete_category",
+      "entity_type": "category",
+      "entity_id": "test-cat",
+      "details": {
+        "name": "TEST CATEGORY",
+        "slug": "test-cat"
+      },
+      "timestamp": "2026-10-26T12:11:14.115983+00:00"
+    },
+    {
+      "id": "log_fbd7e12f",
+      "admin_identity": "test_admin",
+      "action": "create_category",
+      "entity_type": "category",
+      "entity_id": "cat_test-cat",
+      "details": {
+        "slug": "test-cat",
+        "name": "TEST CATEGORY"
+      },
+      "timestamp": "2026-10-26T12:11:14.114547+00:00"
+    },
+    {
+      "id": "log_d1c237e8",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p22",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:07:46.021314+00:00"
+    },
+    {
+      "id": "log_36497475",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p23",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:07:41.896131+00:00"
+    },
+    {
+      "id": "log_7cf18311",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p29",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:07:35.884903+00:00"
+    },
+    {
+      "id": "log_04f4a8a4",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p26",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:07:27.793382+00:00"
+    },
+    {
+      "id": "log_7ec32ae7",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p11",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:02:40.945669+00:00"
+    },
+    {
+      "id": "log_ab2ee0c0",
+      "admin_identity": "superadmin",
+      "action": "delete_product",
+      "entity_type": "product",
+      "entity_id": "p09",
+      "details": {
+        "name": "OFF RECORD OVERSHIRT",
+        "permanent": true
+      },
+      "timestamp": "2026-10-26T12:02:37.263138+00:00"
+    },
+    {
+      "id": "log_43fbfe33",
+      "admin_identity": "superadmin",
+      "action": "delete_product",
+      "entity_type": "product",
+      "entity_id": "p10",
+      "details": {
+        "name": "QUIET RIOT SHIRT",
+        "permanent": true
+      },
+      "timestamp": "2026-10-26T12:02:34.232941+00:00"
+    },
+    {
+      "id": "log_fd6781bb",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p12",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:02:26.405768+00:00"
+    },
+    {
+      "id": "log_bef54f85",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p13",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:02:23.820827+00:00"
+    },
+    {
+      "id": "log_75f9f5ad",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p14",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:02:20.857006+00:00"
+    },
+    {
+      "id": "log_22c5ca58",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p32",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:56.545734+00:00"
+    },
+    {
+      "id": "log_ffbeb0ee",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p25",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:44.963728+00:00"
+    },
+    {
+      "id": "log_952bff17",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p24",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:42.031055+00:00"
+    },
+    {
+      "id": "log_6a1529ee",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p19",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:31.453910+00:00"
+    },
+    {
+      "id": "log_f76693fe",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p16",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:24.542111+00:00"
+    },
+    {
+      "id": "log_cdcbeb23",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p15",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:19.651943+00:00"
+    },
+    {
+      "id": "log_c0856f87",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p10",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:03.236257+00:00"
+    },
+    {
+      "id": "log_41bf469f",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p09",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T12:00:00.099192+00:00"
+    },
+    {
+      "id": "log_00a20330",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p07",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:54.872162+00:00"
+    },
+    {
+      "id": "log_2b4c839f",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p06",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:49.970745+00:00"
+    },
+    {
+      "id": "log_3c354962",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p04",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:45.949055+00:00"
+    },
+    {
+      "id": "log_ad9c5e11",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p03",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:42.713694+00:00"
+    },
+    {
+      "id": "log_580e66b8",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p01",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:32.606521+00:00"
+    },
+    {
+      "id": "log_6de3e631",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p08",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T11:59:07.408731+00:00"
+    },
+    {
+      "id": "log_b23bf067",
+      "admin_identity": "superadmin",
+      "action": "delete_product",
+      "entity_type": "product",
+      "entity_id": "p02",
+      "details": {
+        "name": "WRONG CROWD TEE",
+        "permanent": true
+      },
+      "timestamp": "2026-10-26T09:10:56.609242+00:00"
+    },
+    {
+      "id": "log_21417d84",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p02",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T09:06:44.364627+00:00"
+    },
+    {
+      "id": "log_d07d350f",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p02",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T09:05:47.385688+00:00"
+    },
+    {
+      "id": "log_be6b331d",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p02",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T08:55:30.626251+00:00"
+    },
+    {
+      "id": "log_58a83617",
+      "admin_identity": "superadmin",
+      "action": "archive_product",
+      "entity_type": "product",
+      "entity_id": "p02",
+      "details": {
+        "status": "archived"
+      },
+      "timestamp": "2026-10-26T08:54:52.055326+00:00"
+    },
+    {
+      "id": "log_79fadd65",
+      "admin_identity": "superadmin",
+      "action": "update_product",
+      "entity_type": "product",
+      "entity_id": "p_92dc77",
+      "details": {
+        "name": "RED FLAG — DESI REBELLION HOODIE"
+      },
+      "timestamp": "2026-10-26T08:50:50.662797+00:00"
+    },
+    {
+      "id": "log_dd8e3d9f",
+      "admin_identity": "superadmin",
+      "action": "update_product",
+      "entity_type": "product",
+      "entity_id": "p_92dc77",
+      "details": {
+        "name": "RED FLAG — DESI REBELLION HOODIE"
+      },
+      "timestamp": "2026-10-26T08:50:19.870999+00:00"
+    },
+    {
+      "id": "log_d983b026",
+      "admin_identity": "superadmin",
+      "action": "create_product",
+      "entity_type": "product",
+      "entity_id": "p_92dc77",
+      "details": {
+        "name": "RED FLAG — DESI REBELLION HOODIE",
+        "price": 1999
+      },
+      "timestamp": "2026-10-26T08:49:00.574751+00:00"
+    },
+    {
+      "id": "log_cbb79f8c",
+      "admin_identity": "superadmin",
+      "action": "update_product",
+      "entity_type": "product",
+      "entity_id": "p_fb5714",
+      "details": {
+        "name": "RED FLAG — SCARLET REBELLION HOODIE"
+      },
+      "timestamp": "2026-10-26T08:44:43.969216+00:00"
+    },
+    {
+      "id": "log_69312ec9",
+      "admin_identity": "superadmin",
+      "action": "update_product",
+      "entity_type": "product",
+      "entity_id": "p_fb5714",
+      "details": {
+        "name": "RED FLAG — SCARLET REBELLION HOODIE"
+      },
+      "timestamp": "2026-10-26T08:43:25.703130+00:00"
+    },
+    {
+      "id": "log_8990573f",
+      "admin_identity": "superadmin",
+      "action": "create_product",
+      "entity_type": "product",
+      "entity_id": "p_fb5714",
+      "details": {
+        "name": "RED FLAG — SCARLET REBELLION HOODIE",
+        "price": 1999
+      },
+      "timestamp": "2026-10-26T08:41:58.196716+00:00"
+    },
     {
       "id": "log_55c42111",
       "admin_identity": "system",
@@ -4828,5 +5203,443 @@
       "last_sign_in": "2026-10-25T08:19:00Z",
       "email_verified": true
     }
+  },
+  "categories": {
+    "tees": {
+      "id": "cat_tees",
+      "slug": "tees",
+      "name": "TEES",
+      "subtitle": "240 GSM COMBED COTTON",
+      "desc": "Heavyweight combed cotton oversized tees with drop-shoulder silhouettes.",
+      "image": "/products/devanagari-chaos-tee-front.jpg",
+      "display_order": 1,
+      "is_active": true
+    },
+    "shirts": {
+      "id": "cat_shirts",
+      "slug": "shirts",
+      "name": "SHIRTS",
+      "subtitle": "HEAVYWEIGHT TWILL & RELAXED",
+      "desc": "Relaxed-fit heavyweight twill and utility button-downs.",
+      "image": "photo-1596755094514-f87e34085b2c",
+      "display_order": 2,
+      "is_active": true
+    },
+    "hoodies": {
+      "id": "cat_hoodies",
+      "slug": "hoodies",
+      "name": "HOODIES",
+      "subtitle": "450 GSM BRUSHED FLEECE",
+      "desc": "Ultra-dense 450 GSM box-cut fleece hoodies and crewnecks.",
+      "image": "/products/after-hours-stealth-hoodie-front.jpg",
+      "display_order": 3,
+      "is_active": true
+    },
+    "bottoms": {
+      "id": "cat_bottoms",
+      "slug": "bottoms",
+      "name": "BOTTOMS",
+      "subtitle": "WIDE-LEG CARGOS & DENIM",
+      "desc": "Tactical wide-leg cargo pants, heavy wash denim and hardware tracks.",
+      "image": "/female-jeans-chain.png",
+      "display_order": 4,
+      "is_active": true
+    },
+    "custom-design": {
+      "id": "cat_custom_design",
+      "slug": "custom-design",
+      "name": "CUSTOM DESIGN",
+      "subtitle": "BESPOKE 1-OF-1 ATELIER",
+      "desc": "Bespoke 1-of-1 editorial atelier pieces handcrafted on demand.",
+      "image": "/editorial/about-hero-streetwear.jpg",
+      "display_order": 6,
+      "is_active": true
+    }
+  },
+  "reviews": {
+    "rev-01": {
+      "id": "rev-01",
+      "source": "community",
+      "status": "approved",
+      "author": "Rohan D.",
+      "initials": "RD",
+      "avatar_url": "photo-1507003211169-0a1dd7228f2d",
+      "image": "/products/devanagari-chaos-tee-front.jpg",
+      "product_slug": "nalayak-standard-tee",
+      "productSlug": "nalayak-standard-tee",
+      "location": "Kolkata, WB",
+      "piece": "NALAYAK Standard Tee",
+      "variant": "Jet Black / Size L",
+      "rating": 5,
+      "category": "fabric",
+      "category_label": "FABRIC & WEIGHT",
+      "categoryLabel": "FABRIC & WEIGHT",
+      "highlight": "240 GSM THAT HOLDS ITS SHAPE",
+      "quote": "The 240 GSM weight is no joke. Most Indian streetwear brands claim boxy and send you a limp regular tee. This holds its silhouette even after three hard washes in Kolkata humidity.",
+      "specs": [
+        {
+          "label": "WEIGHT",
+          "value": "240 GSM"
+        },
+        {
+          "label": "CUT",
+          "value": "Drop Shoulder"
+        },
+        {
+          "label": "DURABILITY",
+          "value": "Zero Shrinkage"
+        }
+      ],
+      "date": "OCT 2026",
+      "batch": "BATCH 001 · ARCHIVE",
+      "tag": "240 GSM HEAVYWEIGHT",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ VERIFIED BUYER",
+      "created_at": "2026-10-01T10:00:00Z",
+      "is_demo": true
+    },
+    "rev-02": {
+      "id": "rev-02",
+      "source": "community",
+      "status": "approved",
+      "author": "Ananya M.",
+      "initials": "AM",
+      "avatar_url": "photo-1494790108377-be9c29b29330",
+      "image": "/products/everyday-nalayak-essential-tee-front.jpg",
+      "product_slug": "no-approval-oversized-tee",
+      "productSlug": "no-approval-oversized-tee",
+      "location": "Mumbai, MH",
+      "piece": "No Approval Oversized Tee",
+      "variant": "Chalk White / Size M",
+      "rating": 5,
+      "category": "identity",
+      "category_label": "BRAND IDENTITY",
+      "categoryLabel": "BRAND IDENTITY",
+      "highlight": "FAMILY UNCLE APPROVED? DEFINITELY NOT",
+      "quote": "Wore the No Approval tee to a family Diwali function. My uncle stared at the back graphic for two straight minutes without speaking. 10/10, brand promise fulfilled.",
+      "specs": [
+        {
+          "label": "GRAPHIC",
+          "value": "High-Density Screen"
+        },
+        {
+          "label": "REACTION",
+          "value": "Pure Disapproval"
+        },
+        {
+          "label": "SILHOUETTE",
+          "value": "True Oversized"
+        }
+      ],
+      "date": "SEP 2026",
+      "batch": "DROP 02 · VERBATIM",
+      "tag": "NO APPROVAL · DROP 02",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ FOUNDING MEMBER",
+      "created_at": "2026-09-15T12:00:00Z",
+      "is_demo": true
+    },
+    "rev-03": {
+      "id": "rev-03",
+      "source": "community",
+      "status": "approved",
+      "author": "Kabir S.",
+      "initials": "KS",
+      "avatar_url": "photo-1500648767791-00dcc994a43e",
+      "image": "/products/archive-specimen-series-001-front.jpg",
+      "product_slug": "chaos-club-tee",
+      "productSlug": "chaos-club-tee",
+      "location": "Delhi NCR",
+      "piece": "Chaos Club Tee",
+      "variant": "Ash Grey / Size XL",
+      "rating": 5,
+      "category": "fit",
+      "category_label": "FIT & SILHOUETTE",
+      "categoryLabel": "FIT & SILHOUETTE",
+      "highlight": "TRUE DROP SHOULDER WITHOUT EXCESS BAGGAGE",
+      "quote": "True drop shoulder that actually drapes down the tricep rather than just looking two sizes too big. Collar ribbing is tight 1.25\" and doesn’t bacon after line drying.",
+      "specs": [
+        {
+          "label": "COLLAR",
+          "value": "1.25\" Heavy Rib"
+        },
+        {
+          "label": "DRAPE",
+          "value": "Structured Boxy"
+        },
+        {
+          "label": "ROTATION",
+          "value": "Daily Essential"
+        }
+      ],
+      "date": "AUG 2026",
+      "batch": "DROP 01 · CORE",
+      "tag": "1.25\" HEAVY RIB",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ VERIFIED BUYER",
+      "created_at": "2026-08-20T14:30:00Z",
+      "is_demo": true
+    },
+    "rev-04": {
+      "id": "rev-04",
+      "source": "community",
+      "status": "approved",
+      "author": "Tanya K.",
+      "initials": "TK",
+      "avatar_url": "photo-1524504388940-b1c1722653e1",
+      "image": "/products/wrong-crowd-tee-front.jpg",
+      "product_slug": "basically-famous-tee",
+      "productSlug": "basically-famous-tee",
+      "location": "Bengaluru, KA",
+      "piece": "Basically Famous Tee",
+      "variant": "Jet Black / Size S",
+      "rating": 5,
+      "category": "print",
+      "category_label": "PRINT QUALITY",
+      "categoryLabel": "PRINT QUALITY",
+      "highlight": "SCREENPRINT IN THE FIBERS, NOT PLASTIC",
+      "quote": "The screenprint feels embedded into the cotton fibers instead of a thick rubbery sticker slapped on top. Breathable even when riding in 32° heat.",
+      "specs": [
+        {
+          "label": "PRINT TYPE",
+          "value": "Discharge Inks"
+        },
+        {
+          "label": "FEEL",
+          "value": "Soft Breathable"
+        },
+        {
+          "label": "FABRIC",
+          "value": "100% Combed"
+        }
+      ],
+      "date": "OCT 2026",
+      "batch": "BATCH 003 · EDITORIAL",
+      "tag": "DISCHARGE INK",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ ATELIER TESTED",
+      "created_at": "2026-10-10T16:00:00Z",
+      "is_demo": true
+    },
+    "rev-05": {
+      "id": "rev-05",
+      "source": "community",
+      "status": "approved",
+      "author": "Varun P.",
+      "initials": "VP",
+      "avatar_url": "photo-1506794778202-cad84cf45f1d",
+      "image": "/products/after-hours-stealth-hoodie-front.jpg",
+      "product_slug": "after-hours-stealth-hoodie",
+      "productSlug": "after-hours-stealth-hoodie",
+      "location": "Pune, MH",
+      "piece": "Acid Wash Oversized Hoodie",
+      "variant": "Vintage Charcoal / Size L",
+      "rating": 5,
+      "category": "fabric",
+      "category_label": "WINTER WEIGHT",
+      "categoryLabel": "WINTER WEIGHT",
+      "highlight": "DOUBLE-LAYER HOOD THAT ACTUALLY STANDS UP",
+      "quote": "Heaviest hoodie in my rotation. The double-layered hood actually stays upright and doesn’t collapse flat against your collarbones. Ribbed cuffs don’t stretch out.",
+      "specs": [
+        {
+          "label": "WEIGHT",
+          "value": "420 GSM Fleece"
+        },
+        {
+          "label": "HOOD",
+          "value": "Double-Layered"
+        },
+        {
+          "label": "CUFFS",
+          "value": "Form-Retaining"
+        }
+      ],
+      "date": "SEP 2026",
+      "batch": "WINTER 26 · HEAVY",
+      "tag": "420 GSM FLEECE",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ VERIFIED BUYER",
+      "created_at": "2026-09-28T09:00:00Z",
+      "is_demo": true
+    },
+    "rev-06": {
+      "id": "rev-06",
+      "source": "community",
+      "status": "approved",
+      "author": "Meera V.",
+      "initials": "MV",
+      "avatar_url": "photo-1531746020798-e6953c6e8e04",
+      "image": "/products/her-chaos-crop-tee-front.jpg",
+      "product_slug": "her-chaos-crop-tee",
+      "productSlug": "her-chaos-crop-tee",
+      "location": "Hyderabad, TS",
+      "piece": "Her Chaos Crop Tee",
+      "variant": "Paper White / Size M",
+      "rating": 5,
+      "category": "fit",
+      "category_label": "PROPORTIONS & CUT",
+      "categoryLabel": "PROPORTIONS & CUT",
+      "highlight": "SHARP BOXY CROP WITHOUT BEING FLIMSY",
+      "quote": "Most women’s streetwear crops are either paper-thin or cut like an awkward square box. This has proper structured shoulders and sits right at the high waistband.",
+      "specs": [
+        {
+          "label": "WEIGHT",
+          "value": "220 GSM"
+        },
+        {
+          "label": "CROP",
+          "value": "High Waist Cut"
+        },
+        {
+          "label": "HEM",
+          "value": "Reinforced Twin"
+        }
+      ],
+      "date": "AUG 2026",
+      "batch": "DROP 02 · WOMENS",
+      "tag": "STRUCTURED CROP",
+      "is_verified_buyer": true,
+      "verified_badge": "✦ VERIFIED BUYER",
+      "created_at": "2026-08-14T11:00:00Z",
+      "is_demo": true
+    },
+    "google-places_ChIJN1t_tDeuEmsRUsoyG83frY4_reviews_101": {
+      "id": "google-places_ChIJN1t_tDeuEmsRUsoyG83frY4_reviews_101",
+      "google_review_id": "places/ChIJN1t_tDeuEmsRUsoyG83frY4/reviews/101",
+      "source": "google",
+      "status": "approved",
+      "author": "Priya Sharma",
+      "initials": "PS",
+      "avatar_url": "https://lh3.googleusercontent.com/a/sample-photo-101",
+      "rating": 5,
+      "highlight": "Kolkata atelier vibe is unreal",
+      "quote": "Visited the brand popup in Kolkata. Packaging, branding, and staff are top notch.",
+      "date": "2 WEEKS AGO",
+      "publish_time": "2026-10-14T11:00:00Z",
+      "attribution_url": "https://maps.google.com/?cid=12345",
+      "category": "google",
+      "category_label": "GOOGLE REVIEWS",
+      "categoryLabel": "GOOGLE REVIEWS",
+      "is_verified_buyer": false,
+      "verified_badge": null,
+      "verifiedBadge": null,
+      "piece": null,
+      "product_slug": null,
+      "productSlug": null,
+      "specs": [],
+      "image": null,
+      "created_at": "2026-10-14T11:00:00Z"
+    },
+    "google-places_ChIJN1t_tDeuEmsRUsoyG83frY4_reviews_102": {
+      "id": "google-places_ChIJN1t_tDeuEmsRUsoyG83frY4_reviews_102",
+      "google_review_id": "places/ChIJN1t_tDeuEmsRUsoyG83frY4/reviews/102",
+      "source": "google",
+      "status": "approved",
+      "author": "Dev Malhotra",
+      "initials": "DM",
+      "avatar_url": null,
+      "rating": 5,
+      "highlight": "Great customer service and fast shipping",
+      "quote": "Dispatched within 24 hours. Minimalist aesthetic on the packaging is insane.",
+      "date": "1 MONTH AGO",
+      "publish_time": "2026-09-28T14:30:00Z",
+      "attribution_url": "https://maps.google.com/?cid=12345",
+      "category": "google",
+      "category_label": "GOOGLE REVIEWS",
+      "categoryLabel": "GOOGLE REVIEWS",
+      "is_verified_buyer": false,
+      "verified_badge": null,
+      "verifiedBadge": null,
+      "piece": null,
+      "product_slug": null,
+      "productSlug": null,
+      "specs": [],
+      "image": null,
+      "created_at": "2026-09-28T14:30:00Z"
+    },
+    "rev-cust-6de8a5a745": {
+      "id": "rev-cust-6de8a5a745",
+      "source": "customer",
+      "status": "approved",
+      "author": "shakib",
+      "initials": "SH",
+      "email": "khanshakib0000@gmail.com",
+      "piece": "General Atelier Experience",
+      "product_slug": null,
+      "productSlug": null,
+      "variant": null,
+      "rating": 5,
+      "highlight": "AMAZING QUALITY",
+      "quote": "Amazing quality",
+      "created_at": "2026-10-28T09:28:09.100122+00:00",
+      "date": "OCT 2026",
+      "category": "fabric",
+      "category_label": "CUSTOMER VERBATIM",
+      "categoryLabel": "CUSTOMER VERBATIM",
+      "is_verified_buyer": false,
+      "verified_badge": null,
+      "verifiedBadge": null,
+      "verified_order_id": null,
+      "moderated_by": null,
+      "moderated_at": null,
+      "specs": [
+        {
+          "label": "PIECE",
+          "value": "General Atelier Experience"
+        },
+        {
+          "label": "RATING",
+          "value": "5.0 / 5.0"
+        },
+        {
+          "label": "VERIFICATION",
+          "value": "Community Submission"
+        }
+      ]
+    },
+    "rev-cust-0732646e1e": {
+      "id": "rev-cust-0732646e1e",
+      "source": "customer",
+      "status": "approved",
+      "author": "Kabir Mehta",
+      "initials": "KM",
+      "email": "kabir.m@test.com",
+      "piece": "WRONG CROWD TEE",
+      "product_slug": null,
+      "productSlug": null,
+      "variant": null,
+      "rating": 5,
+      "highlight": "BEST WASH AND WEIGHT",
+      "quote": "The acid wash and print quality are exceptional. Zero collar warp after wash.",
+      "created_at": "2026-10-28T09:51:14.921837+00:00",
+      "date": "OCT 2026",
+      "category": "fabric",
+      "category_label": "CUSTOMER VERBATIM",
+      "categoryLabel": "CUSTOMER VERBATIM",
+      "is_verified_buyer": false,
+      "verified_badge": null,
+      "verifiedBadge": null,
+      "verified_order_id": null,
+      "moderated_by": null,
+      "moderated_at": null,
+      "specs": [
+        {
+          "label": "PIECE",
+          "value": "WRONG CROWD TEE"
+        },
+        {
+          "label": "RATING",
+          "value": "5.0 / 5.0"
+        },
+        {
+          "label": "VERIFICATION",
+          "value": "Community Submission"
+        }
+      ]
+    }
+  },
+  "google_reviews_cache": {
+    "data": null,
+    "timestamp": 0
   }
 }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import SafeImg from '@/components/SafeImg';
+import { useLiveCatalog } from '@/services/catalog';
 
 export const megaMenuData = {
   COLLECTIONS: {
@@ -210,8 +211,23 @@ export const megaMenuData = {
 };
 
 export default function MegaMenu({ activeMenu, onClose, onMouseEnter, onMouseLeave }) {
-  const menu = megaMenuData[activeMenu];
-  if (!menu) return null;
+  const { categories } = useLiveCatalog();
+  const staticMenu = megaMenuData[activeMenu];
+  if (!staticMenu) return null;
+
+  const items = (activeMenu === 'CATEGORIES' && categories && categories.length > 0)
+    ? categories.filter((c) => c.is_active !== false).map((c) => ({
+        title: c.name || c.title || (c.slug ? c.slug.toUpperCase() : 'CATEGORY'),
+        subtitle: c.subtitle || c.kicker || c.desc || '',
+        image: c.image || '/products/devanagari-chaos-tee-front.jpg',
+        to: c.to || (c.slug === 'custom-design' ? '/custom-design' : `/${c.slug}`),
+      }))
+    : staticMenu.items;
+
+  const menu = {
+    ...staticMenu,
+    items,
+  };
 
   return (
     <AnimatePresence>

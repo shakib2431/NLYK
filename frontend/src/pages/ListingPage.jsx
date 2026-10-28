@@ -263,7 +263,7 @@ export default function ListingPage({ listingKey }) {
       )}
 
       {/* Catalog & Filter Section */}
-      <section id="listing-catalog" className="px-4 md:px-8 max-w-[1600px] mx-auto py-8 md:py-12">
+      <section id="listing-catalog" className="px-4 md:px-8 max-w-[1600px] mx-auto py-4 md:py-6">
         {/* Category Pills Navigation Strip */}
         {cfg?.hero?.categoryPills && (
           <div className="mb-6 sm:mb-8 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -462,7 +462,7 @@ export default function ListingPage({ listingKey }) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
               {filtered.slice(0, visible).map((p, i) => (
                 <Reveal key={p.id} delay={Math.min(i, 7) * 0.04}>
                   <ProductCard product={p} />

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Youtube, Smartphone } from 'lucide-react';
+import { Instagram, Twitter, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { footerLinks, site } from '@/data/storeData';
 import RotatingPackage3D from '@/components/RotatingPackage3D';
@@ -24,9 +24,7 @@ export default function Footer() {
       <RotatingPackage3D className="w-[80px] h-[95px] sm:w-[90px] sm:h-[105px] md:w-[100px] md:h-[115px]" />
     </div>
   </div>
-  <p className="text-[11px] tracking-[0.3em] text-paper/50 mb-4">
-    THE FINE PRINT
-  </p>
+
 
             <p className="text-sm text-paper/70 max-w-xs leading-relaxed">
               Clothes for the wrong crowd. Made in India, shipped everywhere, worn unapologetically.
@@ -95,28 +93,7 @@ export default function Footer() {
 
 
 
-<div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-  <p className="text-[10px] tracking-[0.3em] text-paper/50">
-    THE NALAYAK APP
-  </p>
 
-  <h3 className="text-xl font-bold uppercase tracking-wide text-paper">
-    Coming Soon.
-  </h3>
-
-  <p className="max-w-md text-sm text-paper/60">
-    Your crew. Your rules. The Nalayak experience is coming to mobile.
-  </p>
-
-
-<motion.span
-  className="app-coming-soon-glow mt-1 inline-flex items-center gap-2 px-5 py-3 text-[10px] font-semibold tracking-[0.2em]"
->
-  <Smartphone size={15} />
-  STAY TUNED
-</motion.span>
-
-</div>
 
 
         <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-paper/15">

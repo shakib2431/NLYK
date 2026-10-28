@@ -40,18 +40,11 @@ const ALL_COLORS = [
   { name: 'Maroon', hex: '#5C2E2E', label: 'Maroon' },
 ];
 
-const CATEGORY_TABS = [
-  { id: 'ALL', label: 'View all' },
-  { id: 'tees', label: 'T-shirts' },
-  { id: 'shirts', label: 'Shirts' },
-  { id: 'hoodies', label: 'Hoodies' },
-  { id: 'bottoms', label: 'Pants & Cargos' },
-  { id: 'accessories', label: 'Accessories' },
-];
+
 
 export default function Collections() {
   useSeo('Collections', 'The Nalayak Edit — curated drops, edits and moods.');
-  const { products: allProducts, collections: cols } = useLiveCatalog();
+  const { products: allProducts, collections: cols, categories: liveCats } = useLiveCatalog();
 
   const [sort, setSort] = useState('featured');
   const [cats, setCats] = useState([]);
@@ -62,6 +55,14 @@ export default function Collections() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [denseView, setDenseView] = useState(false);
   const [activeCategoryTab, setActiveCategoryTab] = useState('ALL');
+
+  const categoryTabs = useMemo(() => {
+    const list = [{ id: 'ALL', label: 'View all' }];
+    (liveCats || []).filter((c) => c.is_active !== false).forEach((c) => {
+      list.push({ id: c.slug, label: c.title || c.name || c.slug.toUpperCase() });
+    });
+    return list;
+  }, [liveCats]);
 
   const filtered = useMemo(() => {
     let list = allProducts;
@@ -85,7 +86,7 @@ export default function Collections() {
     }
 
     const result = [];
-    const categoryOrder = ['tees', 'shirts', 'hoodies', 'bottoms', 'accessories'];
+    const categoryOrder = (liveCats && liveCats.length > 0) ? liveCats.filter((c) => c.is_active !== false).map((c) => c.slug.toLowerCase()) : ['tees', 'shirts', 'hoodies', 'bottoms'];
 
     categoryOrder.forEach((cat) => {
       const catProducts = filtered.filter((p) => p.category.toLowerCase() === cat);
@@ -108,7 +109,7 @@ export default function Collections() {
     }
 
     return result;
-  }, [denseView, activeCategoryTab, filtered]);
+  }, [denseView, activeCategoryTab, filtered, liveCats]);
 
   const toggle = (arr, setArr, val) =>
     setArr(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
@@ -130,7 +131,7 @@ export default function Collections() {
     (availability !== 'all' ? 1 : 0);
 
   return (
-    <main className="px-4 md:px-8 max-w-[1600px] mx-auto py-10 md:py-16" data-testid="collections-page">
+    <main className="px-4 md:px-8 max-w-[1600px] mx-auto py-5 md:py-8" data-testid="collections-page">
       {/* Breadcrumb */}
       <nav className="text-[10px] tracking-[0.25em] text-smoke mb-6" aria-label="Breadcrumb">
         <Link to="/" className="hover:text-ink transition-colors">HOME</Link>
@@ -140,13 +141,11 @@ export default function Collections() {
 
       {/* Header */}
       <Reveal y={16}>
-        <p className="text-[11px] tracking-[0.3em] text-smoke mb-2">THE NALAYAK EDIT</p>
         <h1 className="font-display font-black uppercase tracking-tighter leading-[0.9] text-5xl md:text-7xl">COLLECTIONS</h1>
-        <p className="mt-3 text-smoke text-sm max-w-md">Curated moods, not categories. Pick your problem.</p>
       </Reveal>
 
       {/* Editorial Collection Tiles */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 md:gap-3.5">
         {cols.map((c, i) => (
           <Reveal key={c.slug} delay={i * 0.08} className={i % 2 === 0 ? 'md:col-span-7' : 'md:col-span-5'}>
             <Link
@@ -160,11 +159,9 @@ export default function Collections() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-paper">
-                <p className="text-[10px] tracking-[0.3em] text-paper/70 mb-2">0{i + 1} — COLLECTION</p>
                 <h2 className="font-display font-extrabold uppercase tracking-tight text-3xl md:text-4xl">{c.title}</h2>
-                <p className="mt-2 text-sm text-paper/80">{c.desc}</p>
                 <span className="mt-4 inline-block text-[11px] tracking-[0.25em] border-b border-paper pb-1 group-hover:translate-x-1 transition-transform duration-300">
-                  SHOP THE EDIT →
+                  EXPLORE →
                 </span>
               </div>
             </Link>
@@ -173,7 +170,7 @@ export default function Collections() {
       </div>
 
       {/* ALL COLLECTION PIECES ATELIER SECTION */}
-      <section className="mt-24 pt-12 border-t border-line" data-testid="all-collection-pieces">
+      <section className="mt-10 pt-6 border-t border-line" data-testid="all-collection-pieces">
         <div className="flex items-center justify-between border-b border-line pb-4 mb-6">
           <div className="flex items-center gap-3">
             <span className="text-xs tracking-[0.2em] font-bold uppercase text-ink">
@@ -245,7 +242,7 @@ export default function Collections() {
         {/* Horizontal Category Quick Tabs (Revealed in Dense View) */}
         {denseView && (
           <div className="mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            {CATEGORY_TABS.map((tab) => {
+            {categoryTabs.map((tab) => {
               const isActive = activeCategoryTab === tab.id;
               return (
                 <button
@@ -337,7 +334,7 @@ export default function Collections() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
                 {filtered.map((p, i) => (
                   <Reveal key={p.id} delay={Math.min(i, 7) * 0.04}>
                     <ProductCard product={p} />

@@ -33,26 +33,20 @@ function Hero() {
     {
       desktop: '/hero/hero-chaos-edit.jpg',
       mobile: '/hero/hero-chaos-edit.jpg',
-      kicker: 'AW26 // THE WRONG CROWD',
       headline: ['NOT FOR', 'EVERYONE.'],
       copy: 'Clothes for people who were never interested in fitting in.',
-      tag: 'DROP 01 · CHAOS EDIT',
     },
     {
       desktop: '/hero/hero-after-hours.jpg',
       mobile: '/hero/hero-after-hours.jpg',
-      kicker: 'WASHED HEAVYWEIGHT // 450 GSM',
       headline: ['AFTER', 'HOURS.'],
       copy: 'Stealth boxy cuts engineered for the plans that start past midnight.',
-      tag: 'DROP 02 · STEALTH FLEECE',
     },
     {
       desktop: '/hero/hero-everyday-nalayak.jpg',
       mobile: '/hero/hero-everyday-nalayak.jpg',
-      kicker: 'RAW KOLKATA ATELIER // ESSENTIALS',
       headline: ['DAILY', 'DISRESPECT.'],
       copy: 'Heavyweight combed cotton. Pre-shrunk so your size stays your size.',
-      tag: 'DROP 03 · EVERYDAY NALAYAK',
     },
   ];
 
@@ -108,12 +102,7 @@ function Hero() {
           transition={{ duration: 0.6, ease }}
           className="max-w-3xl"
         >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <span className="h-px w-8 bg-paper/60" />
-            <span className="text-[10px] md:text-[11px] tracking-[0.35em] uppercase font-medium text-paper/80">
-              {currentSlide.kicker}
-            </span>
-          </div>
+
 
           <h1 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-paper text-[12vw] sm:text-[9vw] md:text-[6.2vw] text-balance">
             {currentSlide.headline.map((line, idx) => (
@@ -169,9 +158,7 @@ function Hero() {
             ))}
           </div>
 
-          <span className="hidden sm:inline-block text-[10px] tracking-[0.25em] text-paper/50 uppercase">
-            {currentSlide.tag}
-          </span>
+
         </div>
       </div>
     </section>
@@ -193,9 +180,9 @@ function EditorialMarquee() {
 
 function NalayakEdit() {
   return (
-    <section className="py-20 md:py-32 px-4 md:px-8 max-w-[1600px] mx-auto" data-testid="nalayak-edit">
-      <SectionHeader kicker="EDITORIAL" title="THE NALAYAK EDIT" desc="Four moods. Zero apologies." linkTo="/collections" linkLabel="VIEW ALL" />
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+    <section className="py-8 md:py-12 px-4 md:px-8 max-w-[1600px] mx-auto" data-testid="nalayak-edit">
+      <SectionHeader title="COLLECTIONS" linkTo="/collections" linkLabel="VIEW ALL" />
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 md:gap-3.5">
         {collections.map((c, i) => (
           <Reveal key={c.slug} delay={i * 0.08} className={i % 4 === 0 || i % 4 === 3 ? 'md:col-span-7' : 'md:col-span-5'}>
             <Link
@@ -209,11 +196,9 @@ function NalayakEdit() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-paper">
-                <p className="text-[10px] tracking-[0.3em] text-paper/70 mb-2">0{i + 1} — COLLECTION</p>
                 <h3 className="font-display font-extrabold uppercase tracking-tight text-2xl md:text-4xl">{c.title}</h3>
-                <p className="mt-2 text-sm text-paper/80 max-w-xs">{c.desc}</p>
                 <span className="mt-4 inline-block text-[11px] tracking-[0.25em] border-b border-paper pb-1 group-hover:translate-x-1 transition-transform duration-300">
-                  SHOP THE EDIT →
+                  EXPLORE →
                 </span>
               </div>
             </Link>
@@ -225,30 +210,33 @@ function NalayakEdit() {
 }
 
 function Categories() {
+  const { categories } = useLiveCatalog();
+
+  const tiles = useMemo(() => {
+    const list = (categories || []).filter((c) => c.is_active !== false);
+    if (list.length > 0) {
+      return list.map((c) => ({
+        label: (c.name || c.title || c.slug).toUpperCase(),
+        spec: c.subtitle || c.kicker || c.desc || 'ATELIER ESSENTIAL',
+        image: c.image || '/products/devanagari-chaos-tee-front.jpg',
+        to: c.to || (c.slug === 'custom-design' ? '/custom-design' : `/${c.slug}`),
+      }));
+    }
+    return categoryTiles;
+  }, [categories]);
+
+  if (tiles.length === 0) return null;
+
   return (
-    <section className="py-16 md:py-24 border-t border-line bg-paper" data-testid="shop-by-category">
-      <div className="px-4 md:px-8 max-w-[1600px] mx-auto mb-8 md:mb-12">
-        <div className="flex items-center gap-3 mb-3">
-          <img
-            src="/NALayak%20Compass%20Gothic%20Logo.png"
-            alt="NALAYAK"
-            className="h-7 md:h-8 w-auto object-contain"
-          />
-          <span className="h-4 w-px bg-line" />
-          <span className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-smoke font-medium">
-            CORE SILHOUETTES · ATELIER SPECIMENS
-          </span>
-        </div>
+    <section className="py-7 md:py-10 border-t border-line bg-paper" data-testid="shop-by-category">
+      <div className="px-4 md:px-8 max-w-[1600px] mx-auto mb-4 md:mb-6">
         <h2 className="font-display font-extrabold uppercase tracking-tight text-3xl md:text-5xl">
-          SHOP BY CATEGORY
+          CATEGORIES
         </h2>
-        <p className="mt-3 text-smoke text-sm md:text-base max-w-lg">
-          Engineered with substantial weight, tight collars and boxy drapes.
-        </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 md:px-8 max-w-[1600px] mx-auto">
-        {categoryTiles.map((tile, i) => (
+      <div className="flex gap-2.5 sm:gap-3 md:gap-3.5 overflow-x-auto no-scrollbar px-4 md:px-8 max-w-[1600px] mx-auto">
+        {tiles.map((tile, i) => (
           <Reveal key={tile.label} delay={i * 0.05} className="shrink-0 w-[68vw] sm:w-[38vw] md:w-[19%] md:min-w-0 md:flex-1">
             <Link
               to={tile.to}
@@ -260,17 +248,7 @@ function Categories() {
                 className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-[1.05]"
               />
 
-              {/* Official NALAYAK Brand Tag Pill */}
-              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 bg-ink/85 backdrop-blur-md border border-paper/25 shadow-sm">
-                <img
-                  src="/nalayak-icon.png"
-                  alt=""
-                  className="h-3 w-3 object-contain invert"
-                />
-                <span className="text-[8.5px] tracking-[0.25em] font-semibold text-paper uppercase">
-                  NALAYAK
-                </span>
-              </div>
+
 
               {/* Animated Compass Star Watermark */}
               <div className="absolute top-3 right-3 z-10 pointer-events-none">
@@ -282,18 +260,10 @@ function Categories() {
               </div>
 
               <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent group-hover:from-ink/95 transition-colors duration-500" />
-              <div className="absolute inset-x-0 bottom-0 p-5">
-                {tile.spec && (
-                  <p className="text-[9px] tracking-[0.25em] text-paper/60 uppercase mb-1">
-                    {tile.spec}
-                  </p>
-                )}
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                 <h3 className="font-display font-black uppercase tracking-tight text-paper text-xl md:text-2xl">
                   {tile.label}
                 </h3>
-                <span className="text-[10px] tracking-[0.25em] text-paper/80 group-hover:translate-x-1 inline-block transition-transform duration-300 mt-2 font-medium">
-                  EXPLORE →
-                </span>
               </div>
             </Link>
           </Reveal>
@@ -306,25 +276,19 @@ function Categories() {
 function ShopByDepartment() {
   const departments = [
     {
-      title: "MEN'S STREETWEAR",
-      kicker: 'DEPARTMENT 01',
-      desc: 'Heavyweight boxy drop-shoulders, wide-leg utility cargo & oversized fleece.',
+      title: "MEN",
       to: '/men',
       image: '/products/devanagari-chaos-tee-front.jpg',
       cta: 'SHOP MEN →',
     },
     {
-      title: "WOMEN'S EDIT",
-      kicker: 'DEPARTMENT 02',
-      desc: 'Structured baby crops, relaxed open collars, tailored twill & jewelry.',
+      title: "WOMEN",
       to: '/women',
       image: '/products/her-chaos-crop-tee-front.jpg',
       cta: 'SHOP WOMEN →',
     },
     {
-      title: 'UNISEX ARCHIVE',
-      kicker: 'DEPARTMENT 03',
-      desc: 'Signature heavyweight 240–450 GSM garments engineered for everyone.',
+      title: 'UNISEX',
       to: '/collections',
       image: '/collections/the-chaos-edit.jpg',
       cta: 'EXPLORE ALL →',
@@ -332,13 +296,11 @@ function ShopByDepartment() {
   ];
 
   return (
-    <section className="py-20 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="shop-by-department">
+    <section className="py-8 md:py-12 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="shop-by-department">
       <SectionHeader
-        kicker="DEPARTMENTS"
-        title="BUILT FOR HOW YOU WEAR IT"
-        desc="Men's, women's, and unisex silhouettes engineered with real weight and posture."
+        title="DEPARTMENTS"
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 md:gap-3.5">
         {departments.map((d, i) => (
           <Reveal key={d.title} delay={i * 0.08}>
             <Link
@@ -354,14 +316,10 @@ function ShopByDepartment() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-paper">
-                <p className="text-[10px] tracking-[0.3em] text-paper/60 mb-2">{d.kicker}</p>
                 <h3 className="font-display font-black uppercase tracking-tight text-2xl md:text-3xl leading-tight">
                   {d.title}
                 </h3>
-                <p className="mt-2 text-xs md:text-sm text-paper/75 max-w-xs leading-relaxed">
-                  {d.desc}
-                </p>
-                <span className="mt-5 inline-block text-[11px] tracking-[0.25em] border-b border-paper pb-1 font-medium group-hover:translate-x-1 transition-transform duration-300">
+                <span className="mt-4 inline-block text-[11px] tracking-[0.25em] border-b border-paper pb-1 font-medium group-hover:translate-x-1 transition-transform duration-300">
                   {d.cta}
                 </span>
               </div>
@@ -386,9 +344,9 @@ function Campaign() {
           className="h-[116%] w-full object-cover opacity-50"
         />
       </motion.div>
-      <div className="relative z-10 px-4 md:px-8 py-28 md:py-44 max-w-[1600px] mx-auto">
+      <div className="relative z-10 px-4 md:px-8 py-12 md:py-20 max-w-[1600px] mx-auto">
         <Reveal>
-          <p className="text-paper/60 text-[11px] tracking-[0.35em] mb-6">FEATURED CAMPAIGN</p>
+          
           <h2 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-paper text-[13vw] md:text-[7.5vw] max-w-5xl text-balance">
             {campaign.headline}
           </h2>
@@ -408,10 +366,10 @@ function Campaign() {
 
 function Manifesto() {
   return (
-    <section className="py-20 md:py-32 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="manifesto-section">
+    <section className="py-8 md:py-12 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="manifesto-section">
       <Reveal>
         <p className="text-[11px] tracking-[0.3em] text-smoke mb-3">THE MANIFESTO</p>
-        <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-4xl md:text-6xl mb-14">
+        <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-4xl md:text-6xl mb-6">
           RULES WE ACTUALLY FOLLOW
         </h2>
       </Reveal>
@@ -431,14 +389,14 @@ function Manifesto() {
 function CustomDesignSection() {
   return (
     <section className="grid md:grid-cols-2 border-t border-line" data-testid="custom-design-section">
-      <div className="flex flex-col justify-center px-6 md:px-16 py-16 md:py-24 order-2 md:order-1 bg-white">
+      <div className="flex flex-col justify-center px-6 md:px-16 py-8 md:py-12 order-2 md:order-1 bg-white">
         <Reveal>
           <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">CUSTOM DESIGN</p>
           <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-3xl md:text-5xl">
             MAKE IT YOURS.
           </h2>
-          <p className="mt-5 text-sm md:text-base text-ink/70 max-w-md leading-relaxed">
-            Have an idea that doesn't exist yet? A one-off piece, made with you, by us. Not off the shelf.
+          <p className="mt-4 text-sm md:text-base text-ink/70 max-w-md leading-relaxed">
+            Bespoke 1-of-1 pieces engineered directly with our atelier.
           </p>
           <Link
             to="/custom-design"
@@ -468,7 +426,7 @@ function BrandStory() {
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
-      <div className="flex flex-col justify-center px-6 md:px-16 py-16 md:py-24 bg-white">
+      <div className="flex flex-col justify-center px-6 md:px-16 py-8 md:py-12 bg-white">
         <Reveal>
           <p className="text-[11px] tracking-[0.3em] text-smoke mb-4">THE ATELIER</p>
           <h2 className="font-display font-extrabold uppercase tracking-tight leading-[0.9] text-3xl md:text-5xl text-balance">
@@ -510,8 +468,8 @@ function IrlGrid() {
   ].slice(0, 6);
 
   return (
-    <section className="py-20 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="nalayak-irl">
-      <SectionHeader kicker="COMMUNITY" title="NALAYAK IRL" desc="See how the wrong crowd wears it." />
+    <section className="py-8 md:py-12 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="nalayak-irl">
+      <SectionHeader title="NALAYAK IRL" />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
         {tiles.map((t, i) => (
           <Reveal key={t.key} delay={i * 0.05}>
@@ -547,7 +505,7 @@ function Newsletter() {
 
   return (
     <section className="bg-white border-t border-line" data-testid="newsletter-section">
-      <div className="px-4 md:px-8 py-20 md:py-32 max-w-[1600px] mx-auto">
+      <div className="px-4 md:px-8 py-10 md:py-14 max-w-[1600px] mx-auto">
         <Reveal>
           <h2 className="font-display font-black uppercase tracking-tighter leading-[0.85] text-[12vw] md:text-[7vw]">
             {newsletter.headline}
@@ -594,15 +552,13 @@ export default function Home() {
       <Categories />
 
       {/* 4. Curated New Arrivals */}
-      <section className="py-20 md:py-28 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="new-arrivals-section">
+      <section className="py-8 md:py-12 px-4 md:px-8 max-w-[1600px] mx-auto border-t border-line" data-testid="new-arrivals-section">
         <SectionHeader
-          kicker="JUST LANDED"
           title="NEW ARRIVALS"
-          desc="Fresh pieces. Questionable decisions."
           linkTo="/new-arrivals"
           linkLabel="VIEW ALL"
         />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
           {newArrivals.map((p, i) => (
             <Reveal key={p.id} delay={i * 0.07}>
               <ProductCard product={p} priority={i < 2} />
@@ -624,9 +580,7 @@ export default function Home() {
       <section className="py-20 md:py-28 border-t border-line" data-testid="best-sellers-section">
         <div className="px-4 md:px-8 max-w-[1600px] mx-auto">
           <SectionHeader
-            kicker="MOST WANTED"
-            title="THE ONES EVERYONE WANTS"
-            desc="Our most-wanted pieces. Statistically speaking, you’re late."
+            title="BEST SELLERS"
             linkTo="/shop"
             linkLabel="VIEW ALL"
           />

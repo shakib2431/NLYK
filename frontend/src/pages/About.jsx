@@ -64,7 +64,7 @@ export default function About() {
         <Reveal y={16}>
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
             <span className="text-[11px] tracking-[0.3em] uppercase text-smoke">
-              EDITORIAL MANIFESTO · PROPOSED BRAND POSITIONING
+              EDITORIAL MANIFESTO
             </span>
             {/* <span className="text-[11px] tracking-[0.25em] uppercase text-smoke">
               AUTUMN / WINTER 2026
@@ -108,10 +108,10 @@ export default function About() {
             {/* Editorial Caption Bar */}
             <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 flex flex-col sm:flex-row sm:items-end justify-between gap-2 text-paper text-[10px] md:text-[11px] tracking-[0.25em]">
               <span className="uppercase font-medium">
-                FIG 01. URBAN ATELIER PERSPECTIVE · CONCEPTUAL EDITORIAL PHOTOGRAPHY
+                FIG 01. URBAN ATELIER PERSPECTIVE
               </span>
               <span className="text-paper/70">
-                REAL URBAN TEXTURES · RAW LIGHT · UNAPOLOGETIC STYLING
+                RAW LIGHT · UNAPOLOGETIC STYLING
               </span>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function About() {
                     alt="NALAYAK Star"
                     className="h-4 w-4 object-contain"
                   />
-                  <p className="text-[10px] tracking-[0.3em] text-smoke uppercase">PROPOSED BRAND POSITIONING</p>
+                  <p className="text-[10px] tracking-[0.3em] text-smoke uppercase">ATELIER ETHOS</p>
                 </div>
                 <p className="font-display font-black tracking-tight text-xl md:text-3xl uppercase text-ink">
                   NOT MADE FOR EVERYONE. MADE FOR YOURSELF.

@@ -232,13 +232,13 @@ export default function ProductDetail() {
         <nav className="text-[10px] tracking-[0.25em] text-smoke" aria-label="Breadcrumb">
           <Link to="/" className="hover:text-ink transition-colors">HOME</Link>
           <span className="mx-2">/</span>
-          <Link to={`/${product.category}`} className="hover:text-ink transition-colors">{product.category.toUpperCase()}</Link>
+          <Link to={`/${product.category || 'shop'}`} className="hover:text-ink transition-colors">{(product.category || 'shop').toUpperCase()}</Link>
           <span className="mx-2">/</span>
           <span className="text-ink">{product.name}</span>
         </nav>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 px-4 md:px-8 py-8 md:py-12">
+      <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 px-4 md:px-8 py-5 md:py-7">
         <div>
           <motion.div
             key={`${imgIndex}-${color?.name || 'default'}`}
@@ -403,7 +403,7 @@ export default function ProductDetail() {
               </div>
               {soldOut && (
                 <p className="mt-3 text-[11px] tracking-[0.2em] text-smoke" data-testid="pdp-soldout">
-                  SOLD OUT. SOMEONE FASTER HAD WORSE IMPULSE CONTROL.
+                  SOLD OUT.
                 </p>
               )}
             </div>
@@ -469,7 +469,7 @@ export default function ProductDetail() {
                       data-testid="pdp-wishlist-btn"
                       onClick={() => {
                         toggleWishlist(product.slug);
-                        toast(wished ? 'Removed from wishlist' : 'Saved for later regret', { description: product.name });
+                        toast(wished ? 'Removed from wishlist' : 'Saved to wishlist', { description: product.name });
                       }}
                       aria-label="Toggle wishlist"
                       className="border border-ink px-5 hover:bg-ink hover:text-paper transition-colors duration-300"
@@ -492,7 +492,7 @@ export default function ProductDetail() {
 
             <div className="mt-6 space-y-3 text-sm text-ink/70">
               <p className="flex items-center gap-3"><Truck size={15} strokeWidth={1.5} /> Free shipping above ₹999. Dispatched in 48 hours.</p>
-              <p className="flex items-center gap-3"><RotateCcw size={15} strokeWidth={1.5} /> 7-day easy returns. No interrogation.</p>
+              <p className="flex items-center gap-3"><RotateCcw size={15} strokeWidth={1.5} /> 7-day easy returns.</p>
             </div>
 
             {dropState === 'sold-out' && (
@@ -551,9 +551,9 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <section className="px-4 md:px-8 py-16 md:py-24 border-t border-line" data-testid="complete-the-look">
-        <SectionHeader kicker="STYLE IT" title="COMPLETE THE LOOK" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+      <section className="px-4 md:px-8 py-8 md:py-12 border-t border-line" data-testid="complete-the-look">
+        <SectionHeader title="COMPLETE THE LOOK" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
           {(completeTheLook.length ? completeTheLook : related).map((p, i) => (
             <Reveal key={p.id} delay={i * 0.06}>
               <ProductCard product={p} />
@@ -562,9 +562,9 @@ export default function ProductDetail() {
         </div>
       </section>
 
-      <section className="px-4 md:px-8 py-16 md:py-24 border-t border-line" data-testid="you-may-also-like">
-        <SectionHeader kicker="KEEP GOING" title="YOU MAY ALSO LIKE" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+      <section className="px-4 md:px-8 py-8 md:py-12 border-t border-line" data-testid="you-may-also-like">
+        <SectionHeader title="YOU MAY ALSO LIKE" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
           {related.map((p, i) => (
             <Reveal key={p.id} delay={i * 0.06}>
               <ProductCard product={p} />
@@ -575,8 +575,8 @@ export default function ProductDetail() {
 
       {recentlyViewedProducts.filter((p) => p.slug !== product.slug).length > 0 && (
         <section className="px-4 md:px-8 py-16 border-t border-line" data-testid="recently-viewed">
-          <SectionHeader kicker="STILL THINKING" title="RECENTLY VIEWED" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <SectionHeader title="RECENTLY VIEWED" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-3.5">
             {recentlyViewedProducts.filter((p) => p.slug !== product.slug).slice(0, 4).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

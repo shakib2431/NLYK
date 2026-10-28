@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function SectionHeader({ kicker, title, desc, linkTo, linkLabel }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-6 mb-10 md:mb-14">
+    <div className="flex flex-wrap items-end justify-between gap-6 mb-4 md:mb-6">
       <div>
         {kicker && (
           <p className="text-[11px] tracking-[0.3em] text-smoke mb-3 font-medium">{kicker}</p>

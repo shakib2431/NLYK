@@ -175,7 +175,7 @@ export default function ProductCard({ product, priority = false }) {
         )}
       </div>
 
-      <div className="pt-3 flex items-start justify-between gap-3">
+      <div className="pt-2 flex items-start justify-between gap-2">
         <div>
           <Link to={`/product/${product.slug}`} className="block">
             <h3 className="text-[13px] font-medium tracking-wide leading-snug">{product.name}</h3>

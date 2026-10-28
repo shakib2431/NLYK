@@ -188,7 +188,7 @@ async def get_public_product_detail(slug_or_id: str):
     Get full detail for a single product by slug or id.
     """
     prod = catalog_store.get_product(slug_or_id)
-    if not prod:
+    if not prod or prod.get("status") == "archived":
         raise HTTPException(status_code=404, detail="product_not_found")
     return {"product": prod}
 
@@ -200,6 +200,15 @@ async def get_public_collections():
     """
     cols = [c for c in catalog_store.list_collections() if c.get("isActive", True)]
     return {"collections": cols}
+
+
+@router.get("/catalog/categories")
+async def get_public_categories():
+    """
+    Get all active categories for storefront navigation and mega-menu.
+    """
+    cats = catalog_store.list_categories(include_inactive=False)
+    return {"categories": cats}
 
 
 @router.get("/catalog/collections/{slug}")
@@ -374,6 +383,17 @@ async def admin_delete_product(
     return {"status": "success", "message": f"Product {action_type} successfully."}
 
 
+@router.post("/admin/catalog/products/{pid}/unarchive")
+async def admin_unarchive_product(
+    pid: str,
+    admin: Dict[str, Any] = Depends(verify_admin),
+):
+    prod = catalog_store.unarchive_product(pid, admin_identity=admin["admin_identity"])
+    if not prod:
+        raise HTTPException(status_code=404, detail="product_not_found")
+    return {"status": "success", "product": prod, "message": "Product restored to live store."}
+
+
 @router.post("/admin/catalog/products/{pid}/duplicate")
 async def admin_duplicate_product(
     pid: str,
@@ -424,6 +444,33 @@ async def admin_delete_collection(
     if not ok:
         raise HTTPException(status_code=404, detail="collection_not_found")
     return {"status": "success", "message": "Collection deleted."}
+
+
+# ── ADMIN CATEGORIES ─────────────────────────────────────────────────────────
+
+@router.get("/admin/catalog/categories")
+async def admin_list_categories(admin: Dict[str, Any] = Depends(verify_admin)):
+    return {"categories": catalog_store.list_categories(include_inactive=True)}
+
+
+@router.post("/admin/catalog/categories")
+async def admin_save_category(
+    data: Dict[str, Any],
+    admin: Dict[str, Any] = Depends(verify_admin),
+):
+    saved = catalog_store.save_category(data, admin_identity=admin["admin_identity"])
+    return {"category": saved, "message": "Category saved successfully."}
+
+
+@router.delete("/admin/catalog/categories/{slug_or_id}")
+async def admin_delete_category(
+    slug_or_id: str,
+    admin: Dict[str, Any] = Depends(verify_admin),
+):
+    ok = catalog_store.delete_category(slug_or_id, admin_identity=admin["admin_identity"])
+    if not ok:
+        raise HTTPException(status_code=404, detail="category_not_found")
+    return {"status": "success", "message": "Category deleted successfully."}
 
 
 # ── ADMIN DISCOUNTS & COUPONS ────────────────────────────────────────────────

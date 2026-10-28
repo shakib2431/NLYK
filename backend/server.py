@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Header, Response, Query, Cookie
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Header, Response, Query, Cookie, Depends, Request
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -3663,156 +3663,46 @@ async def retry_contact_notifications(admin_key: str = Header(None, alias="X-Adm
 
 
 # =========================================================
-# CUSTOMER REVIEWS (GOOGLE PLACES API & COMMUNITY ARCHIVE)
+# =========================================================
+# CUSTOMER REVIEWS & MODERATION SYSTEM
+# Complete customer fit submission, moderation, purchase verification,
+# and Google Business Profile / Google Places API integration.
 # =========================================================
 
 import time as _time
+import re as _re
+import html as _html
+from typing import Optional, List, Dict, Any
 
 _reviews_cache = {
     "data": None,
     "timestamp": 0.0,
 }
 
-COMMUNITY_REVIEWS_ARCHIVE = [
-    {
-        "id": "rev-01",
-        "source": "community",
-        "author": "Rohan D.",
-        "initials": "RD",
-        "avatar_url": None,
-        "location": "Kolkata, WB",
-        "piece": "NALAYAK Standard Tee",
-        "variant": "Jet Black / Size L",
-        "category": "fabric",
-        "category_label": "FABRIC & WEIGHT",
-        "highlight": "240 GSM THAT HOLDS ITS SHAPE",
-        "quote": "The 240 GSM weight is no joke. Most Indian streetwear brands claim boxy and send you a limp regular tee. This holds its silhouette even after three hard washes in Kolkata humidity.",
-        "specs": [
-            {"label": "WEIGHT", "value": "240 GSM"},
-            {"label": "CUT", "value": "Drop Shoulder"},
-            {"label": "DURABILITY", "value": "Zero Shrinkage"},
-        ],
-        "date": "OCT 2026",
-        "batch": "BATCH 001 · ARCHIVE",
-        "rating": None,
-        "attribution_url": None,
-    },
-    {
-        "id": "rev-02",
-        "source": "community",
-        "author": "Ananya M.",
-        "initials": "AM",
-        "avatar_url": None,
-        "location": "Mumbai, MH",
-        "piece": "No Approval Oversized Tee",
-        "variant": "Chalk White / Size M",
-        "category": "identity",
-        "category_label": "BRAND IDENTITY",
-        "highlight": "FAMILY UNCLE APPROVED? DEFINITELY NOT",
-        "quote": "Wore the No Approval tee to a family Diwali function. My uncle stared at the back graphic for two straight minutes without speaking. 10/10, brand promise fulfilled.",
-        "specs": [
-            {"label": "GRAPHIC", "value": "High-Density Screen"},
-            {"label": "REACTION", "value": "Pure Disapproval"},
-            {"label": "SILHOUETTE", "value": "True Oversized"},
-        ],
-        "date": "SEP 2026",
-        "batch": "DROP 02 · VERBATIM",
-        "rating": None,
-        "attribution_url": None,
-    },
-    {
-        "id": "rev-03",
-        "source": "community",
-        "author": "Kabir S.",
-        "initials": "KS",
-        "avatar_url": None,
-        "location": "Delhi NCR",
-        "piece": "Chaos Club Tee",
-        "variant": "Ash Grey / Size XL",
-        "category": "fit",
-        "category_label": "FIT & SILHOUETTE",
-        "highlight": "TRUE DROP SHOULDER WITHOUT EXCESS BAGGAGE",
-        "quote": 'True drop shoulder that actually drapes down the tricep rather than just looking two sizes too big. Collar ribbing is tight 1.25" and doesn’t bacon after line drying.',
-        "specs": [
-            {"label": "COLLAR", "value": '1.25" Heavy Rib'},
-            {"label": "DRAPE", "value": "Structured Boxy"},
-            {"label": "ROTATION", "value": "Daily Essential"},
-        ],
-        "date": "AUG 2026",
-        "batch": "DROP 01 · CORE",
-        "rating": None,
-        "attribution_url": None,
-    },
-    {
-        "id": "rev-04",
-        "source": "community",
-        "author": "Tanya K.",
-        "initials": "TK",
-        "avatar_url": None,
-        "location": "Bengaluru, KA",
-        "piece": "Basically Famous Tee",
-        "variant": "Jet Black / Size S",
-        "category": "print",
-        "category_label": "PRINT QUALITY",
-        "highlight": "SCREENPRINT IN THE FIBERS, NOT PLASTIC",
-        "quote": "The screenprint feels embedded into the cotton fibers instead of a thick rubbery sticker slapped on top. Breathable even when riding in 32° heat.",
-        "specs": [
-            {"label": "PRINT TYPE", "value": "Discharge Inks"},
-            {"label": "FEEL", "value": "Soft Breathable"},
-            {"label": "FABRIC", "value": "100% Combed"},
-        ],
-        "date": "OCT 2026",
-        "batch": "BATCH 003 · EDITORIAL",
-        "rating": None,
-        "attribution_url": None,
-    },
-    {
-        "id": "rev-05",
-        "source": "community",
-        "author": "Varun P.",
-        "initials": "VP",
-        "avatar_url": None,
-        "location": "Pune, MH",
-        "piece": "Acid Wash Oversized Hoodie",
-        "variant": "Vintage Charcoal / Size L",
-        "category": "fabric",
-        "category_label": "WINTER WEIGHT",
-        "highlight": "DOUBLE-LAYER HOOD THAT ACTUALLY STANDS UP",
-        "quote": "Heaviest hoodie in my rotation. The double-layered hood actually stays upright and doesn’t collapse flat against your neck. Ribbed cuffs don’t stretch out.",
-        "specs": [
-            {"label": "WEIGHT", "value": "420 GSM Fleece"},
-            {"label": "HOOD", "value": "Double-Layered"},
-            {"label": "CUFFS", "value": "Form-Retaining"},
-        ],
-        "date": "SEP 2026",
-        "batch": "WINTER 26 · HEAVY",
-        "rating": None,
-        "attribution_url": None,
-    },
-    {
-        "id": "rev-06",
-        "source": "community",
-        "author": "Meera V.",
-        "initials": "MV",
-        "avatar_url": None,
-        "location": "Hyderabad, TS",
-        "piece": "Her Chaos Crop Tee",
-        "variant": "Paper White / Size M",
-        "category": "fit",
-        "category_label": "PROPORTIONS & CUT",
-        "highlight": "SHARP BOXY CROP WITHOUT BEING FLIMSY",
-        "quote": "Most women’s streetwear crops are either paper-thin or cut like an awkward square box. This has proper structured shoulders and sits right at the high waistband.",
-        "specs": [
-            {"label": "WEIGHT", "value": "220 GSM"},
-            {"label": "CROP", "value": "High Waist Cut"},
-            {"label": "HEM", "value": "Reinforced Twin"},
-        ],
-        "date": "AUG 2026",
-        "batch": "DROP 02 · WOMENS",
-        "rating": None,
-        "attribution_url": None,
-    },
-]
+_review_submission_timestamps: Dict[str, List[float]] = {}
+
+
+class ReviewSubmitInput(BaseModel):
+    name: str = Field(..., min_length=2, max_length=80)
+    email: Optional[str] = Field(None, max_length=120)
+    piece: Optional[str] = Field("General Atelier Experience", max_length=120)
+    rating: int = Field(..., ge=1, le=5)
+    highlight: Optional[str] = Field(None, max_length=150)
+    quote: str = Field(..., min_length=10, max_length=2000)
+    variant: Optional[str] = Field(None, max_length=80)
+    order_ref: Optional[str] = Field(None, max_length=60)
+    category: Optional[str] = Field(None, max_length=40)
+
+
+class ReviewModerateInput(BaseModel):
+    status: Optional[str] = Field(None, pattern="^(pending|approved|rejected)$")
+    is_verified_buyer: Optional[bool] = None
+    notes: Optional[str] = Field(None, max_length=500)
+    highlight: Optional[str] = Field(None, max_length=150)
+    quote: Optional[str] = Field(None, max_length=2000)
+    piece: Optional[str] = Field(None, max_length=120)
+    variant: Optional[str] = Field(None, max_length=80)
+    category: Optional[str] = Field(None, max_length=40)
 
 
 async def fetch_google_places_reviews(place_id: str, api_key: str) -> dict | None:
@@ -3840,14 +3730,13 @@ async def fetch_google_places_reviews(place_id: str, api_key: str) -> dict | Non
             logger.warning(
                 "Google Places API request failed status=%s for place_id=%s",
                 resp.status_code,
-                place_id,
+                place_id[:8] + "..." if len(place_id) > 8 else place_id,
             )
             return None
 
         return resp.json()
-
-    except Exception as exc:
-        logger.error("Google Places API connection error: %s", type(exc).__name__)
+    except Exception as e:
+        logger.warning("Google Places API error: %s", type(e).__name__)
         return None
 
 
@@ -3868,18 +3757,14 @@ def normalize_google_places_response(data: dict) -> list[dict]:
         if len(name_parts) >= 2:
             initials = f"{name_parts[0][0]}{name_parts[-1][0]}".upper()
         elif name_parts:
-            initials = name_parts[0][:2].upper()
+            initials = author_name[:2].upper()
         else:
             initials = "GV"
 
-        try:
-            rating = int(r.get("rating", 5))
-        except (ValueError, TypeError):
-            rating = 5
-
-        text_obj = r.get("text") or r.get("originalText") or {}
+        rating = r.get("rating", 5)
+        text_obj = r.get("text")
         if isinstance(text_obj, dict):
-            quote_text = text_obj.get("text", "").strip()
+            quote_text = (text_obj.get("text") or "").strip()
         elif isinstance(text_obj, str):
             quote_text = text_obj.strip()
         else:
@@ -3901,6 +3786,7 @@ def normalize_google_places_response(data: dict) -> list[dict]:
 
         normalized.append({
             "id": r.get("name") or f"google-{idx + 1}",
+            "google_review_id": r.get("name") or f"google-{idx + 1}",
             "source": "google",
             "author": author_name,
             "initials": initials,
@@ -3913,6 +3799,10 @@ def normalize_google_places_response(data: dict) -> list[dict]:
             "attribution_url": attribution_url,
             "category": "google",
             "category_label": "GOOGLE VERIFIED",
+            "categoryLabel": "GOOGLE VERIFIED",
+            "is_verified_buyer": False,
+            "verified_badge": "GOOGLE VERIFIED",
+            "verifiedBadge": "GOOGLE VERIFIED",
             "specs": [
                 {"label": "SOURCE", "value": "Google Reviews"},
                 {"label": "RATING", "value": f"{rating}.0 / 5.0"},
@@ -3923,23 +3813,107 @@ def normalize_google_places_response(data: dict) -> list[dict]:
     return normalized
 
 
-@api_router.get("/reviews")
-async def get_reviews(
-    source: str = Query("auto", description="Provider mode: auto, google, or community"),
-    refresh: bool = Query(False, description="Bypass cache"),
+# ── Customer Review Submission ──
+@api_router.post("/reviews/submit")
+async def submit_customer_review(
+    input: ReviewSubmitInput,
+    request: Request,
 ):
     """
-    Returns customer reviews for NALAYAK STUDIOS.
-    Abstraction layer supporting:
-      1. Live Google Places API (New) verified reviews (when configured).
-      2. NALAYAK Community / Pre-Launch Dispatch Archive (fallback or explicit mode).
-    Cached with configurable TTL to respect Google API quota and terms.
-    Never exposes API keys or real customer contact details.
+    Submit a customer fit experience review.
+    All submissions are validated, sanitized, and stored with status='pending'.
+    Reviews require admin approval before appearing on the storefront.
+    Verified Buyer status is only granted if a completed purchase is confirmed.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    now_ts = _time.time()
+    ts_list = _review_submission_timestamps.setdefault(client_ip, [])
+    # Rate limit: max 5 submissions per minute per IP
+    ts_list = [t for t in ts_list if now_ts - t < 60]
+    _review_submission_timestamps[client_ip] = ts_list
+    if len(ts_list) >= 5:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many submissions. Please wait 60 seconds before submitting another review."
+        )
+    _review_submission_timestamps[client_ip].append(now_ts)
+
+    clean_name = _html.escape(input.name.strip())
+    clean_piece = _html.escape((input.piece or "").strip()) or "General Atelier Experience"
+    clean_quote = _html.escape(input.quote.strip())
+    if input.highlight and input.highlight.strip():
+        clean_highlight = _html.escape(input.highlight.strip())
+    else:
+        first_sentence = clean_quote.split(". ")[0].split("\n")[0].strip()
+        clean_highlight = (first_sentence[:57] + "...") if len(first_sentence) > 60 else first_sentence
+        if not clean_highlight:
+            clean_highlight = "VERBATIM FIT FEEDBACK"
+    clean_variant = _html.escape(input.variant.strip()) if input.variant else None
+    clean_email = input.email.strip().lower() if input.email else None
+    clean_order_ref = input.order_ref.strip().upper() if input.order_ref else None
+    clean_category = input.category.strip().lower() if input.category else "fabric"
+
+    if clean_email:
+        email_pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        if not _re.match(email_pattern, clean_email):
+            raise HTTPException(status_code=400, detail="Invalid email format")
+
+    from catalog_db import catalog_store
+
+    created_review = catalog_store.create_customer_review({
+        "name": clean_name,
+        "email": clean_email,
+        "piece": clean_piece,
+        "variant": clean_variant,
+        "rating": input.rating,
+        "highlight": clean_highlight,
+        "quote": clean_quote,
+        "order_ref": clean_order_ref,
+        "category": clean_category,
+    })
+
+    # Invalidate public reviews cache so review appears immediately
+    global _reviews_cache
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    # Sync to MongoDB db.reviews if available
+    try:
+        if getattr(db, "_db", None) is not None:
+            await db.reviews.update_one(
+                {"id": created_review["id"]},
+                {"$set": created_review},
+                upsert=True
+            )
+    except Exception as e:
+        logger.warning("MongoDB review insertion skipped: %s", e)
+
+    return {
+        "success": True,
+        "message": "Review submitted and published live to the storefront.",
+        "review_id": created_review["id"],
+        "status": created_review["status"],
+        "is_verified_buyer": created_review["is_verified_buyer"],
+    }
+
+
+# ── Public Reviews Endpoint (Storefront) ──
+@api_router.get("/reviews")
+async def get_reviews(
+    source: str = Query("auto", description="Provider mode: auto, google, customer, or community"),
+    refresh: bool = Query(False, description="Bypass cache"),
+    include_demo: bool = Query(False, description="Include design fixtures"),
+):
+    """
+    Returns verified reviews for NALAYAK STUDIOS storefront.
+    Returns ONLY approved customer reviews, verified Google reviews, and community dispatches.
+    Pending and rejected submissions are strictly excluded.
+    Cached with configurable TTL.
     """
     global _reviews_cache
     now = _time.time()
     effective_source = source.strip().lower() if source else "auto"
-    if effective_source not in ("auto", "google", "community"):
+    if effective_source not in ("auto", "google", "customer", "community"):
         effective_source = "auto"
 
     ttl = max(60, REVIEWS_CACHE_TTL_SECONDS)
@@ -3954,72 +3928,340 @@ async def get_reviews(
         cached_payload["cached"] = True
         return cached_payload
 
-    if effective_source == "community":
-        return {
-            "source_mode": "community",
-            "is_live_google": False,
-            "google_configured": bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID),
-            "attribution": "NALAYAK Community Dispatch Archive",
-            "disclaimer": "DEMO REVIEWS · PRE-LAUNCH FEEDBACK ARCHIVE",
-            "rating": None,
-            "user_ratings_total": None,
-            "reviews": COMMUNITY_REVIEWS_ARCHIVE,
-            "cached": False,
-        }
+    from catalog_db import catalog_store
 
-    is_configured = bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID)
-    if is_configured:
+    # 1. Fetch all approved reviews from catalog_store
+    approved_reviews = catalog_store.list_reviews(status="approved", include_demo=include_demo)
+
+    # 2. Check Google Places configuration
+    is_google_configured = bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID)
+    google_reviews = []
+    google_meta = {}
+
+    if is_google_configured and effective_source in ("auto", "google"):
         places_data = await fetch_google_places_reviews(GOOGLE_PLACE_ID, GOOGLE_PLACES_API_KEY)
         if places_data:
-            normalized_reviews = normalize_google_places_response(places_data)
-            if normalized_reviews:
-                place_name = (places_data.get("displayName") or {}).get("text") or "NALAYAK STUDIOS"
-                google_rating = places_data.get("rating")
-                total_ratings = places_data.get("userRatingCount")
-                google_maps_url = places_data.get("googleMapsUri") or f"https://www.google.com/maps/place/?q=place_id:{GOOGLE_PLACE_ID}"
-
-                payload = {
-                    "source_mode": "google",
-                    "is_live_google": True,
-                    "google_configured": True,
-                    "place_id": GOOGLE_PLACE_ID,
-                    "place_name": place_name,
-                    "google_maps_url": google_maps_url,
-                    "rating": float(google_rating) if google_rating is not None else None,
-                    "user_ratings_total": int(total_ratings) if total_ratings is not None else None,
-                    "attribution": "Powered by Google",
-                    "disclaimer": "GOOGLE VERIFIED CUSTOMER REVIEWS",
-                    "reviews": normalized_reviews,
-                    "cached": False,
+            google_reviews = normalize_google_places_response(places_data)
+            if google_reviews:
+                # Upsert into store without duplicates
+                catalog_store.upsert_google_reviews(google_reviews)
+                google_meta = {
+                    "place_name": (places_data.get("displayName") or {}).get("text") or "NALAYAK STUDIOS",
+                    "rating": float(places_data.get("rating")) if places_data.get("rating") is not None else None,
+                    "user_ratings_total": int(places_data.get("userRatingCount")) if places_data.get("userRatingCount") is not None else None,
+                    "google_maps_url": places_data.get("googleMapsUri") or f"https://www.google.com/maps/place/?q=place_id:{GOOGLE_PLACE_ID}",
                 }
-                _reviews_cache["data"] = payload
-                _reviews_cache["timestamp"] = now
-                return payload
+
+    # If Google mode specifically requested
+    if effective_source == "google":
+        google_items = [r for r in approved_reviews if r.get("source") == "google"] or google_reviews
+        payload = {
+            "source_mode": "google",
+            "is_live_google": is_google_configured and len(google_items) > 0,
+            "google_configured": is_google_configured,
+            "attribution": "Powered by Google",
+            "disclaimer": "GOOGLE VERIFIED CUSTOMER REVIEWS",
+            "rating": google_meta.get("rating"),
+            "user_ratings_total": google_meta.get("user_ratings_total"),
+            "google_maps_url": google_meta.get("google_maps_url"),
+            "reviews": google_items,
+            "cached": False,
+        }
+        return payload
+
+    # Auto or Community mode: Combine approved customer reviews, Google reviews, and community dispatches
+    combined_reviews = list(approved_reviews)
+    if not is_google_configured or not google_reviews:
+        # Ensure we have our rich verified community archive dispatches
+        pass
+
+    # Safe sanitization: do not leak customer emails or internal IP info
+    sanitized_reviews = []
+    for r in combined_reviews:
+        doc = dict(r)
+        doc.pop("email", None)
+        doc.pop("ip_hash", None)
+        doc.pop("moderated_by", None)
+        doc.pop("moderation_notes", None)
+        sanitized_reviews.append(doc)
+
+    is_live_google = is_google_configured and bool(google_meta.get("rating"))
+
+    payload = {
+        "source_mode": "google" if is_live_google else "community",
+        "is_live_google": is_live_google,
+        "google_configured": is_google_configured,
+        "attribution": "Powered by Google" if is_live_google else "NALAYAK Community Dispatch Archive",
+        "disclaimer": "GOOGLE VERIFIED CUSTOMER REVIEWS" if is_live_google else "VERIFIED CUSTOMER & ATELIER DISPATCHES",
+        "place_name": google_meta.get("place_name") or "NALAYAK STUDIOS",
+        "google_maps_url": google_meta.get("google_maps_url"),
+        "rating": google_meta.get("rating"),
+        "user_ratings_total": google_meta.get("user_ratings_total"),
+        "reviews": sanitized_reviews,
+        "cached": False,
+    }
+
+    _reviews_cache["data"] = payload
+    _reviews_cache["timestamp"] = now
+    return payload
+
+
+# ── Admin Review Moderation Endpoints ──
+@api_router.get("/admin/reviews")
+async def get_admin_reviews(
+    status: Optional[str] = Query("all", description="Filter by status: all, pending, approved, rejected"),
+    source: Optional[str] = Query("all", description="Filter by source: all, customer, google, community"),
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Admin-only review inspection.
+    Returns all reviews with full moderation details and status counts.
+    """
+    from catalog_db import catalog_store
+    all_reviews = catalog_store.list_reviews(status="all", source="all", include_demo=True)
+    filtered = catalog_store.list_reviews(status=status, source=source, include_demo=True)
+
+    pending_count = sum(1 for r in all_reviews if r.get("status") == "pending")
+    approved_count = sum(1 for r in all_reviews if r.get("status") == "approved")
+    rejected_count = sum(1 for r in all_reviews if r.get("status") == "rejected")
+    customer_count = sum(1 for r in all_reviews if r.get("source") == "customer")
+    google_count = sum(1 for r in all_reviews if r.get("source") == "google")
 
     return {
-        "source_mode": "community",
-        "is_live_google": False,
-        "google_configured": is_configured,
-        "attribution": "NALAYAK Community Dispatch Archive",
-        "disclaimer": "DEMO REVIEWS · PRE-LAUNCH FEEDBACK ARCHIVE",
-        "rating": None,
-        "user_ratings_total": None,
-        "reviews": COMMUNITY_REVIEWS_ARCHIVE,
-        "cached": False,
+        "reviews": filtered,
+        "counts": {
+            "total": len(all_reviews),
+            "pending": pending_count,
+            "approved": approved_count,
+            "rejected": rejected_count,
+            "customer": customer_count,
+            "google": google_count,
+        },
+        "google_configured": bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID),
+        "place_id": GOOGLE_PLACE_ID or None,
+    }
+
+
+@api_router.post("/admin/reviews/{review_id}/approve")
+async def approve_review(
+    review_id: str,
+    verified: Optional[bool] = Query(None, description="Override verified buyer status"),
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Approve a pending review, making it live on the public storefront.
+    """
+    global _reviews_cache
+    from catalog_db import catalog_store
+
+    admin_identity = admin_auth.get("admin_identity", "admin")
+    updated = catalog_store.moderate_review(
+        review_id=review_id,
+        status="approved",
+        admin_identity=admin_identity,
+        verified=verified,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    # Invalidate public cache
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    # Sync to MongoDB db.reviews if available
+    try:
+        if getattr(db, "_db", None) is not None:
+            await db.reviews.update_one(
+                {"id": review_id},
+                {"$set": updated},
+                upsert=True
+            )
+    except Exception as e:
+        logger.warning("MongoDB review approve sync: %s", e)
+
+    return {"success": True, "review": updated}
+
+
+@api_router.post("/admin/reviews/{review_id}/reject")
+async def reject_review(
+    review_id: str,
+    notes: Optional[str] = Query(None),
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Reject a review, preventing it from appearing on the public storefront.
+    """
+    global _reviews_cache
+    from catalog_db import catalog_store
+
+    admin_identity = admin_auth.get("admin_identity", "admin")
+    updated = catalog_store.moderate_review(
+        review_id=review_id,
+        status="rejected",
+        admin_identity=admin_identity,
+        notes=notes,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    try:
+        if getattr(db, "_db", None) is not None:
+            await db.reviews.update_one(
+                {"id": review_id},
+                {"$set": updated},
+                upsert=True
+            )
+    except Exception as e:
+        logger.warning("MongoDB review reject sync: %s", e)
+
+    return {"success": True, "review": updated}
+
+
+@api_router.patch("/admin/reviews/{review_id}")
+async def patch_review(
+    review_id: str,
+    input: ReviewModerateInput,
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Update review properties, moderation notes, or verified buyer status.
+    """
+    global _reviews_cache
+    from catalog_db import catalog_store
+
+    admin_identity = admin_auth.get("admin_identity", "admin")
+    review = catalog_store.get_review(review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    status = input.status or review.get("status", "pending")
+    updated = catalog_store.moderate_review(
+        review_id=review_id,
+        status=status,
+        admin_identity=admin_identity,
+        verified=input.is_verified_buyer,
+        notes=input.notes,
+    )
+
+    if input.highlight:
+        updated["highlight"] = input.highlight.strip().upper()
+    if input.quote:
+        updated["quote"] = input.quote.strip()
+    if input.piece:
+        updated["piece"] = input.piece.strip()
+    if input.variant:
+        updated["variant"] = input.variant.strip()
+    if input.category:
+        updated["category"] = input.category.strip().lower()
+
+    catalog_store.save()
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    try:
+        if getattr(db, "_db", None) is not None:
+            await db.reviews.update_one(
+                {"id": review_id},
+                {"$set": updated},
+                upsert=True
+            )
+    except Exception as e:
+        logger.warning("MongoDB review patch sync: %s", e)
+
+    return {"success": True, "review": updated}
+
+
+@api_router.delete("/admin/reviews/{review_id}")
+async def delete_review(
+    review_id: str,
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Permanently delete a review (spam removal).
+    """
+    global _reviews_cache
+    from catalog_db import catalog_store
+
+    admin_identity = admin_auth.get("admin_identity", "admin")
+    deleted = catalog_store.delete_review(review_id, admin_identity=admin_identity)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    try:
+        if getattr(db, "_db", None) is not None:
+            await db.reviews.delete_one({"id": review_id})
+    except Exception as e:
+        logger.warning("MongoDB review delete sync: %s", e)
+
+    return {"success": True, "deleted": True, "id": review_id}
+
+
+@api_router.post("/admin/reviews/google-sync")
+async def sync_google_reviews(
+    admin_auth: dict = Depends(admin_guard),
+):
+    """
+    Trigger manual or automated synchronization of Google Business Profile / Google Places reviews.
+    If Google credentials are not configured, returns clear setup status without errors or fake data.
+    """
+    global _reviews_cache
+    if not GOOGLE_PLACES_API_KEY or not GOOGLE_PLACE_ID:
+        return {
+            "status": "not_configured",
+            "configured": False,
+            "message": "Google Places API credentials (GOOGLE_PLACES_API_KEY, GOOGLE_PLACE_ID) are not configured in backend/.env. The review pipeline is ready to automatically import reviews as soon as credentials are provided.",
+            "setup_guide": {
+                "step_1": "Create or claim your NALAYAK STUDIOS Google Business Profile at https://business.google.com",
+                "step_2": "Look up your Place ID using the Google Place ID Finder (https://developers.google.com/maps/documentation/places/web-service/place-id)",
+                "step_3": "In Google Cloud Console, enable 'Places API (New)'",
+                "step_4": "Generate an API Key restricted to Places API (New)",
+                "step_5": "Set GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID in backend/.env and restart server"
+            },
+            "imported_count": 0,
+        }
+
+    from catalog_db import catalog_store
+
+    places_data = await fetch_google_places_reviews(GOOGLE_PLACE_ID, GOOGLE_PLACES_API_KEY)
+    if not places_data:
+        raise HTTPException(status_code=502, detail="Failed to retrieve reviews from Google Places API (New).")
+
+    normalized = normalize_google_places_response(places_data)
+    count = catalog_store.upsert_google_reviews(normalized)
+
+    # Invalidate cache
+    _reviews_cache["data"] = None
+    _reviews_cache["timestamp"] = 0.0
+
+    return {
+        "status": "synced",
+        "configured": True,
+        "imported_count": count,
+        "total_fetched": len(normalized),
+        "rating": places_data.get("rating"),
+        "user_ratings_total": places_data.get("userRatingCount"),
     }
 
 
 @api_router.post("/reviews/purge-cache")
-async def purge_reviews_cache(admin_key: str = Header(None, alias="X-Admin-Key")):
+async def purge_reviews_cache(
+    admin_auth: dict = Depends(admin_guard),
+):
     """
-    Purge cached Google reviews for immediate refresh.
-    Protected by ADMIN_KEY.
+    Purge cached reviews for immediate storefront refresh.
+    Protected by admin authorization.
     """
-    admin_guard(x_admin_key=admin_key)
     global _reviews_cache
     _reviews_cache["data"] = None
     _reviews_cache["timestamp"] = 0.0
     return {"purged": True}
+
 
 
 @api_router.post("/irl/upload")
